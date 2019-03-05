@@ -1,0 +1,199 @@
+微擎loading
+开启 util.loading().show();
+关闭 util.loading().close();
+
+前端压缩图片：
+
+//微擎图片上传组件（在原微擎框架上传图片组件基础下添加js压缩图片功能）
+function tpl_app_form_field_image_seapow($name, $value = '') {
+global $_W;
+if(!empty($value)){
+$h = '';
+foreach ($value as $k => $v) {
+$h .= '<li class="addli addliss"><div class="pic"><img src="'.tomedia($v).'" onclick="return zoomPic(\''.tomedia($v).'\')" style="width: 100%;"></div><input type="hidden" name="'.$name.'" value="'.$v.'"/><div class="opicn" onclick="deleteimg(this)"><div class="opicn_up"></div><div class="opicn_un"></div></div></li>';
+}
+}
+$url = "./index.php?i={$_W['uniacid']}&j=&c=utility&a=file&do=upload&type=image&thumb=0";
+$html = <<<EOF
+<style>.js-image-{$name} .webuploader-pick{width:100%;height:100%;}.addliss{margin-left: 5px;margin-bottom: 10px;height: 71px;width：71px;}.webuploader-element-invisible-{$name}{opacity: 0;position: absolute !important;z-index: 99;height: 1.2rem !important;width: 1.2rem !important;background: #000;left: 0;}</style>
+<div class="albums">
+<ul id="js-image-{$name}">
+<li class="addli addliss">
+<div class="add js-image-{$name} webuploader-container"><div class="webuploader-pick"></div><div id="rt_rt_1d41p5lc21agp1scnja47md1vv21" style="position: absolute; top: 0px; left: 0px; width: 58px; height: 69px; overflow: hidden; bottom: auto; right: auto;"><input type="file" id="ajax-image-{$name}" name="file" onchange="UpladFileMore_{$name}()" class="webuploader-element-invisible-{$name}" multiple="multiple"><label style="opacity: 0; width: 100%; height: 100%; display: block; cursor: pointer; background: rgb(255, 255, 255);"></label></div></div>
+</li>
+</ul>
+</div>
+<script src="/addons/dg_ask/resource/js/exif.js"></script>
+<script type="text/javascript">
+var Orientation = ''; //图片方向角
+function photoCompress_{$name}(file,w,objDiv){
+var ready=new FileReader();
+ready.readAsDataURL(file);
+ready.onload=function(){
+var re=this.result;
+canvasDataURL_{$name}(re,w,objDiv,file)
+}
+}
+function canvasDataURL_{$name}(path, obj, callback,file){
+var img = new Image();
+img.src = path;
+img.onload = function(){
+var that = this;
+// 默认按比例压缩
+var w = that.width,
+h = that.height,
+scale = w / h;
+w = obj.width || w;
+h = obj.height || (w / scale);
+if(w > 800){
+w = 800;
+h = Math.floor(800 / scale);
+}
+var quality = 1; // 默认图片质量为0.7
+//生成canvas
+var canvas = document.createElement('canvas');
+var ctx = canvas.getContext('2d');
+
+
+//利用插件获取图片参数 拍摄方向
+EXIF.getData(file, function() {
+EXIF.getAllTags(this);
+Orientation = EXIF.getTag(this, 'Orientation'); 
+console.log('Orientation:',Orientation);
+if(Orientation == ""||Orientation == undefined||Orientation == null){
+Orientation = 1;
+}
+});
+console.log('Orientation:',Orientation);
+if(Orientation == 6){//需要顺时针90度旋转
+// 创建属性节点
+var anw = document.createAttribute("width");
+anw.nodeValue = h;
+var anh = document.createAttribute("height");
+anh.nodeValue = w;
+canvas.setAttributeNode(anw);
+canvas.setAttributeNode(anh);
+ctx.fillStyle="#fff";
+ctx.rotate(1*90*Math.PI/180); 
+ctx.drawImage(that,0,-h,w,h);
+console.log('已顺时针90度旋转');
+}else if(Orientation == 8){//需要逆时针90度旋转
+// 创建属性节点
+var anw = document.createAttribute("width");
+anw.nodeValue = h;
+var anh = document.createAttribute("height");
+anh.nodeValue = w;
+canvas.setAttributeNode(anw);
+canvas.setAttributeNode(anh);
+// 铺底色
+ctx.fillStyle="#fff";
+ctx.rotate(3*90*Math.PI/180); 
+ctx.drawImage(that,-w,0,w,h);
+console.log('已逆时针90度旋转');
+}else{
+// 创建属性节点
+var anw = document.createAttribute("width");
+anw.nodeValue = w;
+var anh = document.createAttribute("height");
+anh.nodeValue = h;
+canvas.setAttributeNode(anw);
+canvas.setAttributeNode(anh);
+console.log('未旋转');
+ctx.drawImage(that, 0, 0, w, h);
+}
+console.log('success');
+
+
+// 图像质量
+if(obj.quality && obj.quality <= 1 && obj.quality > 0){
+quality = obj.quality;
+}
+// quality值越小，所绘制出的图像越模糊
+var base64 = canvas.toDataURL('image/jpeg', quality);
+// 回调函数返回base64的值
+callback(base64);
+}
+}
+/**
+* 将以base64的图片url数据转换为Blob
+* @param urlData
+* 用url方式表示的base64图片数据
+*/
+function convertBase64UrlToBlob_{$name}(urlData){
+var arr = urlData.split(','), mime = arr[0].match(/:(.*?);/)[1],
+bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+while(n--){
+u8arr[n] = bstr.charCodeAt(n);
+}
+return new Blob([u8arr], {type:mime});
+}
+
+
+var xhr;
+//多图上传文件方法
+function UpladFileMore_{$name}(){
+var count = document.getElementById("ajax-image-{$name}").files.length;
+var url = "{$url}"; // 接收上传文件的后台地址 
+var form = new FormData(); // FormData 对象
+xhr = new XMLHttpRequest(); // XMLHttpRequest 对象
+//util.loading().show();
+for (var i = 0; i <= count-1; i++) {
+util.loading().show();
+var fileObj = document.getElementById("ajax-image-{$name}").files[i]; // js 获取文件对象
+//初始化；
+form.delete('file');
+if(fileObj.size/1024 > 1025) { //大于1M，进行压缩上传
+photoCompress_{$name}(fileObj, {
+quality: 1
+}, function(base64Codes){
+var bl = convertBase64UrlToBlob_{$name}(base64Codes);
+form.append("file", bl, "file_"+Date.parse(new Date())+".jpg"); // 文件对象
+xhr.open("post", url, false); //post方式，url为服务器请求地址，true 该参数规定请求是否异步处理。
+xhr.onload = uploadComplete_{$name}; //请求完成
+xhr.send(form); //开始上传，发送form数据
+});
+}else{ //小于等于1M 原图上传
+form.append("file", fileObj); // 文件对象
+xhr.open("post", url, false); //post方式，url为服务器请求地址，true 该参数规定请求是否异步处理。
+xhr.onload = uploadComplete_{$name}; //请求完成
+xhr.send(form); //开始上传，发送form数据
+}
+}
+}
+//上传成功响应
+function uploadComplete_{$name}(evt) {
+//服务断接收完文件返回的结果
+var data = JSON.parse(evt.target.responseText);
+$('#js-image-{$name}').append('<li class="addli addliss"><div class="pic"><img src="'+data.url+'" onclick="return zoomPic(\''+data.url+'\')" style="width: 100%;"></div><input type="hidden" name="{$name}" value="'+data.attachment+'"/><div class="opicn" onclick="deleteimg(this)"><div class="opicn_up"></div><div class="opicn_un"></div></div></li>');
+util.loading().close();
+}
+</script>
+EOF;
+return $html;
+}
+
+
+微擎分享调用方法
+
+{php echo register_jssdk(false)}
+wx.ready(function(){
+        var shareData = {
+        title: '我就是一个长长长长长长长标题',
+        desc: '我就是一个多多多多多多多多描述',
+        link: "http://spwx.seapow.com/app/./index.php?i=2&c=entry&eid=67",
+        imgUrl: 'http://www.baidu.com/img/bdlogo.png',
+      };
+      var adurl="http://www.baidu.com/";//回调
+      //分享朋友
+      wx.onMenuShareAppMessage({
+          title: shareData.title,
+          desc: shareData.desc,
+          link: shareData.link,
+          imgUrl:shareData.imgUrl,
+          success: function (res) {
+            window.location.href =adurl;
+          },
+          cancel: function (res) {
+          },
+        });
+});
