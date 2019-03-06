@@ -1,0 +1,848 @@
+{template 'common/header'}
+<style type="text/css">
+	.table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+  		white-space:normal;
+	}
+    .checkbox-custom {
+        position: relative;
+		display: inline;
+    }
+    /*
+    将初始的checkbox的样式改变
+    */
+    .checkbox-custom input[type="checkbox"] {
+        opacity: 0;/*将初始的checkbox隐藏起来*/
+        position: absolute;
+        cursor: pointer;
+        z-index: 2;
+        margin: -6px 0 0 0;
+        top: 50%;
+        left: 0;
+    }
+    /*
+    设计新的checkbox，位置
+    */
+    .checkbox-custom label:before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        margin-top: -9px;
+        width: 19px;
+        height: 18px;
+        display: inline-block;
+        border-radius: 2px;
+        border: 1px solid #bbb;
+        background: #fff;
+    }
+    /*
+    点击初始的checkbox，将新的checkbox关联起来
+    */
+    .checkbox-custom input[type="checkbox"]:checked +label:after {
+        position: absolute;
+        display: inline-block;
+        font-family: 'FontAwesome';
+        content: '\F00C';
+        top: 50%;
+        left: 4px;
+        margin-top: -5px;
+        font-size: 11px;
+        line-height: 1;
+        width: 16px;
+        height: 16px;
+        color: #333;
+    }
+    .checkbox-custom label {
+        cursor: pointer;
+        line-height: 1.2;
+        font-weight: normal;/*改变了rememberme的字体*/
+        margin-bottom: 0;
+        text-align: left;
+    }
+</style>
+
+<ul class="nav nav-tabs">
+	<li {if $_GPC['op'] =='' || $_GPC['op'] == 'display'}class="active"{/if}><a
+		href="{php echo $this->createWebUrl('chat_index',array('op'=>'display','eid'=>$_GPC['eid'],'version_id'=>0))}">精选管理</a></li>
+	{if $_GPC['op'] == 'zhiding'}
+		<li {if $_GPC['op'] == 'zhiding'}class="active"{/if}><a href="javascript:;">编辑置顶</a></li>
+	{/if}
+	<li {if $_GPC['op'] == 'lanmu'}class="active"{/if}><a href="{php echo $this->createWebUrl('chat_index',array('op'=>'lanmu','eid'=>$_GPC['eid'],'version_id'=>0))}">栏目管理</a></li>
+	{if $_GPC['op'] != ''}
+		<li {if $_GPC['op'] == 'add_lanmu'}class="active"{/if}><a href="{php echo $this->createWebUrl('chat_index',array('op'=>'add_lanmu','eid'=>$_GPC['eid'],'version_id'=>0))}">{if empty($_GPC['upid'])} 添加栏目{else}编辑栏目{/if}</a></li>
+   	{/if}
+   	{if $_GPC['op'] == 'examine'}
+		<li {if $_GPC['op'] == 'examine'}class="active"{/if}><a href="{php echo $this->createWebUrl('chat_index',array('op'=>'examine','irid'=>$_GPC['irid'],'title'=>$_GPC['title'],'type'=>$_GPC['type'],'eid'=>$_GPC['eid'],'version_id'=>0))}">查看精选</a></li>
+	{/if}
+   	{if $_GPC['op'] == 'message' || $_GPC['op'] == 'reply'}
+		<li {if $_GPC['op'] == 'message' || $_GPC['op'] == 'reply'}class="active"{/if}><a href="#">评论管理</a></li>
+   	{/if}
+</ul>
+{if $op == "display"}
+	<div id="action_list" class="panel panel-default">
+		<div class="panel-body">
+			<div class="col-xs-12 col-sm-11" style="width:99%;">
+				<form action="" method="get" class="form-horizontal" role="form" id="form1">
+					<input type="hidden" name="action" value="add">
+					<input type="hidden" name="c" value="{$_GPC['c']}">
+					<input type="hidden" name="a" value="{$_GPC['a']}">
+					<input type="hidden" name="eid" value="{$_GPC['eid']}">
+					<input type="hidden" name="version_id" value="0">
+					<div class="input-group">
+						<select name="status_select" class="form-control input-medium">
+							<option value="1" <?php if($_GPC['status_select'] == 1){echo 'selected';} ?> >不按时间</option>
+							<option value="create_time" <?php if($_GPC['status_select'] == 'create_time'){echo 'selected';} ?> >创建时间</option>
+						</select>
+						<span class="input-group-addon" style="padding: 0; width: 0;"></span>
+						{php echo tpl_form_field_daterange('time',array('start'=>$_GPC['time']['start'],'end'=>$_GPC['time']['end']));}
+						<script type="text/javascript">
+	                        $(function(){
+	                            $("#action_list .input-group .daterange-date").addClass("form-control");
+	                            $("body").click(function(){
+							        $('.look_ewm').hide();
+							    });
+	                        })
+
+							function previewcode(id,type){
+							    $('.look_ewm').hide();
+							    var resurl = "{php echo $this->createWebUrl('chat_index',array('op'=>'preview'))}";
+							    $.post(resurl,{id:id,type:type},function(data){
+							        if(data.code == 100){
+							            util.message(data.msg);
+							        }else{
+							            get_qrcode(data.url);
+							            $('.look_ewm').show();
+							        }
+							    },'json');
+							}
+
+							//获取二维码图片
+							function get_qrcode(url){
+							    require(['jquery.qrcode'], function(){
+							        $('.fy-js-clip').each(function(){
+							            $('.qrcode-block').html('').qrcode({
+							                render: 'canvas',
+							                width: 200,
+							                height: 200,
+							                text: url
+							            });
+							        });
+							    });
+							}
+						</script>
+						<span class="input-group-addon"></span>
+						<select name="imid" class="form-control input-medium">
+							<option value="7" <?php if($_GPC['imid'] == 0){echo 'selected';} ?> >全部栏目</option>
+							{loop $m_data $i $v}
+                            {if $v['status']==1}
+							<option value="{$v['imid']}" <?php if($_GPC['imid'] == $v['imid']){echo 'selected';} ?> >{$v['name']}</option>
+							{/if}
+                            {/loop}
+						</select>
+						<span class="input-group-addon"></span>
+						<select name="type" class="form-control input-medium">
+							<option value="7" <?php if($_GPC['type'] == 7){echo 'selected';} ?> >全部类型</option>
+							<option value="1" <?php if($_GPC['type'] == 1){echo 'selected';} ?> >文章</option>
+							<option value="2" <?php if($_GPC['type'] == 2){echo 'selected';} ?> >问答</option>
+						</select>
+
+						<span class="input-group-addon"></span>
+						<select name="status" class="form-control input-medium">
+							<option value="7" <?php if($_GPC['status'] == 7){echo 'selected';} ?> >全部状态</option>
+							<option value="1" <?php if($_GPC['status'] == 1){echo 'selected';} ?> >上架</option>
+							<option value="0" <?php if($_GPC['status'] == '0'){echo 'selected';} ?> >下架</option>
+						</select>
+						<span class="input-group-addon"></span>
+						<select name="is_top" class="form-control input-medium">
+							<option value="7" <?php if($_GPC['is_top'] == 7){echo 'selected';} ?> >全部标识</option>
+							<option value="1" <?php if($_GPC['is_top'] == 1){echo 'selected';} ?> >置顶</option>
+							<option value="0" <?php if($_GPC['is_top'] == '0'){echo 'selected';} ?> >非置顶</option>
+						</select>
+						<span class="input-group-addon">标题</span>
+						<input type="text" name="name" class="form-control ac_name" placeholder="请输入标题" value="{$_GPC['name']}"/>
+						<span class="input-group-btn">
+	                    <input type="submit" class="btn" value="提交筛选" style="border:1px solid #ccc;"/>
+	                    </span>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="main">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<div class="panel-heading-filter">
+					共计 {$total} 条数据
+				</div>
+		    </div>
+			<form method="post" class="form-horizontal" id="formfans">
+				<div style="position:relative">
+					<div class="panel-body table-responsive">
+						<table class="table we7-table table-hover vertical-middle" style="position:relative">
+							<thead class="navbar-inner">
+							<tr>
+								<th style="width:40px;">
+			                        <div class="checkbox-custom checkbox-default" >
+			                            <input class="RememberMe" type="checkbox" id="allAndNotAll">
+			                            <label for="RememberMe" style=" pointer-events: none;cursor: default;opacity: 0.6;"></label>
+			                        </div>
+			                    </th>
+								<th style="text-align: center;">ID</th>
+								<th width="200px">标题</th>
+								<th>类目名称</th>
+								<th>类型</th>
+								<th>评论</th>
+                                <th>作者</th>
+								<th>状态</th>
+								<th>置顶</th>
+								<th>创建时间</th>
+								<th>操作</th>
+							</tr>
+							</thead>
+							<tbody>
+							{loop $rec $i $v}
+							<tr>
+								<td>
+	                                <div class="checkbox-custom checkbox-default">
+	                                    <input class="RememberMe" type="checkbox" name="irid[]" value="{$v['irid']}">
+	                                    <label for="RememberMe" style=" pointer-events: none;cursor: default;opacity: 0.6;"></label>
+	                                </div>
+		                        </td>
+								<td style="white-space: nowrap;">{$v['irid']}</td>
+								<td title="【{$v['reid']}】{$v['title']}">
+									<p class="sl" style="display: inline;">{$v['title']}</p>
+								</td>
+								<td>{$v['name']}</td>
+								<td>{if $v['type'] == 1}文章{elseif $v['type'] == 2}问答{/if}</td>
+								<td>{$v['pinglun']['num']}</td>
+                                <td title="{$v['nickname']}">{if $v['real_name']}{php echo $this->str_strs($v['real_name'],0,4)}{else}{php echo $this->str_strs($v['nickname'],0,4)}{/if}</td>
+								<td>
+									{if $v['status'] == 1}
+										正常
+									{else}
+										<span style="color: red">下架</span>
+									{/if}
+								</td>
+								<td>{if $v['is_top'] == 1}<i class="fa fa-check"></i>{/if}</td>
+								<td title="{php echo date('Y-m-d H:i',$v['create_time']);}">{php echo date('Y-m-d',$v['create_time']);}</td>
+								<td>
+									{if $v['type'] == 1}
+										<a href="{$_W['siteroot']}web/index.php?c=site&a=entry&action=update&id={$v['reid']}&version_id=0&do=article&m=seapow_sm&jingxuan=1&jingxuan_eid={$_GPC['eid']}" class="btn btn-default btn-sm manage"><i title="编辑" class="fa fa-edit"></i></a>
+									{else}
+									<a href="{php echo $this->createWebUrl('chat_index', array('op' => 'examine', 'irid'=>$v['irid'],'reid'=>$v['reid'],'type'=>$v['type'],'eid'=>$_GPC['eid'],'version_id'=>0))}" class="btn btn-default btn-sm manage"><i title="查看" class="fa fa-file-text-o"></i></a>
+									{/if}
+	                                {if $v['type']==1}
+										<a href="javascript:;" onclick="previewcode({$v['reid']},1);" class="btn btn-default btn-sm manage fy-js-clip"><i class="fa fa-del"></i><i title="预览" class="fa fa-search"></i></a>
+	                                {elseif $v['type']==2}
+	                                	<a href="javascript:;" onclick="previewcode({$v['reid']},2);" class="btn btn-default btn-sm manage fy-js-clip"><i class="fa fa-del"></i><i title="预览" class="fa fa-search"></i></a>
+	                                {/if}
+									{if $v['status'] == 0}
+										<a onclick="return confirm('你确定要删除吗？')" href="{php echo $this->createWebUrl('chat_index', array('op' => 'delete', 'irid'=>$v['irid'],'reid'=>$v['reid'],'type'=>$v['type'],'status'=>$v['status'],'eid'=>$_GPC['eid'],'version_id'=>0))}" class="btn btn-default btn-sm manage"><i title="删除" class="fa fa-trash-o"></i></a>
+									{/if}
+									<a href="{php echo $this->createWebUrl('chat_index', array('op' => 'shangjia', 'irid'=>$v['irid'],'status'=>$v['status'],'eid'=>$_GPC['eid'],'version_id'=>0))}" class="btn btn-default btn-sm manage">{if $v['status'] == 1}下架{else}上架{/if}</a>
+	                                <a href="{php echo $this->createWebUrl('chat_index', array('op' => 'message', 'id'=>$v['irid'],'reid'=>$v['reid'],'eid'=>$_GPC['eid'],'type'=>$v['type'],'version_id'=>0))}" class="btn btn-default btn-sm manage">评论</a>
+									{if $v['status'] == 1}
+										{if $v['is_top'] == 0}
+											<a href="{php echo $this->createWebUrl('chat_index', array('op' => 'zhiding','irid'=>$v['irid'],'eid'=>$_GPC['eid'],'version_id'=>0))}" class="btn btn-default btn-sm manage">
+												置顶
+											</a>
+										{/if}
+									{/if}
+									{if $v['is_top'] == 1}
+										<a onclick="return confirm('你确定要操作吗？');" href="{php echo $this->createWebUrl('chat_index', array('op' => 'zhiding','irid'=>$v['irid'],'eid'=>$_GPC['eid'],'is_top'=>$v['is_top'],'version_id'=>0))}" class="btn btn-default btn-sm manage">
+											取消置顶
+										</a>
+									{/if}
+								</td>
+							</tr>
+							{/loop}
+							</tbody>
+						</table>
+						<div class="look_ewm" style=" padding:40px; background-color: rgba(170,133,64,.9); position: fixed; left: 50%; top: 40%; z-index:1000;display: none;border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,.2);">
+							<div class="qrcode-block" style="padding:10px;background:#fff;"><canvas></canvas></div>
+							<div style="width: 100%;text-align: center;font-size: 16px;color:#fff;margin-top: 10px;">微信扫描二维码可预览</div>
+						</div>
+					</div>
+				</div>
+			</form>
+			<div class="panel-footer">
+				<a class="btn btn-default btn-sm manage" onclick="batchOperation(1,'SetStatus')">批量上架</a>
+				<a class="btn btn-default btn-sm manage" onclick="batchOperation(0,'SetStatus')">批量下架</a>
+				<a class="btn btn-default btn-sm manage" onclick="frame(1,'SetTop')">批量置顶</a>
+				<a class="btn btn-default btn-sm manage" onclick="batchOperation(0,'SetTop')">批量取消置顶</a>
+			</div>
+		</div>
+	</div>
+	{$pager}
+	<div class="modal fade" id="module-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="width:800px;">
+			<div class="modal-content">
+				<input type="hidden" name="m" value=""/>
+				<input type="hidden" name="is_top">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4>置顶结束时间</h4>
+				</div>
+				<div class="modal-body" style="padding:50px 30px!important;">
+                       	<div class="row clearfix">
+                           	<div class="input-group" style="float:left;width:50px">
+                               	<input type="text" style="width:650px!important" autocomplete="off" class="form-control" name="dayNumber" placeholder="请输入天数">
+                               	<span class="input-group-btn">
+                               		<button type="button" class="btn btn-default" style="margin-left:25px;" onclick="batchOperation(1,'SetTop')">
+                               			确定
+                           			</button>
+                               	</span>
+                           </div>
+                       	</div>
+                       	<div id="module-menus" style="padding-top:5px;">
+                        <div style="max-height:500px;overflow:auto;min-width:750px;">
+							<table class="table table-hover" style="min-width:750px;">
+								<tbody id="search_list">
+								</tbody>
+							</table>
+					    </div>
+					    <p style="color:red;">提示：永久置顶输入0天数即可。</p>
+				    </div>
+			 	</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		$(function(){
+			$(".sl").each(function(){
+				var maxSize = 15;
+				if($(this).text().length > maxSize){
+		            $(this).text($(this).text().substring(0,maxSize)); $(this).html($(this).html()+'…');
+		        }
+			});
+			$(".sl").show();
+		});
+
+		$("#allAndNotAll").click(function(){
+			if(this.checked){
+				$("input[name='irid[]']:checkbox").each(function(){
+					$(this).prop("checked", true);
+				});
+			}else{
+				$("input[name='irid[]']:checkbox").each(function(){
+					$(this).prop("checked", false);
+				});
+			}
+		});
+
+		//弹出框
+		function frame(parameter,name){
+			$("#module-info").modal('show');
+		}
+
+		//批量操作
+		function batchOperation(parameter,name){
+			if(confirm('你确定要操作吗？') == false){
+                return false;
+            }
+
+            var dayNumber = $("input[name=dayNumber]").val();
+            var reg = /^\d+$/;
+            if(name == 'SetTop' && parameter == 1){
+            	if(dayNumber == '' || dayNumber < 0 || !reg.test(dayNumber)){
+            		util.message('请填写正确的天数');
+                	return false;
+            	}
+            }
+
+			var irids = '';
+			$("input[name='irid[]']:checked").each(function(){
+				irids += $(this).val();
+				irids += ',';
+			});
+			irids = irids.substr(0,irids.lastIndexOf(','));
+			if(irids == ''){
+				util.message('请勾选数据','','error');
+            	return false;
+			}else{
+				$.post("{php echo $this->createWebUrl('chat_index',array('op'=>'batchOperation'))}",{
+					irids: irids,
+					name: name,
+					parameter: parameter,
+					dayNumber: dayNumber
+				},function(data){
+					if(data.code == 200){
+		                util.message(data.msg,setTimeout(function(){location.reload()},1000),'success');
+		                return false;
+		            }
+		            if(data.code == 400){
+		                util.message(data.msg,'','error');
+		                return false;
+		            }
+				},'json');
+			}
+		}
+	</script>
+{/if}
+
+<!-- 置顶 start -->
+{if $op == 'zhiding'}
+	<form method="post" class="form-horizontal bv-form" role="form" novalidate="novalidate" onsubmit="return checkforms();">
+		<input type="hidden" name="irid" value="{$record['irid']}">
+	    <div class="panel panel-info">
+	        <div class="panel-body">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active">
+                    	<a href="#tab_basic_card" aria-controls="tab_basic_card" role="tab" data-toggle="tab">编辑置顶</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="tab_basic_card">
+                        <div class="form-group">
+                            <label class="col-xs-12 col-sm-3 col-md-2 control-label" for="title">
+                            	置顶结束时间
+                            </label>
+                            <div class="col-sm-9 col-xs-12">
+                            	<input type="number" name="dayNumber" class="form-control" value="">
+                            </div>
+                        </div>
+	               	</div>
+	            </div>
+
+				<div class="form-group col-sm-12">
+		            <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1"/>
+		            <input type="hidden" name="token" value="{$_W['token']}" />
+		            <p class="col-xs-12 col-sm-3 col-md-2 control-label" style="color:red;">提示：永久置顶输入0天数即可。</p>
+		        </div>
+
+	        </div>
+	    </div>
+	</form>
+
+	<script>
+		function checkforms(){
+			var dayNumber,reg;
+			dayNumber = $("input[name=dayNumber]").val();
+			reg = /^\d+$/;
+
+			if(dayNumber == '' || dayNumber < 0 || !reg.test(dayNumber)){
+				util.message("请填写正确的天数");
+            	return false;
+			}
+		}
+	</script>
+{/if}
+<!-- 置顶 end -->
+
+
+<!-- 栏目管理 -->
+{if $op == "lanmu"}
+	<div id="action_list" class="panel panel-default">
+		<div class="panel-body">
+			<div class="col-xs-12 col-sm-11" style="width:99%;">
+				<form action="" method="get" class="form-horizontal" role="form" id="form1">
+					<input type="hidden" name="op" value="lanmu">
+					<input type="hidden" name="c" value="{$_GPC['c']}">
+					<input type="hidden" name="a" value="{$_GPC['a']}">
+					<input type="hidden" name="eid" value="{$_GPC['eid']}">
+					<input type="hidden" name="version_id" value="0">
+
+					<div class="input-group">
+						<select name="status_select" class="form-control input-medium">
+							<option value="1" <?php if($_GPC['status_select'] == 1){echo 'selected';} ?> >不按时间</option>
+							<option value="create_time" <?php if($_GPC['status_select'] == 'create_time'){echo 'selected';} ?> >创建时间</option>
+						</select>
+						<span class="input-group-addon" style="padding: 0; width: 0;"></span>
+						{php echo tpl_form_field_daterange('time',array('start'=>$_GPC['time']['start'],'end'=>$_GPC['time']['end']));}
+						<script type="text/javascript">
+		                    $(function(){
+		                        $("#action_list .input-group .daterange-date").addClass("form-control");
+		                    })
+						</script>
+
+						<span class="input-group-addon">状态</span>
+						<select name="status" class="form-control input-medium">
+							<option value="7" <?php if($_GPC['status'] == 7){echo 'selected';} ?> >全部</option>
+							<option value="1" <?php if($_GPC['status'] == 1){echo 'selected';} ?> >正常</option>
+							<option value="2" <?php if($_GPC['status'] == 2){echo 'selected';} ?> >关闭</option>
+						</select>
+						<span class="input-group-addon">标题</span>
+						<input type="text" name="name" class="form-control ac_name" placeholder="请输入标题" value="{$_GPC['name']}"/>
+						<span class="input-group-btn">
+		        			<input type="submit" class="btn" value="提交筛选" style="border:1px solid #ccc;"/>
+		        		</span>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="main">
+		<div class="panel panel-default">
+			<form method="post" class="form-horizontal" id="formfans">
+				<div style="position:relative">
+					<div class="panel-body table-responsive">
+						<table class="table we7-table table-hover vertical-middle" style="position:relative">
+							<thead class="navbar-inner">
+							<tr>
+								<th>
+									<a href="#" onclick="paixu(this);" id="chat_index_menu" style="border: 1px solid #b0b0b0;padding: 10px;border-radius: 5px;background-color: #e7e7eb">排序
+									</a>
+								</th>
+								<th>名称</th>
+								<th>状态</th>
+								<th>创建时间</th>
+								<th>操作</th>
+							</tr>
+							</thead>
+							<tbody>
+							{loop $adv $i $v}
+								<tr>
+									<td><input type="text" id="{$v['imid']}"  name="paixu"  value="{$v['sort']}" onkeyup="value=value.replace(/[^\d]/g,'')" class="form-control" style="width: 60px;border-radius: 5px;">
+									</td>
+									<td>{$v['name']}</td>
+									<td>{if $v['status'] == 1}正常{else}
+										<span style="color: red">下架</span>{/if}</td>
+									<td>{php echo date('Y-m-d H:i',$v['create_time']);}</td>
+									<td style="text-align:left;white-space:nowrap;" align="left">
+										<a href="{php echo $this->createWebUrl('chat_index', array('op' => 'lan_status', 'imid'=>$v['imid'],'status'=>$v['status'],'eid'=>$_GPC['eid'],'version_id'=>0))}" class="btn btn-default btn-sm manage"><i class="fa fa-edit"></i>{if $v['status'] == 1}下架{else}上架{/if}</a>
+										<a href="{php echo $this->createWebUrl('chat_index', array('op' => 'add_lanmu', 'imid'=>$v['imid'],'eid'=>$_GPC['eid'],'upid'=>1,'version_id'=>0))}" class="btn btn-default btn-sm manage"><i class="fa fa-edit"></i>编辑</a>
+										<a href="{php echo $this->createWebUrl('chat_index', array('op' => 'lan_status', 'imid'=>$v['imid'],'eid'=>$_GPC['eid'],'del'=>2,'version_id'=>0))}" class="btn btn-default btn-sm manage"><i class="fa fa-edit"></i>删除</a>
+									</td>
+								</tr>
+							{/loop}
+							</tbody>
+						</table>
+						{$pager}
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+{/if}
+
+<!--栏目添加-->
+{if $op  == "add_lanmu"}
+	<div class="main">
+		<form class="form-horizontal" role="form" action="" method="post" onsubmit="return checkform();">
+			<input type="hidden" name="caid" value="{$lanmu['imid']}">
+			<input type="hidden" name="op" value="add_lanmu">
+			<div class="panel panel-info">
+				<div class="panel-heading">{if $_GPC['imid'] ==''}添加栏目{else}编辑栏目{/if}</div>
+					<div class="panel-body">
+						<ul class="nav nav-tabs" role="tablist">
+							<li role="presentation" class="active"><a href="#tab_basic" aria-controls="tab_basic" role="tab" data-toggle="tab">栏目信息</a></li>
+						</ul>
+						<!-- Tab panes -->
+						<div class="tab-content">
+							<!-- 服务基本信息start -->
+							<div role="tabpanel" class="tab-pane active" id="tab_basic">
+								<div class="panel-body">
+
+									<div class="form-group">
+										<label for="inputEmail3" class="col-sm-2 control-label">名称</label>
+										<div class="col-sm-6">
+											<input type="text" class="form-control"  name="name" value="{$lanmu['name']}">
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="inputEmail3" class="col-sm-2 control-label">价格</label>
+										<div class="col-sm-6">
+											<input type="number" class="form-control"  name="price" value="{$lanmu['price']}">
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="inputEmail3" class="col-sm-2 control-label">类型</label>
+										<div class="col-sm-6">
+				    						<select name="type" class="form-control input-medium">
+				    							<option value="0" selected="selected">其他</option>
+				    							<option value="1"{if '1' == $lanmu['type']} selected="selected"{/if}>微课</option>
+				    						</select>
+			    						</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="col-sm-12 col-xs-12">
+								<input type="submit" name="submit" class="btn btn-primary col-lg-1 submit" value="提交"/>
+								<input type="hidden" name="token" value="{$_W['token']}" />
+								<span style="padding: 20px; color:#92939b;line-height: 35px;color:#cc0000;">价格为0代表不收费</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+{/if}
+<!--栏目添加-->
+
+<script>
+
+	function checkform() {
+		if($("input[name='name']").val() == ""){
+            util.message("没有填写栏目名称", "", "error");
+            return false;
+		}
+
+    }
+
+	function paixu(e) {
+        var tab = e.id;
+
+        var names = document.getElementsByName("paixu");
+
+        var value_data  = "";
+        var key_data  = "";
+
+        var i=0;
+        for(;i<names.length;i++){
+            value_data += ","+names[i].value;
+            key_data += ","+names[i].id;
+        }
+        var url = "{php echo $this->createWebUrl('chat_index', array('op' => 'paixu','version_id'=>0))}";
+        window.location.href=url+"&key="+key_data+"&value="+value_data+"&tab="+tab;
+
+
+    }
+</script>
+
+{if $op == 'examine'}
+
+<body onload="refresh()">
+<form method="post" class="form-horizontal bv-form" role="form" novalidate="novalidate" onsubmit="return checkforms();">
+    <div class="panel panel-info">
+            <div class="panel-body">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active">
+                    	<a href="#tab_basic_card" aria-controls="tab_basic_card" role="tab" data-toggle="tab">文章信息</a>
+                    </li>
+                </ul>
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <!-- 文章信息start -->
+                    <div role="tabpanel" class="tab-pane active" id="tab_basic_card">
+                        <div class="form-group">
+                            <label class="col-xs-12 col-sm-3 col-md-2 control-label" for="title">
+                            	{if $type == 1}文章标题{elseif $type == 2}问答标题{/if}
+                            </label>
+                            <div class="col-sm-9 col-xs-12">
+                            	{if $type == 1}
+                                	<input type="text" name="title" value="{$rec_data['title']}" class="form-control" readonly="readonly">
+                            	{elseif $type == 2}
+                            		<input type="text" name="title" value="{$rec_data['title']}" class="form-control" readonly="readonly">
+                        		{/if}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-xs-12 col-sm-3 col-md-2 control-label"><span style="color:red"></span>问答图片</label>
+                            <div class="col-sm-9 col-xs-12">
+                            {if $type == 1}
+                            	<img src="{php echo tomedia($art_data['photo'])}" style="height:150px;width:150px;"/>
+                            {elseif $type == 2}
+                         		{loop $imgs $i $v}
+                         			<img src="{php echo tomedia($v)}" style="height:150px;width:150px;"/>
+                         		{/loop}
+                            {/if}
+                            </div>
+                        </div>
+
+						{if $type == 1}
+	                        <div class="form-group">
+	                            <label class="col-xs-12 col-sm-3 col-md-2 control-label" for="title">
+	                            	文章分类
+	                            </label>
+	                            <div class="col-sm-9 col-xs-12">
+	                            	<input type="text" class="form-control" value="{$tags['tag_name']}" readonly="readonly">
+	                            </div>
+	                        </div>
+                        {/if}
+
+                        <div class="form-group">
+                            <label class="col-xs-12 col-sm-3 col-md-2 control-label" for="title">
+                            	{if $type == 1}文章作者{elseif $type == 2}提问者{/if}
+                        	</label>
+                            <div class="col-sm-9 col-xs-12">
+                                <input type="text" class="form-control" value="{$user['real_name']}" readonly="readonly">
+                            </div>
+                        </div>
+
+                        {if $type == 1}
+	                        <div class="form-group">
+	                            <label class="col-xs-12 col-sm-3 col-md-2 control-label" for="author"><span style="color:red">*</span>国家</label>
+	                            <div class="col-sm-9 col-xs-12">
+									{if $position['name'] != 0}
+										<input class="form-control" value="{$country['name']}" readonly="readonly">
+									{else}
+										<input class="form-control" value="中国" readonly="readonly">
+									{/if}
+	                            </div>
+	                        </div>
+	                        <div class="form-group">
+	                            <label class="col-xs-12 col-sm-3 col-md-2 control-label" for="title">地区</label>
+	                            <div class="col-xs-9 col-sm-10">
+	                                <select style="width:29.5%;">
+	                                    <option>
+	                                    	{if $province['name'] == ""}请选择省{else}{$province['name']}{/if}
+	                                	</option>
+	                                </select>
+	                                <select style="width:29.5%">
+	                                    <option>
+	                                    	{if $city['name'] == ""}请选择市{else}{$city['name']}{/if}
+	                                	</option>
+	                                </select>
+	                                <select style="width:29.3%">
+	                                    <option>
+	                                    	{if $area['name'] == ""}请选择区{else}{$area['name']}{/if}
+	                                    </option>
+	                                </select>
+	                                <br>
+	                                <span style="color: red">说明: 政策适应范围，用于政策地图</span>
+	                            </div>
+	                        </div>
+                        {/if}
+
+                        <div class="form-group">
+                            <label class="col-xs-12 col-sm-3 col-md-2 control-label" for="author">栏目类型</label>
+                            <div class="col-sm-9 col-xs-12">
+                            	<input type='text' class="form-control" value="{$index_menu['name']}" readonly="readonly">
+                            </div>
+                        </div>
+
+						{if $type == 1}
+							{if $art_data['trial_reading'] == ''}
+		            			<div class="form-group" id="sdus">
+			                        <label class="col-xs-12 col-sm-3 col-md-2 control-label" for="contents">文章试读内容</label>
+			                        <div class="col-sm-9 col-xs-12">
+			                            {php echo tpl_ueditor('trial_reading',$art_data['trial_reading']);}
+			                        </div>
+		                    	</div>
+	                    	{/if}
+
+	                        <div class="form-group">
+	                            <label class="col-xs-12 col-sm-3 col-md-2 control-label" for="contents">文章内容</label>
+	                            <div class="col-sm-9 col-xs-12">
+	                                {php echo tpl_ueditor('info',$art_data['info']);}
+	                            </div>
+	                        </div>
+                        {/if}
+
+                        {if $type == 2}
+                    		{if $answer['user_type'] == 1}<!-- 快捷回答 -->
+                        		<div class="form-group">
+			                        <label class="col-xs-12 col-sm-3 col-md-2 control-label" for="contents">回答</label>
+		                        	<div class="col-sm-9 col-xs-12">
+										<textarea class="form-control" readonly="readonly" style="height:150px;">{$answer['answer_wenzi']}</textarea>
+								 	</div>
+		                        </div>
+							{elseif $answer['user_type'] == 2}<!-- 专业回答 -->
+
+		                        <div class="form-group">
+			                        <label class="col-xs-12 col-sm-3 col-md-2 control-label" for="contents">问题提炼</label>
+		                        	<div class="col-sm-9 col-xs-12">
+										<textarea class="form-control" readonly="readonly" style="height:150px;">{$answer['answer_problem_refining']}</textarea>
+								 	</div>
+		                        </div>
+
+		                        <div class="form-group">
+			                        <label class="col-xs-12 col-sm-3 col-md-2 control-label" for="contents">政策依据</label>
+		                        	<div class="col-sm-9 col-xs-12">
+										<textarea class="form-control" readonly="readonly" style="height:150px;">{$answer['policy_basis']}</textarea>
+								 	</div>
+		                        </div>
+
+		                        <div class="form-group">
+			                        <label class="col-xs-12 col-sm-3 col-md-2 control-label" for="contents">专家结论</label>
+		                        	<div class="col-sm-9 col-xs-12">
+										<textarea class="form-control" readonly="readonly" style="height:150px;">{$answer['expert_conclusion']}</textarea>
+								 	</div>
+		                        </div>
+
+		                        <div class="form-group">
+			                        <label class="col-xs-12 col-sm-3 col-md-2 control-label" for="contents">分析解答</label>
+		                        	<div class="col-sm-9 col-xs-12">
+										<textarea class="form-control" readonly="readonly" style="height:150px;">{$answer['answer_content_down']}</textarea>
+								 	</div>
+		                        </div>
+							{/if}
+                        {/if}
+                   </div>
+               </div>
+            </div>
+        </div>
+    </div>
+</form>
+{/if}
+{if $_GPC['op'] =='message'}
+<table class="table table-hover">
+    <thead class="navbar-inner">
+    <tr>
+        <th class="fonwenzhang">评论信息</th>
+        <th class="fonwenzhang">评论人</th>
+        <th class="fonwenzhang">评论时间</th>
+        <th class="fonwenzhang">状态</th>
+        <th class="fonwenzhang">是否已回复</th>
+        <th class="fonwenzhang">回复内容</th>
+        <th class="fonwenzhang">回复时间</th>
+        <th class="fonwenzhang" style="width:250px;">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {loop $data $v}
+    <tr>
+        <td class="fonwenzhang">{$v['content']}</td>
+        <td class="fonwenzhang">{$v['nickname']}</td>
+        <td class="fonwenzhang">{php echo date('Y-m-d', $v['create_time'])}</td>
+        <td>{if $v['is_show']==0}
+            <span style="color: red">隐藏</span>
+            {elseif $v['is_show']==1}
+            <span >正常</span>
+            {/if}</td>
+        <td class="fonwenzhang">
+            {if $v['is_answer']==0}
+            <span>未回复</span>
+            {elseif $v['is_answer']==1}
+            <span style="color: red">已回复</span>
+            {/if}
+        </td>
+        <td>{$v['hf_content']}</td>
+        <td class="fonwenzhang">{if $v['answer_time'] != '0'}{php echo date('Y-m-d', $v['answer_time'])}{/if}</td>
+        <td>
+
+            <a class="btn btn-default btn-sm manage" href="{php echo $this->createWebUrl('chat_index',array('op'=>'reply','is_answer'=>$v['is_answer'],'type'=>$v['type'],'uid'=>$v['uid'],'aaid' => $v['aaid'],'version_id'=>0,'type_id'=>$v['type_id'],'eid'=>$_GPC['eid'],'cont_info'=>$v['hf_content']));}">  {if $v['is_answer']==0}回复{else}编辑{/if}</a>
+           <a class="btn btn-default btn-sm manage" href="{php echo $this->createWebUrl('chat_index',array('op'=>'is_show','is_answer'=>$v['is_answer'],'type'=>$v['type'],'uid'=>$v['uid'],'aaid' => $v['aaid'],'version_id'=>0,'type_id'=>$v['type_id'],'eid'=>$_GPC['eid'],'is_show'=>$v['is_show']))}">{if $v['is_show'] == 1}不显示{elseif $v['is_show']==0}显示{/if}</a>
+            <a class="btn btn-default btn-sm manage" onclick="return confirm('你确定要删除该数据吗？')" href="{php echo $this->createWebUrl('chat_index',array('op'=>'delete_message','is_answer'=>$v['is_answer'],'type'=>$v['type'],'uid'=>$v['uid'],'aaid' => $v['aaid'],'version_id'=>0,'type_id'=>$v['type_id'],'eid'=>$_GPC['eid']))}">删除</a>
+
+        </td>
+    </tr>
+    {/loop}
+    </tbody>
+</table>
+
+<div class="col-xs-12">
+    {php echo $pager}
+</div>
+
+{/if}
+
+{if $_GPC['op'] == 'reply'}
+<form method="post" action="{php echo $this->createWebUrl('chat_index',array('op'=>'reply','aaid' => $aaid,'type_id'=>$type_id,'uid'=>$uid,'type'=>$type,'is_answer'=>$is_answer,'eid'=>$_GPC['eid']))}" class="form-horizontal bv-form" role="form" novalidate="novalidate">
+
+    <div class="panel panel-info">
+        <div class="panel-heading">回复</div>
+        <div class="panel-body">
+            <div class="form-group">
+                <label class="col-xs-12 col-sm-3 col-md-2 control-label" for="title">回复内容</label>
+                <div class="col-sm-9 col-xs-12">
+                   <textarea name="info" style="width:500px;height:400px;">{$hj_content}</textarea>
+                </div>
+            </div>
+        </div>
+        <div class="form-group" style="margin-left: 10%;">
+            <div class="col-sm-9 col-xs-12">
+                <input type="submit" value="提交" class="btn btn-primary">
+            </div>
+        </div>
+    </div>
+</form>
+{/if}
+
+{template 'common/footer'}

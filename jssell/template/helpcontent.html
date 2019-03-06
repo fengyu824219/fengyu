@@ -1,0 +1,63 @@
+<div class="panel-body">
+	<!-- <form class="form-horizontal" action="" method="post" onsubmit="return ckForm();"> -->
+	<div class="form-group">
+		<label for="inputEmail3" class="col-sm-2 control-label"><span style="color:red">*</span>说明类型</label>
+		<div class="col-sm-7">
+		  	<select class="form-control" name="type" id="testSelect" onchange="showSelectValue(this)">
+			  	<option onclick="hide();" value="1" <?php if($v['type'] == 1){echo 'selected';} ?> >帮助与反馈</option>
+			  	<option value="8" <?php if($v['type'] == 8){echo 'selected';} ?> >税媒大使合作政策</option>
+			  	<option value="9" <?php if($v['type'] == 9){echo 'selected';} ?> >城市合伙人政策</option>
+			  	<option value="2" <?php if($v['type'] == 2){echo 'selected';} ?> >关于税媒声明</option>
+			 	<option value="3" <?php if($v['type'] == 3){echo 'selected';} ?> >税媒用户协议</option>
+			  	<option value="4" <?php if($v['type'] == 4){echo 'selected';} ?> >税媒用户隐私协议</option>
+			  	<option value="5" <?php if($v['type'] == 5){echo 'selected';} ?> >税媒知识产权声明</option>
+			  	<option value="6" <?php if($v['type'] == 6){echo 'selected';} ?> >税媒网站免责声明</option>
+		  	</select>
+		</div>
+		<div class="col-sm-3">
+			<p style="color:red"><span id="titlemsg"></span></p>
+		</div>
+	</div>
+
+	<div class="form-group">
+		<label for="inputEmail3" class="col-sm-2 control-label"><span style="color:red">*</span>状态</label>
+		<div class="col-sm-7">
+		  <select class="form-control" name="status">
+			  <option value="1" <?php if($v['status'] == 1){echo 'selected';} ?> >上架</option>
+			  <option value="2" <?php if($v['status'] == 2){echo 'selected';} ?> >下架</option>
+		  </select>
+		</div>
+		<div class="col-sm-3">
+			<p style="color:red"><span id="titlemsg"></span></p>
+		</div>
+	</div>
+
+	<div class="form-group" {if $v['type'] == null }style="display:black"{/if}{if $v['type'] == 1} style="display:black"{/if}style="display:none" id="ses" data-value="1">
+		<label for="inputEmail3" class="col-sm-2 control-label"><span style="color:red">*</span>问题</label>
+		<div class="col-sm-7">
+		  <input type="text" class="form-control"  id="answer"  name="ask" value="{$v['ask']}" placeholder="设置帮助中心的问题" >
+		</div>
+	</div>
+	<!-- <	div class="form-group" {if $v['type'] == null }style="display:black"{/if}{if $v['type'] == 1} style="display:black"{else} style="display:none" {/if} id="ses1">
+		<label for="inputEmail3" class="col-sm-2 control-label"><span style="color:red">*</span>回答</label>
+		<div class="col-sm-7">
+			<textarea class="form-control"  style="width: 490px;height: 200px;" name="answer">{$v['answer']}</textarea>
+		</div>
+	</div> -->
+    <div class="form-group" id="sor" {if $v['type'] == null }style="display:black"{/if}{if $v['type'] == 1} style="display:black"{/if}style="display:none" id="ses" data-value="1">
+	    <label for="inputEmail3" class="col-sm-2 control-label"><span style="color:red">*</span>排序</label>
+	    <div class="col-sm-7">
+	        <input type="number" class="form-control"  name="sort" value="{$v['sort']}" >
+	    </div>
+    </div>
+
+	<div class="form-group" id="ses2">
+		<label for="inputPassword3"  class="col-sm-2 control-label"><span style="color:red">*</span>内容</label>
+		<div class="col-sm-9 content">
+		  {php echo tpl_ueditor('content',$v['content']);}
+		  <span style="padding: 10px; color:#92939b;"></span>
+		</div>
+	</div>
+
+<!-- </form> -->
+</div>

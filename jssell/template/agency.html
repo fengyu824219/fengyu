@@ -1,0 +1,104 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li {if $_GPC['op'] == '' || $_GPC['op'] == 'display'}class="active"{/if}>
+        <a href="{php echo $this->createWebUrl('agency',array('op'=>'display','eid'=>$_GPC['eid'],'version_id'=>0))}">待办管理</a>
+    </li>
+</ul>
+<style>
+.agency_list a{float:left;width:50%;}
+</style>
+<!-- 专家团管理 start -->
+{if $operation == 'display'}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="row-fluid">
+            <div class="span8 control-group">
+                待办列表
+                <!-- 共计 {$total['num']} 条数据 -->
+            </div>
+        </div>
+    </div>
+    <div class="panel-body table-responsive">
+        <table class="table table-hover">
+            <thead class="navbar-inner">
+                <tr>
+                    <th>名称</th>
+                    <th>待审核数量</th>
+                    <th>操作</th>
+                    <th>名称</th>
+                    <th>待审核数量</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {loop $agencyData $i $vo}
+                    {if $i%2==0}<tr>{/if}
+                        <td>{$vo['name']}</td>
+                        <td {if $vo['total'] > 0 && $vo['name'] != '文章审核'}style="color:red;font-weight:bold;"{/if}>{$vo['total']}</td>
+                        <td>
+                            {if $vo['total'] > 0 && $vo['name']}
+                                <!-- 专家认证 -->
+                                {if $i == 0}
+                                    <a href="{php echo $this->createWebUrl('chat_audit',array('op'=>'display','version_id'=>0))}" class="btn btn-default btn-sm manage" target="_blank">去审核</a>
+                                {/if}
+                                <!-- 企业认证 -->
+                                {if $i == 1}
+                                    <a href="{php echo $this->createWebUrl('chat_audit',array('op'=>'chat_qyrz','version_id'=>0,'status'=>1))}" class="btn btn-default btn-sm manage" target="_blank">去审核</a>
+                                {/if}
+                                <!-- 专家团申请 -->
+                                {if $i == 2}
+                                    <a href="{php echo $this->createWebUrl('agent',array('op'=>'display','version_id'=>0,'eid'=>$expertGroupMenu['eid'],'status'=>0))}" class="btn btn-default btn-sm manage" target="_blank">去审核</a>
+                                {/if}
+                                <!-- 代理人申请 -->
+                                {if $i == 3}
+                                    <a href="{php echo $this->createWebUrl('chat_audit',array('op'=>'user_partner','version_id'=>0,'difference'=>2,'status'=>3))}" class="btn btn-default btn-sm manage" target="_blank">去审核</a>
+                                {/if}
+                                <!-- 城市合伙人申请 -->
+                                {if $i == 4}
+                                    <a href="{php echo $this->createWebUrl('chat_audit',array('op'=>'user_partner','version_id'=>0,'difference'=>1,'status'=>3))}" class="btn btn-default btn-sm manage" target="_blank">去审核</a>
+                                {/if}
+                                <!-- 专家自定义服务 -->
+                                {if $i == 5}
+                                    <a href="{php echo $this->createWebUrl('ask_manage',array('op'=>'custom_serve','version_id'=>0))}" class="btn btn-default btn-sm manage" target="_blank">去审核</a>
+                                {/if}
+                                <!-- 专家团服务 -->
+                                {if $i == 6}
+                                    <a href="{php echo $this->createWebUrl('agent',array('op'=>'expertGroupService','version_id'=>0,'status'=>3))}" class="btn btn-default btn-sm manage" target="_blank">去审核</a>
+                                {/if}
+                                <!-- 订单指定 -->
+                                {if $i == 7}
+                                    <a href="{php echo $this->createWebUrl('order',array('op'=>'productOrderList','version_id'=>0,'eid'=>$orderMenu['eid'],'matter'=>'yes','appointStatus'=>1))}" class="btn btn-default btn-sm manage" target="_blank">去指派</a>
+                                {/if}
+                                <!-- 订单转账处理 -->
+                                {if $i == 8}
+                                    <a href="{php echo $this->createWebUrl('order',array('op'=>'transferAccountsList','version_id'=>0,'eid'=>$orderMenu['eid']))}" class="btn btn-default btn-sm manage" target="_blank">去审核</a>
+                                {/if}
+                                <!-- 提现 -->
+                                {if $i == 9}
+                                    <a href="{php echo $this->createWebUrl('ask_payment',array('op'=>'display','version_id'=>0,'status'=>1))}" class="btn btn-default btn-sm manage" target="_blank">去审核</a>
+                                {/if}
+                                <!-- 开具发票 -->
+                                {if $i == 10}
+                                    <a href="{php echo $this->createWebUrl('invoice',array('op'=>'display','version_id'=>0,'eid'=>$invoiceMenu['eid'],'status'=>1))}" class="btn btn-default btn-sm manage" target="_blank">去开票</a>
+                                {/if}
+                                <!-- 文章 -->
+                                {if $i == 11}
+                                    <a href="{$_W['siteroot']}web/index.php?c=site&a=entry&version_id=0&do=article&m=seapow_sm&type=2&eid={$articleMenu['eid']}" class="btn btn-default btn-sm manage" target="_blank">去审核</a>
+                                {/if}
+                                <!-- 评论 -->
+                                {if $i == 12}
+                                    <a href="{php echo $this->createWebUrl('comment',array('op'=>'display','version_id'=>0,'eid'=>$commentMenu['eid'],'is_show'=>0))}" class="btn btn-default btn-sm manage" target="_blank">去审核</a>
+                                {/if}
+                            {/if}
+                        </td>
+                        {if count($agencyData)%2 == 1 && $i+1==count($agencyData)}<td></td><td></td><td></td>{/if}
+                    {if $i%2==1}</tr>{/if}
+                {/loop}
+            </tbody>
+        </table>
+    </div>
+</div>
+{$pager}
+{/if}
+<!-- 专家团管理 end -->
+{template 'common/footer'}

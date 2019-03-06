@@ -1,0 +1,73 @@
+{template 'common/header'}
+<style type="text/css">
+.table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+  white-space:normal;
+}
+</style>
+<div class="main">
+	<div class="panel panel-info">
+		<div class="panel-body">
+			<form  method="get" class="form-horizontal" role="form">	
+				<input type="hidden" name="c" value="site">
+				<input type="hidden" name="version_id" value="0">
+				<input type="hidden" name="a" value="entry">
+				<input type="hidden" name="do" value="recharge_manage">
+				<input type="hidden" name="m" value="dg_ask">		
+				<div class="form-group">
+					<label>查询关键词</label>
+					<div class="col-sm-6 col-lg-8">
+						<input class="form-control" name="keyword" id="" type="text" value="{$_GPC['keyword']}" placeholder="请输入用户昵称关键字">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">时间范围</label>
+					<div class="col-sm-6 col-lg-8">
+						{php echo tpl_form_field_daterange('time', array('start'=>date('Y-m-d', $starttime),'end'=>date('Y-m-d', $endtime)));}
+					</div>
+					<div class="pull-right col-xs-12 col-sm-3 col-lg-2">
+						<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div class="panel panel-default">
+		<div class="panel-heading">	
+				<div class="row-fluid">
+					<div class="span8 control-group">
+						共计 {$total} 条数据
+					</div>
+				</div>
+			</div>
+			<div class="panel-body table-responsive">
+			<table class="table table-hover" style="font-size:14px;">
+				<thead class="navbar-inner">
+					<tr>
+						<th style="width:65px;" align="center">头像</th>
+						<th style="width:75px;">昵称</th>
+						<th style="width:75px;">真实姓名</th>
+						<th style="width:75px;">充值金额</th>
+						<th style="width:75px;">状态</th>
+						<th style="width:65px;">时间</th>
+					</tr>
+				</thead>
+				<tbody>
+					{loop $records $row}
+					
+					<tr id="row_{$row['id']}">
+						<td><img alt="" src="{$row['avatar']}" width='auto' style="max-width:50px; max-height:50px;" height='auto'></td>
+						<td>{$row['nickname']}</td>
+						<td>{$row['real_name']}</td>
+						<td>{$row['money']}</td>
+						<td>{$row['pay_status']}</td>
+						<td>{php echo date('Y/m/d H:i:s', $row['time']);}</td>
+					</tr>
+					{/loop}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	{$pager}
+</div>
+{template 'common/footer'}

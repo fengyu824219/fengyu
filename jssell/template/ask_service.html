@@ -1,0 +1,156 @@
+{template 'common/header'}
+
+<ul class="nav nav-tabs">
+	<li {if $op == 'display'}class="active"{/if}><a href="{php echo $this->createWebUrl('ask_users')}">服务管理</a></li>
+	{if $op == 'add_service' || $op == 'display'}
+	<li {if $op == 'add_service'}class="active"{/if}><a href="{php echo $this->createWebUrl('ask_service', array('op' => 'add_service','version_id'=>0))}">添加服务</a></li>
+	{else}
+	<li {if $op == 'edit_service'}class="active"{/if}><a href="{php echo $this->createWebUrl('ask_service', array('op' => 'edit_service','version_id'=>0))}">修改服务</a></li>
+    {/if}
+</ul>
+
+{if $op == 'balance'}
+<div class="main">
+	<form action="" method="post" class="form-horizontal form"	enctype="multipart/form-data">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				余额设置
+			</div>
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">余额</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="balance" class="form-control" value="{$ask_user['balance']}" />
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="form-group col-sm-12">
+			<input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+			<input type="hidden" name="token" value="{$_W['token']}" />
+		</div>
+	</form>
+</div>
+{else if $op == 'add_service'}
+<div class="main">
+	<form action="" method="post" class="form-horizontal form"	id="user-submit"  enctype="multipart/form-data">
+		<input type="hidden" name="op" value="add_service">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				编辑服务
+			</div>
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">服务昵称</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="title" class="form-control" value="{$user['title']}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">服务类型</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="type" class="form-control" value="{$user['type']}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">服务描述</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="service_desc" class="form-control" value="{$user['service_desc']}" />
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="form-group col-sm-12">
+			<input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+			<input type="hidden" name="token" value="{$_W['token']}" />
+		</div>
+	</form>
+</div>
+{else}
+<div class="main">
+<div class="panel panel-info">
+		<div class="panel-heading">筛选</div>
+		<div class="panel-body">
+			<form  method="get" class="form-horizontal" role="form">				
+				<div class="form-group">
+					<input type="hidden" name="c" value="site">
+					<input type="hidden" name="a" value="entry">
+					<input type="hidden" name="do" value="ask_users">
+					<input type="hidden" name="m" value="dg_ask">
+					<input type="hidden" name="version_id" value="0">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">查询关键词</label>
+					<div class="col-sm-6 col-lg-8">
+						<input class="form-control" name="keyword" id="" type="text" value="{$_GPC['keyword']}" placeholder="请输入服务昵称">
+					</div>
+					<div class="pull-right col-xs-12 col-sm-3 col-lg-2">
+						<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="panel panel-default">
+	<div class="panel-heading">	
+			<div class="row-fluid">
+				<div class="span8 control-group">
+					共计 {$total} 条数据
+				</div>
+			</div>
+		</div>
+		<div class="panel-body table-responsive">
+		<table class="table table-hover">
+			<thead class="navbar-inner">
+				<tr>
+					<th>服务ID</th>
+					<th>服务名称</th>
+					<th>服务类型</th>
+					<th align="center">加入时间</th>
+					<th style="width:150px;">快捷操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				{loop $result $row}
+				<tr>
+					<td>{$row['sid']}</td>
+					<td>{$row['title']}</td>
+					<td>{$row['type']}</td>
+					<td>{php echo date('Y/m/d H:i:s', $row['create_time']);}</td>
+					<td>
+						<a href="{php echo $this->createWebUrl('ask_users', array('op' => 'balance','id'=>$row['id'],'version_id'=>0))}"><label style="cursor:pointer;" data="{$row['id']}" class="label label-default">删除</label></a>
+						<a href="{php echo $this->createWebUrl('ask_users', array('op' => 'edit_users','id'=>$row['id'],'version_id'=>0))}"><label style="cursor:pointer;" data="{$row['id']}" class="label label-default" >编辑</label></a>
+
+					</td>
+				</tr>
+				{/loop}
+			</tbody>
+		</table>
+	</div>
+	</div>
+	{$pager}
+</div>
+{/if}
+
+<script type="text/javascript">
+
+require(['jquery', 'util'], function($, util) {
+    $('#user-submit').submit(function () {
+        if($('input[name="title"]').val() == ''){
+            util.message('昵称不能为空');
+            return false;
+        }
+        if($('input[name="price"]').val() == ''){
+            util.message('金额不能为空');
+            return false;
+        }
+        if($('input[name="type"]').val() == ''){
+            util.message('类型不能为空');
+            return false;
+        }
+
+    });
+});
+
+</script>
+{template 'common/footer'}

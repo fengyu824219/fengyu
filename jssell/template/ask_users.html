@@ -1,0 +1,1886 @@
+{template 'common/header'}
+
+{if $op == 'balance' || $op == 'edit_users'}
+<ul class="nav nav-tabs">
+	<li><a href="{php echo $this->createWebUrl('ask_users')}">用户管理</a></li>
+	<!-- <li {if $op == 'balance'}class="active"{/if}><a href="{php echo $this->createWebUrl('ask_users', array('op' => 'balance','id'=>$sid,'version_id'=>0))}">设置余额</a></li> -->
+	<li {if $op == 'edit_users'}class="active"{/if}><a href="{php echo $this->createWebUrl('ask_users', array('op' => 'edit_users','id'=>$sid,'version_id'=>0))}">编辑</a></li>
+</ul>
+{/if}
+{if $op == 'edit_quyu'}
+<ul class="nav nav-tabs">
+	{if $_GPC['type'] == '1'}
+		<li><a href="{php echo $this->createWebUrl('ask_users',array('op'=>'partnerList'))}">城市合伙人管理</a></li>
+	{/if}
+	<!-- {if $_GPC['type'] == '2'}
+		<li><a href="{php echo $this->createWebUrl('ask_users',array('op'=>'operate'))}">运营总监管理</a></li>
+	{/if} -->
+	{if $_GPC['type'] == '3'}
+		<li><a href="{php echo $this->createWebUrl('ask_users',array('op'=>'salesmanList'))}">税媒大使管理</a></li>
+	{/if}
+	<li {if $op == 'edit_quyu'}class="active"{/if}><a href="{php echo $this->createWebUrl('ask_users', array('op' => 'edit_quyu','upid'=>$_GPC['upid'],'version_id'=>0,'type'=>$_GPC['type']))}">编辑</a></li>
+</ul>
+{/if}
+{if $op == 'balance'}
+<div class="main">
+	<form action="" method="post" class="form-horizontal form"	enctype="multipart/form-data">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				余额设置
+			</div>
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">余额</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="balance" class="form-control" value="{$ask_user['balance']}" />
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="form-group col-sm-12">
+			<input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+			<input type="hidden" name="token" value="{$_W['token']}" />
+		</div>
+	</form>
+</div>
+{else if $op == 'edit_users'}
+<div class="main">
+	<form action="" method="post" class="form-horizontal form"	id="user-submit"  enctype="multipart/form-data">
+
+		<input type="hidden" name="op" value="edit_users">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				编辑用户
+			</div>
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">姓名</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="real_name" class="form-control" value="{$user['real_name']}" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">昵称</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="nickname" class="form-control" value="{$user['nickname']}" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">联系方式</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="number" name="mobile" class="form-control" value="{$user['mobile']}" />
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="form-group col-sm-12">
+			<input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+			<input type="hidden" name="token" value="{$_W['token']}" />
+		</div>
+	</form>
+</div>
+{else if $op == 'edit_quyu'}
+	<!-- 编辑区域管理 start -->
+	<form class="form-horizontal form">
+		<div class="main">
+			<input type="hidden" name="op" value="edit_quyu">
+			<input type="hidden" name="upid" value="{$quyu['upid']}">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					编辑区域
+				</div>
+				<div class="panel-body">
+					{if $_GPC['type'] == '2'}
+						<div class="form-group">
+							<label class="col-xs-12 col-sm-3 col-md-2 control-label">上级合伙人</label>
+							<div class="col-sm-9 col-xs-12">
+								<select name="pid" style="width:550px!important" class="form-control">
+									{loop $hhr $i $vo}
+		                       			<option <?php if($vo['id'] == $quyu['pid']){echo 'selected';} ?> value="{$vo['id']}">
+		                       				{if $vo['real_name']}{$vo['real_name']}{else}{$vo['nickname']}{/if}
+		                       			</option>
+		                       		{/loop}
+	                       		</select>
+							</div>
+						</div>
+					{/if}
+					{if $_GPC['type'] == '3'}
+						<div class="form-group">
+							<label class="col-xs-12 col-sm-3 col-md-2 control-label">上级合伙人</label>
+							<div class="col-sm-9 col-xs-12">
+								<select name="pid" style="width:550px!important" class="form-control">
+									{loop $yyzj $i $vo}
+		                       			<option <?php if($vo['id'] == $quyu['pid']){echo 'selected';} ?> value="{$vo['id']}">
+		                       				{if $vo['real_name']}{$vo['real_name']}{else}{$vo['nickname']}{/if}
+		                       			</option>
+		                       		{/loop}
+	                       		</select>
+							</div>
+						</div>
+					{/if}
+					<div class="form-group">
+						<label class="col-xs-12 col-sm-3 col-md-2 control-label">代理等级</label>
+						<div class="col-sm-9 col-xs-12">
+							<select style="float:left;" name="level">
+	                   			<option value='0'>请选择</option>
+	                   			<option value='1' <?php if($quyu['level'] == 1){echo 'selected';} ?>>省代理</option>
+	                   			<option value='2' <?php if($quyu['level'] == 2){echo 'selected';} ?>>市代理</option>
+	                   			<option value='3' <?php if($quyu['level'] == 3){echo 'selected';} ?>>区代理</option>
+	                   		</select>
+	               		</div>
+					</div>
+					<div class="form-group">
+						<label class="col-xs-12 col-sm-3 col-md-2 control-label">区域</label>
+						<div class="col-sm-9 col-xs-12">
+							{php echo tpl_form_field_district('addaddress',array('province'=>$quyu['province'],'city'=>$quyu['city'],'district'=>$quyu['area']));}
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="form-group col-sm-12">
+				<input type="button" onclick="quyu_submit({$quyu['upid']},{$quyu['type']},'edit',{$quyu['uid']})" value="提交" class="btn btn-primary col-lg-1" />
+				<input type="hidden" name="token" value="{$_W['token']}" />
+			</div>
+		</div>
+	</form>
+	<!-- 编辑区域管理 end -->
+{else}
+	<ul class="nav nav-tabs">
+		<li {if $op == 'display'}class="active"{/if}>
+			<a href="{php echo $this->createWebUrl('ask_users',array('version_id'=>0))}">用户管理</a>
+		</li>
+		{if $op == 'invitationList'}
+			<li {if $op == 'invitationList'}class="active"{/if}><a href="javascript:;">邀请列表</a></li>
+		{/if}
+
+		<li {if $op == 'salesmanList' || ($op == 'quyuList' && $_GPC['type'] == '3')}class="active"{/if}>
+			<a href="{php echo $this->createWebUrl('ask_users',array('op'=>'salesmanList','version_id'=>0))}">税媒大使管理</a>
+		</li>
+		<li {if $op == 'partnerList' || ($op == 'quyuList' && $_GPC['type'] == '1')}class="active"{/if}>
+			<a href="{php echo $this->createWebUrl('ask_users',array('op'=>'partnerList','version_id'=>0))}">城市合伙人管理</a>
+		</li>
+
+		<li {if $op == 'management_layer'}class="active"{/if}>
+			<a href="{php echo $this->createWebUrl('ask_users',array('op'=>'management_layer','version_id'=>0))}">管理层管理</a>
+		</li>
+
+		<!-- <li {if $op == 'operate' || ($op == 'quyuList' && $_GPC['type'] == '2')}class="active"{/if}>
+			<a href="{php echo $this->createWebUrl('ask_users',array('op'=>'operate','version_id'=>0))}">运营总监管理</a>
+		</li> -->
+		<li {if $op == 'tape'}class="active"{/if}>
+			<a href="{php echo $this->createWebUrl('ask_users', array('op' => 'tape','version_id'=>0))}">录音员管理</a>
+		</li>
+		<li {if $op == 'ciphertext'}class="active"{/if}>
+			<a href="{php echo $this->createWebUrl('ask_users', array('op' => 'ciphertext','id'=>$sid,'version_id'=>0))}">秘文管理</a>
+		</li>
+		<li {if $op == 'integral_log'}class="active"{/if}>
+			<a href="{php echo $this->createWebUrl('ask_users',array('version_id'=>0,'op'=>'integral_log','eid'=>$_GPC['eid']))}">用户积分</a>
+		</li>
+	</ul>
+	{if $op == 'display'}
+    <div id="action_list" class="panel panel-default">
+        <div class="panel-body">
+            <div class="col-xs-12 col-sm-11" style="width:99%;">
+				<form  method="get" class="form-horizontal" role="form">
+					<div class="input-group">
+						<input type="hidden" name="c" value="site">
+						<input type="hidden" name="a" value="entry">
+						<input type="hidden" name="do" value="ask_users">
+						<input type="hidden" name="op" value="display">
+						<input type="hidden" name="m" value="dg_ask">
+						<input type="hidden" name="version_id" value="0">
+						<input type="hidden" name="eid" value="{$_GPC['eid']}">
+
+						<select name="status_select" class="form-control input-medium">
+	                        <option value="1" <?php if($status_select == 1){echo 'selected';} ?> >不按时间</option>
+	                        <option value="create_time" <?php if($_GPC['status_select'] == 'create_time'){echo 'selected';} ?> >创建时间</option>
+	                    </select>
+	                    <span class="input-group-addon" style="padding: 0; width: 0;border:none;"></span>
+	                    {php echo tpl_form_field_daterange('time',array('start'=>($_GPC['start'] ? $_GPC['start'] : $_GPC['time']['start']),'end'=>($_GPC['end'] ? $_GPC['end'] : $_GPC['time']['end'])));}
+	                    <script type="text/javascript">
+	                        $(function(){
+	                            $("#action_list .input-group .daterange-date").addClass("form-control");
+	                        })
+	                    </script>
+	                    <span class="input-group-addon"></span>
+	                    <select name="sex" class="form-control input-medium">
+	                      	<option value="3" <?php if($_GPC['sex'] == 3){echo 'selected';} ?> >全部性别</option>
+	                      	<option value="1" <?php if($_GPC['sex'] == 1){echo 'selected';} ?> >男</option>
+	                      	<option value="2" <?php if($_GPC['sex'] == 2){echo 'selected';} ?> >女</option>
+	                    </select>
+	                    <span class="input-group-addon"></span>
+	                    <select name="type" class="form-control input-medium">
+	                      	<option value="0">全部身份类型</option>
+	                      	<option <?php if($_GPC['type'] == 'expert'){echo 'selected';} ?> value="expert">专家</option>
+	                      	<option <?php if($_GPC['type'] == 'platformExpert'){echo 'selected';} ?> value="platformExpert">平台专家</option>
+	                      	<option <?php if($_GPC['type'] == 'salesman'){echo 'selected';} ?> value="salesman">税媒大使</option>
+	                      	<!-- <option <?php if($_GPC['type'] == 'partnerSalesman'){echo 'selected';} ?> value="partnerSalesman">城市合伙人</option> -->
+	                      	<option <?php if($_GPC['type'] == 'partner'){echo 'selected';} ?> value="partner">城市合伙人</option>
+	                      	<!-- <option <?php if($_GPC['type'] == 'operate'){echo 'selected';} ?> value="operate">运营总监</option> -->
+	                    </select>
+						<span class="input-group-addon">关键词</span>
+						<input  name="keyword" id="" type="text" value="{$_GPC['keyword']}" placeholder="用户昵称 | 姓名 | 手机号" class="form-control ac_name">
+						<span class="input-group-btn">
+							<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+		                </span>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<div class="panel-heading-filter">
+				<span class="search_time"></span>
+				<span class="sex"></span>
+				<span class="type"></span>
+				<span style="float:right;">共计 <b>{$total}</b> 个用户</span>
+			</div>
+		</div>
+		<div class="panel-body table-responsive">
+			<table class="table table-hover">
+				<thead class="navbar-inner">
+					<tr>
+						<th></th>
+						<th>头像</th>
+						<th>姓名 / 昵称</th>
+						<th>手机号</th>
+						<th style="text-align: center;">平台角色</th>
+						<!-- <th>是否为运营总监</th> -->
+						<th style="text-align: center;">城市</th>
+						<th style="text-align: right;">余额</th>
+						<th style="text-align: center;">加入时间</th>
+						<th style="text-align:center;"></th>
+					</tr>
+				</thead>
+				<tbody>
+					{loop $records $row}
+					<tr>
+						<td style="text-align: center;">{if $row['sex'] == 1}<i class="fa fa-male"></i>{elseif $row['sex'] == 2}<i class="fa fa-female"></i>{/if}</td>
+						<td><a href="{php echo tomedia($row['avatar'])}" target="_blank"><img src="{php echo tomedia($row['avatar'])}" style="width:30px; height:30px;"></a></td>
+						<td title="{$row['nickname']}">{if $row['real_name']}<span style="color:#449D44">{$row['real_name']}</span>{else}{php echo $this->str_strs($row['nickname'],0,5)}{/if}</td>
+						<td title="{$row['mobile']}">{if strlen($row['mobile'])==11}{$row['mobile']}{else}-{/if}</td>
+						<td style="text-align: center;">
+							{if $row['vstatus'] == 1}{if $row['is_platform'] == 1}平台{/if}专家{/if}
+							{if $row['is_salesman'] == 1}<br>税媒大使{/if}
+							{if $row['is_partner'] == 1}<br>合伙人{/if}
+						</td>
+						<!-- <td><center>{if $row['is_boss'] == 1}是{else}否{/if}</center></td> -->
+						<td style="text-align: center;" title="{$row['city']} {$row['area']}">{$row['city']}</td>
+						<td style="text-align: right;">{$row['balance']}</td>
+						<td style="text-align: center;color:#ccc;" title="{php echo date('Y/m/d H:i:s', $row['create_time']);}">{php echo date('Y/m/d', $row['create_time']);}</td>
+						<td>
+							<a target="_blank" title="编辑用户信息" href="{php echo $this->createWebUrl('ask_users', array('op' => 'edit_users','id'=>$row['id'],'version_id'=>0))}"><label style="cursor:pointer;" data="{$row['id']}" class="btn btn-default btn-sm manage" ><i class="fa fa-edit"></i></label></a>
+							<a title="查看用户二维码" class="btn btn-default btn-sm manage" onclick="userCode({$row['id']});"><i class="fa fa-qrcode"></i></a>
+							<!-- {if $row['vstatus'] == 1}
+								<a href="{php echo $this->createWebUrl('ask_users', array('op' => 'onoff_users','id'=>$row['id'],'onoff'=>$row['onoff'],'version_id'=>0))}"><label style="cursor:pointer;"  class="btn btn-default btn-sm manage" >{if $row['onoff'] == 1}上线{else}<span style="color: red">下线</span>{/if}</label></a>
+							{/if} -->
+							<a target="_blank" href="{php echo $this->createWebUrl('ask_users', array('op' => 'invitationList','id'=>$row['id'],'version_id'=>0))}">
+								<label style="cursor:pointer;" class="btn btn-default btn-sm manage" >邀请记录</label>
+							</a>
+							{if empty($row['superior_id'])}
+								<a href="javascript:;">
+									<label style="cursor:pointer;" class="btn btn-default btn-sm manage" onclick="appoint({$row['id']})">指定推荐人</label>
+								</a>
+							{/if}
+						</td>
+					</tr>
+					{/loop}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="look_ewm" onclick="ewm_hide()" style=" padding:20px; background-color: rgba(170,133,64,.9); position: fixed; left: 38%; top: 20%; z-index:500;display: none;border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,.2);">
+	    <div class="qrcode-block" style="padding:10px;background:#fff;">
+	    	<img style="width:300px;height:300px" id="userCode" src="">
+	    </div>
+	   	<div style="width: 100%;text-align: center;font-size: 16px;color:#fff;margin-top: 10px;">二维码</div>
+	</div>
+	<script>
+
+
+		/*//生成二维码图片
+		function previewcode(that){
+	        $('.look_ewm').hide();
+	        var url = $(that).data('url');
+	        get_qrcode(url);
+	        $('.look_ewm').show();
+	    }
+	    function get_qrcode(url){
+	        require(['jquery.qrcode'], function(){
+	            $('.qrcode-block').html('').qrcode({
+                    render: 'canvas',
+                    width: 400,
+                    height: 400,
+                    text: "{$_W['siteroot']}app/index.php?i={$uniacid}&c=entry&do=ask_index&m=dg_ask&superior_id=u{$row['id']}"
+                });
+	        });
+	    }*/
+
+	    function userCode(userId)
+	    {
+
+            $.ajax({
+            	url: "{php echo $this->createWebUrl('ask_users', array('op' => 'userCode','version_id'=>0))}",
+            	type: 'POST',
+            	dataType: 'json',
+            	data: {userId: userId},
+            	success:function(res){
+                    if(res.code==200){
+	        			$('.look_ewm').show();
+	        			$("#userCode").attr("src",res.data)
+                    }else{
+                    	util.message(res.message);
+	            		return false;
+                    }
+            	}
+            })
+	    }
+	    //二维码消失
+	    function ewm_hide(){
+	    	$('.look_ewm').hide();
+	    }
+	</script>
+	<div class="modal fade" id="module-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="width:800px;">
+			<div class="modal-content">
+				<input type="hidden" name="m" value=""/>
+				<input type="hidden" name="user_id">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4>指定推荐</h4>
+				</div>
+				<div class="modal-body" style="padding:50px 30px!important;">
+                       	<div class="row clearfix">
+                           	<div class="input-group" style="float:left;width:50px">
+                               	<input type="text" style="width:650px!important" autocomplete="off" class="form-control" name="keyword" value="" id="keyword4" placeholder="请输入真实姓名/手机号">
+                               	<span class="input-group-btn"><button type="button" class="btn btn-default" onclick="search_members('display');">搜索</button></span>
+                           </div>
+                       	</div>
+                       	<div id="module-menus" style="padding-top:5px;">
+                        <div style="max-height:500px;overflow:auto;min-width:750px;">
+							<table class="table table-hover" style="min-width:750px;">
+								<tbody id="search_list">
+								</tbody>
+							</table>
+					    </div>
+				    </div>
+			 	</div>
+			</div>
+		</div>
+	</div>
+	{$pager}
+	<!-- 秘文管理 start -->
+	{else if $op == 'ciphertext'}
+	<div id="action_list" class="panel panel-default">
+        <div class="panel-body">
+            <div class="col-xs-12 col-sm-11" style="width:99%;">
+				<form  method="get" class="form-horizontal" role="form">
+					<div class="input-group">
+						<input type="hidden" name="version_id" value="0">
+						<input type="hidden" name="c" value="site">
+						<input type="hidden" name="a" value="entry">
+						<input type="hidden" name="do" value="ask_users">
+						<input type="hidden" name="op" value="ciphertext">
+						<input type="hidden" name="m" value="dg_ask">
+
+						<span class="input-group-addon">查询关键词</span>
+						<input  class="form-control ac_name" name="keyword" id="" type="text" value="{$_GPC['keyword']}" placeholder="请输入公司或者姓名或者手机号码">
+						<span class="input-group-btn">
+
+                        <button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+
+                        </span>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+		<div class="panel panel-default">
+		<div class="panel-heading">
+				<div class="row-fluid">
+					<div class="span8 control-group">
+						共计 {$total} 条数据
+					</div>
+				</div>
+			</div>
+			<div class="panel-body table-responsive">
+			<table class="table table-hover">
+				<thead class="navbar-inner">
+					<tr>
+						<th align="center">公司</th>
+						<th>姓名</th>
+						<th>手机号码</th>
+						<th>推荐人ID</th>
+					</tr>
+				</thead>
+				<tbody>
+					{loop $records $row}
+					<tr>
+						<td>{$row['company']}</td>
+						<td>{$row['name']}</td>
+						<td>{$row['mobile']}</td>
+						<td>{$row['pid']}</td>
+					</tr>
+					{/loop}
+				</tbody>
+			</table>
+		</div>
+		</div>
+		{$pager}
+	{/if}
+	<!-- 秘文管理 end -->
+{/if}
+<!-- 邀请列表 start -->
+{if $op == 'invitationList'}
+	<div id="action_list" class="panel panel-default">
+	    <div class="panel-body">
+	        <div class="col-xs-12 col-sm-11" style="width:99%;">
+				<form  method="get" class="form-horizontal" role="form">
+					<div class="input-group">
+						<input type="hidden" name="c" value="site">
+						<input type="hidden" name="a" value="entry">
+						<input type="hidden" name="do" value="ask_users">
+						<input type="hidden" name="op" value="invitationList">
+						<input type="hidden" name="m" value="dg_ask">
+						<input type="hidden" name="version_id" value="0">
+						<input type="hidden" name="id" value="{$_GPC['id']}">
+
+						<select name="status_select" class="form-control input-medium">
+	                        <option value="1" <?php if($status_select == 1){echo 'selected';} ?> >不按时间</option>
+	                        <option value="create_time" <?php if($_GPC['status_select'] == 'create_time'){echo 'selected';} ?> >创建时间</option>
+	                    </select>
+	                    <span class="input-group-addon" style="padding: 0; width: 0;border:none;"></span>
+	                    {php echo tpl_form_field_daterange('time',array('start'=>$_GPC['time']['start'],'end'=>$_GPC['time']['end']));}
+	                    <script type="text/javascript">
+	                        $(function(){
+	                            $("#action_list .input-group .daterange-date").addClass("form-control");
+	                        })
+	                    </script>
+
+	                    <span class="input-group-addon">性别</span>
+	                    <select name="sex" class="form-control input-medium">
+	                      	<option value="3" <?php if($_GPC['sex'] == 3){echo 'selected';} ?> >全部</option>
+	                      	<option value="1" <?php if($_GPC['sex'] == 1){echo 'selected';} ?> >男</option>
+	                      	<option value="2" <?php if($_GPC['sex'] == 2){echo 'selected';} ?> >女</option>
+	                    </select>
+
+	                    <span class="input-group-addon">身份类型</span>
+	                    <select name="type" class="form-control input-medium">
+	                      	<option value="0">全部</option>
+	                      	<option <?php if($_GPC['type'] == 'expert'){echo 'selected';} ?> value="expert">专家</option>
+	                      	<option <?php if($_GPC['type'] == 'platformExpert'){echo 'selected';} ?> value="platformExpert">平台专家</option>
+	                      	<option <?php if($_GPC['type'] == 'salesman'){echo 'selected';} ?> value="salesman">平台业务员</option>
+	                      	<!-- <option <?php if($_GPC['type'] == 'partnerSalesman'){echo 'selected';} ?> value="partnerSalesman">城市合伙人</option> -->
+	                      	<option <?php if($_GPC['type'] == 'partner'){echo 'selected';} ?> value="partner">合伙人</option>
+	                      	<!-- <option <?php if($_GPC['type'] == 'operate'){echo 'selected';} ?> value="operate">运营总监</option> -->
+	                    </select>
+
+						<span class="input-group-addon">查询关键词</span>
+						<input  name="keyword" type="text" value="{$_GPC['keyword']}" placeholder="请输入用户昵称或者姓名或者手机号" class="form-control ac_name">
+						<span class="input-group-btn">
+
+		                <button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+
+		                </span>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+				<div class="row-fluid">
+					<div class="span8 control-group">
+						共计 {$total} 条数据
+					</div>
+				</div>
+			</div>
+			<div class="panel-body table-responsive">
+			<table class="table table-hover">
+				<thead class="navbar-inner">
+					<tr>
+						<th>头像</th>
+						<th>昵称/姓名</th>
+						<th>性别</th>
+						<th>手机号</th>
+						<th>余额</th>
+						<th>是否为专家</th>
+						<th>是否为平台专家</th>
+						<th>是否为税媒大使</th>
+						<th>是否为合伙人</th>
+						<!-- <th>是否为运营总监</th> -->
+						<th align="center">加入时间</th>
+						<th>城市</th>
+						<th>地区</th>
+					</tr>
+				</thead>
+				<tbody>
+					{loop $users $row}
+					<tr>
+						<td><img alt="" src="{php echo tomedia($row['avatar'])}" style="width:50px; height:50px;"></td>
+						<td>{if $row['real_name']}{$row['real_name']}{else}{$row['nickname']}{/if}</td>
+						<td>{if $row['sex'] == 1}男{elseif $row['sex'] == 2}女{/if}</td>
+						<td>{$row['mobile']}</td>
+						<td>{$row['balance']}</td>
+						<td><center>{if $row['vstatus'] == 1}是{else}否{/if}</center></td>
+						<td><center>{if $row['is_platform'] == 1}是{else}否{/if}</center></td>
+						<td><center>{if $row['is_salesman'] == 1}是{else}否{/if}</center></td>
+						<td><center>{if $row['is_partner'] == 1}是{else}否{/if}</center></td>
+						<!-- <td><center>{if $row['is_boss'] == 1}是{else}否{/if}</center></td> -->
+						<td>{php echo date('Y/m/d H:i:s', $row['create_time']);}</td>
+						<td>{$row['city']}</td>
+						<td>{$row['area']}</td>
+					</tr>
+					{/loop}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	{$pager}
+{/if}
+<!-- 邀请列表 end -->
+<!-- 积分日志 start -->
+{if $op == 'integral_log'}
+	<div id="action_list" class="panel panel-default">
+        <div class="panel-body">
+            <div class="col-xs-12 col-sm-11" style="width:99%;">
+				<form  method="get" class="form-horizontal" role="form">
+					<div class="input-group">
+						<input type="hidden" name="c" value="site">
+						<input type="hidden" name="a" value="entry">
+						<input type="hidden" name="do" value="ask_users">
+						<input type="hidden" name="m" value="dg_ask">
+						<input type="hidden" name="version_id" value="0">
+						<input type="hidden" name="op" value="integral_log">
+
+						<select name="status_select" class="form-control input-medium">
+	                        <option value="1" <?php if($status_select == 1){echo 'selected';} ?> >不按时间</option>
+	                        <option value="create_time" <?php if($_GPC['status_select'] == 'create_time'){echo 'selected';} ?> >创建时间</option>
+	                    </select>
+	                    <span class="input-group-addon" style="padding: 0; width: 0;border:none;"></span>
+	                     {php echo tpl_form_field_daterange('time',array('start'=>($_GPC['start'] ? $_GPC['start'] : $_GPC['time']['start']),'end'=>($_GPC['end'] ? $_GPC['end'] : $_GPC['time']['end'])));}
+	                    <script type="text/javascript">
+	                        $(function(){
+	                            $("#action_list .input-group .daterange-date").addClass("form-control");
+	                        })
+	                    </script>
+
+	                    <span class="input-group-addon">类型</span>
+	                    <select name="difference" class="form-control input-medium">
+	                      	<option value="0" <?php if($_GPC['difference'] == 0){echo 'selected';} ?> >全部</option>
+							<option value="1" <?php if($_GPC['difference'] == 1){echo 'selected';} ?> >新用户</option>
+							<option value="2" <?php if($_GPC['difference'] == 2){echo 'selected';} ?> >完善手机号</option>
+							<option value="3" <?php if($_GPC['difference'] == 3){echo 'selected';} ?> >APP第一次登录</option>
+							<option value="4" <?php if($_GPC['difference'] == 4){echo 'selected';} ?> >充值</option>
+							<option value="5" <?php if($_GPC['difference'] == 5){echo 'selected';} ?> >每日登录</option>
+							<option value="6" <?php if($_GPC['difference'] == 6){echo 'selected';} ?> >评论文章</option>
+							<option value="7" <?php if($_GPC['difference'] == 7){echo 'selected';} ?> >查看付费文章</option>
+							<option value="8" <?php if($_GPC['difference'] == 8){echo 'selected';} ?> >发布悬赏</option>
+							<option value="9" <?php if($_GPC['difference'] == 9){echo 'selected';} ?> >申请认证专家</option>
+							<option value="10" <?php if($_GPC['difference'] == 10){echo 'selected';} ?> >发布文章</option>
+							<option value="11" <?php if($_GPC['difference'] == 11){echo 'selected';} ?> >文章精选</option>
+							<option value="12" <?php if($_GPC['difference'] == 12){echo 'selected';} ?> >悬赏回答被采纳</option>
+							<option value="13" <?php if($_GPC['difference'] == 13){echo 'selected';} ?> >推荐成功收入</option>
+							<option value="14" <?php if($_GPC['difference'] == 14){echo 'selected';} ?> >评论问题</option>
+							<option value="15" <?php if($_GPC['difference'] == 15){echo 'selected';} ?> >查看付费问答</option>
+							<option value="16" <?php if($_GPC['difference'] == 16){echo 'selected';} ?> >分享税媒</option>
+
+	                    </select>
+
+						<span class="input-group-addon">查询关键词</span>
+						<input  name="keyword" id="" type="text" value="{$_GPC['keyword']}" placeholder="请输入用户昵称或者姓名" class="form-control ac_name">
+						<span class="input-group-btn">
+		                	<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+		                </span>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+				<div class="row-fluid">
+					<div class="span8 control-group">
+						<span class="padd search_time"></span>
+						<span class="padd difference"></span>
+						<span style="float:right;">共计 {$total['num']} 条数据&nbsp;
+						总积分：<span style="color:red;">{if $integralTotal['fraction'] == ''}0{else}{$integralTotal['fraction']}{/if}</span>
+						</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="panel-body table-responsive">
+			<table class="table table-hover">
+				<thead class="navbar-inner">
+					<tr>
+						<th>头像</th>
+						<th>昵称/姓名</th>
+						<th>积分类型</th>
+						<th>积分</th>
+						<th>创建时间</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					{loop $integralLog $i $vo}
+						<tr>
+							<td><a href="{php echo tomedia($vo['avatar'])}"><img alt="" src="{php echo tomedia($vo['avatar'])}" style="width:30px; height:30px;"></a></td>
+							<td>{if $vo['real_name']}{$vo['real_name']}{else}{$vo['nickname']}{/if}</td>
+							<td>
+								{if $vo['type'] == 1}
+									新用户
+								{elseif $vo['type'] == 2}
+									完善手机号
+								{elseif $vo['type'] == 3}
+									APP第一次登录
+								{elseif $vo['type'] == 4}
+									充值/元
+								{elseif $vo['type'] == 5}
+									每日登录
+								{elseif $vo['type'] == 6}
+									评论文章
+								{elseif $vo['type'] == 7}
+									查看付费文章/元
+								{elseif $vo['type'] == 8}
+									发布悬赏/元
+								{elseif $vo['type'] == 9}
+									申请认证专家
+								{elseif $vo['type'] == 10}
+									发布文章
+								{elseif $vo['type'] == 11}
+									文章精选
+								{elseif $vo['type'] == 12}
+									悬赏回答被采纳
+								{elseif $vo['type'] == 13}
+									推荐成功收入
+								{elseif $vo['type'] == 14}
+									评论问题
+								{elseif $vo['type'] == 15}
+									查看付费问答/元
+								{elseif $vo['type'] == 16}
+									分享税媒
+								{/if}
+							</td>
+							<td>{$vo['integral']}</td>
+							<td>
+								{if $vo['create_time'] != 0}
+									{php echo date('Y-m-d H:i',$vo['create_time'])}
+								{/if}
+							</td>
+							<td>
+								<!-- 评论文章 -->
+								{if $vo['type'] == 6 || $vo['type'] == 14}
+									<a href="{php echo $this->createWebUrl('chat_index',array('op'=>'examine','type'=>$vo['data']['type'],'irid'=>$vo['data']['irid'],'version_id'=>0))}">
+										<label style="cursor:pointer;" class="btn btn-default btn-sm manage">查看详情</label>
+									</a>
+								{/if}
+								<!-- 查看付费文章或文章精选 -->
+								{if $vo['type'] == 7 || $vo['type'] == 11 || $vo['type'] == 15}
+									<a href="{php echo $this->createWebUrl('chat_index',array('op'=>'examine','type'=>$vo['data']['type'],'irid'=>$vo['data']['irid'],'version_id'=>0))}">
+										<label style="cursor:pointer;" class="btn btn-default btn-sm manage">查看详情</label>
+									</a>
+								{/if}
+								<!-- 专家认证 -->
+								{if $vo['type'] == 9}
+									<a href="{php echo $this->createWebUrl('ask_manage',array('op'=>'edit_manage','id'=>$vo['uid'],'version_id'=>0))}">
+										<label style="cursor:pointer;" class="btn btn-default btn-sm manage">查看详情</label>
+									</a>
+								{/if}
+								<!-- 发布悬赏或悬赏回答被采纳 -->
+								{if $vo['type'] == 8 || $vo['type'] == 12}
+									<a href="{php echo $this->createWebUrl('view_answer',array('askid'=>$vo['data']['id'],'type'=>2,'version_id'=>0))}">
+										<label style="cursor:pointer;" class="btn btn-default btn-sm manage">查看详情</label>
+									</a>
+								{/if}
+							</td>
+						</tr>
+					{/loop}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	{$pager}
+
+{/if}
+<!-- 积分日志 end -->
+<!-- 管理层管理 start -->
+{if $op == 'management_layer'}
+	<div class="main">
+		<div class="panel-heading">
+		  <div class="row-fluid">
+			<div class="span8 control-group">
+				<a class="btn btn-primary add_manager" href="javascript:">
+					<i class="fa fa-plus"></i>添加管理层</a>
+				</div>
+			</div>
+		</div>
+		<div class="panel panel-default">
+			<div class="panel-heading">
+					<div class="row-fluid">
+						<div class="span8 control-group">
+							共计 {$total['num']} 条数据
+						</div>
+					</div>
+				</div>
+				<div class="panel-body table-responsive">
+				<table class="table table-hover">
+					<thead class="navbar-inner">
+						<tr>
+							<th style="width:65px;" align="center">头像</th>
+							<th>昵称/姓名</th>
+							<th align="center">操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						{loop $user $i $vo}
+							<tr>
+								<td><img alt="" src="{php echo tomedia($vo['avatar'])}" width='auto' style="max-width:50px; max-height:50px;" height='auto'></td>
+								<td>{if $vo['real_name']}{$vo['real_name']}{else}{$vo['nickname']}{/if}</td>
+
+								<td data="{$vo['id']}" data-type="management_layer">
+								 	<a class="btn btn-default" data-toggle="tooltip" data-placement="top" href="javascript:" onclick="del(this)" title="删除"><i class="fa fa-times"></i></a>
+								</td>
+							</tr>
+						{/loop}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		{$pager}
+	</div>
+
+	<div class="modal fade" id="module-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="width:800px;">
+			<div class="modal-content">
+				<input type="hidden" name="m" value=""/>
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<span><h4>添加管理层</h4></span>
+				</div>
+				<div class="modal-body" style="padding:50px 30px!important;">
+                   	<div class="row clearfix" style="padding-top:30px!important;">
+                       	<div class="input-group" style="float:left;width:50px">
+                           	<input type="text" style="width:550px!important" autocomplete="off" class="form-control" name="keyword" value="" id="keyword8" placeholder="请输入昵称/姓名/手机号">
+                           	<span class="input-group-btn"><button type="button" class="btn btn-default" onclick="search_members('management_layer');">搜索</button></span>
+                       </div>
+                   	</div>
+                   	<div id="module-menus" style="padding-top:5px;">
+                        <div style="max-height:500px;overflow:auto;min-width:750px;">
+							<table class="table table-hover" style="min-width:750px;">
+								<tbody id="search_list">
+								</tbody>
+							</table>
+					    </div>
+			    	</div>
+			 	</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="module-edit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<input type="hidden" id="j_uid">
+		<div class="modal-dialog" style="width:800px;">
+			<div class="modal-content">
+				<input type="hidden" name="m" value=""/>
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<span><h4>更换城市合伙人</h4></span>
+				</div>
+				<div class="modal-body" style="padding:50px 30px!important;">
+                   	<div class="row clearfix" style="padding-top:30px!important;">
+                       	<div class="input-group" style="float:left;width:50px">
+                           	<input type="text" style="width:550px!important" autocomplete="off" class="form-control" name="keyword" value="" id="keyword7" placeholder="请输入昵称/姓名/手机号">
+                           	<span class="input-group-btn"><button type="button" class="btn btn-default" onclick="search_members('edit_partnerList');">搜索</button></span>
+                       </div>
+                   	</div>
+                   	<div id="module-menus" style="padding-top:5px;">
+                        <div style="max-height:500px;overflow:auto;min-width:750px;">
+							<table class="table table-hover" style="min-width:750px;">
+								<tbody id="edit_partnerList">
+								</tbody>
+							</table>
+					    </div>
+			    	</div>
+			 	</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="del" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="width:800px;">
+			<div class="modal-content">
+				<input type="hidden" name="m" value=""/>
+				<input type="hidden" name="duid"/>
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4>删除</h4>
+				</div>
+				<div class="modal-body">
+                       	<div class="row clearfix">
+                       		<div class="input-group" style="float:left;width:50px">
+	                       		<select name="delIdentity" style="width:550px!important" class="form-control">
+	                       			<option value='0'>请选择</option>
+	                       			<!-- <option value='1'>运营总监</option> -->
+	                       			<option value='2'>城市合伙人</option>
+	                       		</select>
+	                       		<span class="input-group-btn">
+	                       			<button type="button" class="btn btn-default" style="margin-left:25px;" onclick="del('delIdentity');">确定</button>
+                       			</span>
+                       		</div>
+                       	</div>
+
+				    </div>
+			 	</div>
+			</div>
+		</div>
+	</div>
+{/if}
+<!-- 管理层管理 end -->
+<!-- 合伙人管理 start -->
+{if $op == 'partnerList'}
+	<div class="main">
+		<div class="panel-heading">
+		  <div class="row-fluid">
+			<div class="span8 control-group">
+				<a class="btn btn-primary add_manager" href="javascript:">
+					<i class="fa fa-plus"></i>添加城市合伙人</a>
+				</div>
+			</div>
+		</div>
+		<div class="panel panel-default">
+			<div class="panel-heading">
+					<div class="row-fluid">
+						<div class="span8 control-group">
+							共计 {$total['num']} 条数据
+						</div>
+					</div>
+				</div>
+				<div class="panel-body table-responsive">
+				<table class="table table-hover">
+					<thead class="navbar-inner">
+						<tr>
+							<th style="width:65px;" align="center">头像</th>
+							<th>昵称/姓名</th>
+							<th>运营身份</th>
+							<th align="center">操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						{loop $user $i $vo}
+							<tr>
+								<td><img alt="" src="{php echo tomedia($vo['avatar'])}" width='auto' style="max-width:50px; max-height:50px;" height='auto'></td>
+								<td>{if $vo['real_name']}{$vo['real_name']}{else}{$vo['nickname']}{/if}</td>
+								<td>
+									{if $vo['is_partner'] == 1}城市合伙人{/if}
+									<!-- {if $vo['is_boss'] == 1}运营总监{/if} -->
+									{if $vo['is_salesman']==1}税媒大使{/if}
+								</td>
+								<td data="{$vo['id']}" data-type="hhr">
+									<a class="btn btn-default" data-toggle="tooltip" data-placement="top" href="{php echo $this->createWebUrl('ask_users',array('op'=>'quyuList','uid'=>$vo['id'],type=>1))}"><i class="fa">查看区域</i></a>
+
+									<a id="ptzj{$vo['id']}" class="btn btn-default" onclick="pl({$vo['is_platform']},{$vo['id']})">
+										{if $vo['is_platform'] == 0}设为平台城市合伙人{else if $vo['is_platform'] == 1}取消平台城市合伙人{/if}
+									</a>
+									<a class="btn btn-default edit_manager" onClick="edit_manager({$vo['id']})" data-toggle="tooltip" data-placement="top" ><i class="fa">更换城市合伙人</i></a>
+								 	<a class="btn btn-default" data-toggle="tooltip" data-placement="top" href="javascript:" onclick="del(this)" title="删除"><i class="fa fa-times"></i></a>
+								</td>
+							</tr>
+						{/loop}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		{$pager}
+	</div>
+
+	<div class="modal fade" id="module-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="width:800px;">
+			<div class="modal-content">
+				<input type="hidden" name="m" value=""/>
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<span><h4>添加城市合伙人</h4></span>
+				</div>
+				<div class="modal-body" style="padding:50px 30px!important;">
+                   	<div class="row clearfix" style="padding-top:30px!important;">
+                       	<div class="input-group" style="float:left;width:50px">
+                           	<input type="text" style="width:550px!important" autocomplete="off" class="form-control" name="keyword" value="" id="keyword5" placeholder="请输入昵称/姓名/手机号">
+                           	<span class="input-group-btn"><button type="button" class="btn btn-default" onclick="search_members('partnerList');">搜索</button></span>
+                       </div>
+                   	</div>
+                   	<div id="module-menus" style="padding-top:5px;">
+                        <div style="max-height:500px;overflow:auto;min-width:750px;">
+							<table class="table table-hover" style="min-width:750px;">
+								<tbody id="search_list">
+								</tbody>
+							</table>
+					    </div>
+			    	</div>
+			 	</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="module-edit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<input type="hidden" id="j_uid">
+		<div class="modal-dialog" style="width:800px;">
+			<div class="modal-content">
+				<input type="hidden" name="m" value=""/>
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<span><h4>更换城市合伙人</h4></span>
+				</div>
+				<div class="modal-body" style="padding:50px 30px!important;">
+                   	<div class="row clearfix" style="padding-top:30px!important;">
+                       	<div class="input-group" style="float:left;width:50px">
+                           	<input type="text" style="width:550px!important" autocomplete="off" class="form-control" name="keyword" value="" id="keyword7" placeholder="请输入昵称/姓名/手机号">
+                           	<span class="input-group-btn"><button type="button" class="btn btn-default" onclick="search_members('edit_partnerList');">搜索</button></span>
+                       </div>
+                   	</div>
+                   	<div id="module-menus" style="padding-top:5px;">
+                        <div style="max-height:500px;overflow:auto;min-width:750px;">
+							<table class="table table-hover" style="min-width:750px;">
+								<tbody id="edit_partnerList">
+								</tbody>
+							</table>
+					    </div>
+			    	</div>
+			 	</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="del" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="width:800px;">
+			<div class="modal-content">
+				<input type="hidden" name="m" value=""/>
+				<input type="hidden" name="duid"/>
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4>删除</h4>
+				</div>
+				<div class="modal-body">
+                       	<div class="row clearfix">
+                       		<div class="input-group" style="float:left;width:50px">
+	                       		<select name="delIdentity" style="width:550px!important" class="form-control">
+	                       			<option value='0'>请选择</option>
+	                       			<!-- <option value='1'>运营总监</option> -->
+	                       			<option value='2'>城市合伙人</option>
+	                       		</select>
+	                       		<span class="input-group-btn">
+	                       			<button type="button" class="btn btn-default" style="margin-left:25px;" onclick="del('delIdentity');">确定</button>
+                       			</span>
+                       		</div>
+                       	</div>
+
+				    </div>
+			 	</div>
+			</div>
+		</div>
+	</div>
+{/if}
+<!-- 合伙人管理 end -->
+<!-- 业务经理管理 start -->
+{if $op == 'salesmanList'}
+	<div class="main">
+		<div class="panel-heading">
+		  <div class="row-fluid">
+			<div class="span8 control-group">
+				<a class="btn btn-primary add_manager" href="javascript:">
+					<i class="fa fa-plus"></i>添加税媒大使</a>
+				</div>
+			</div>
+		</div>
+		<div class="panel panel-default">
+			<div class="panel-heading">
+					<div class="row-fluid">
+						<div class="span8 control-group">
+							共计 {$total['num']} 条数据
+						</div>
+					</div>
+				</div>
+				<div class="panel-body table-responsive">
+				<table class="table table-hover">
+					<thead class="navbar-inner">
+						<tr>
+							<th style="width:65px;" align="center">头像</th>
+							<th>昵称/姓名</th>
+							<th>类型</th>
+							<th>邀请码</th>
+							<th>上级</th>
+							<th align="center">操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						{loop $user $i $vo}
+							<tr>
+								<td><img alt="" src="{php echo tomedia($vo['avatar'])}" width='auto' style="max-width:50px; max-height:50px;" height='auto'></td>
+								<td>{if $vo['real_name']}{$vo['real_name']}{else}{$vo['nickname']}{/if}</td>
+								<td>
+									{if $vo['is_partner'] == 1}城市合伙人{/if}
+									<!-- {if $vo['is_boss'] == 1}运营总监{/if} -->
+									{if $vo['is_salesman']==1}税媒大使{/if}
+								</td>
+								<td>{$vo['invitation_code']}</td>
+								<td>{$vo['pname']}</td>
+								<td data="{$vo['id']}" data-type="ywjl">
+								 	<!-- <a class="btn btn-default" data-toggle="tooltip" data-placement="top" href="{php echo $this->createWebUrl('ask_users',array('op'=>'quyuList','uid'=>$vo['id'],type=>3))}"><i class="fa">查看区域</i></a> -->
+								 	<!-- <a id="ptzj{$vo['id']}" class="btn btn-default" onclick="pl({$vo['is_platform']},{$vo['id']})">
+										{if $vo['is_platform'] == 0}设为平台业务经理{else if $vo['is_platform'] == 1}取消平台业务经理{/if}
+									</a> -->
+								 	<a class="btn btn-default" data-toggle="tooltip" data-placement="top" href="javascript:" onclick="del(this)" title="删除"><i class="fa fa-times"></i></a>
+								</td>
+							</tr>
+						{/loop}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		{$pager}
+	</div>
+
+	<div class="modal fade" id="module-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="width:800px;">
+			<div class="modal-content">
+				<input type="hidden" name="m" value=""/>
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<span><h4>添加税媒大使</h4></span>
+				</div>
+               	<div class="modal-body" style="padding:50px 30px!important;">
+                   	<div class="row clearfix">
+						<div class="form-group">
+							<label class="col-xs-12 col-sm-3 col-md-2 control-label">选择上级合伙人</label>
+							<div class="col-sm-9 col-xs-12">
+								<div class="input-group" style="float:left;width:50px">
+									<input type="hidden" id="hhr_id">
+		                           	<input type="text" style="width:550px!important" autocomplete="off" class="form-control" name="keyword" value="" id="keyword6" placeholder="请输入昵称/姓名/手机号">
+		                           	<span class="input-group-btn"><button type="button" class="btn btn-default" onclick="search_members('hehuoren');">搜索</button></span>
+		                       </div>
+							</div>
+						</div>
+						<br><br>
+						<div class="form-group">
+							<label class="col-xs-12 col-sm-3 col-md-2 control-label">选择用户</label>
+							<div class="col-sm-9 col-xs-12">
+								<div class="input-group" style="float:left;width:50px">
+		                           	<input type="text" style="width:550px!important" autocomplete="off" class="form-control" name="keyword" value="" id="keyword" placeholder="请输入昵称/姓名/手机号">
+                       				<span class="input-group-btn"><button type="button" class="btn btn-default" onclick="search_members('salesmanList');">搜索</button></span>
+		                       </div>
+							</div>
+						</div>
+                   	</div>
+                   	<div id="module-menus" style="padding-top:5px;">
+	                    <div style="max-height:500px;overflow:auto;min-width:750px;">
+							<table class="table table-hover" style="min-width:750px;">
+								<tbody id="search_list">
+								</tbody>
+							</table>
+					    </div>
+			    	</div>
+			 	</div>
+
+			</div>
+		</div>
+	</div>
+{/if}
+<!-- 业务经理管理 end -->
+<!-- 运营总监管理 start -->
+{if $op == 'operate'}
+	<div class="main">
+		<div class="panel-heading">
+		  <div class="row-fluid">
+			<div class="span8 control-group">
+				<a class="btn btn-primary add_manager" href="javascript:">
+					<i class="fa fa-plus"></i>添加运营总监</a>
+				</div>
+			</div>
+		</div>
+		<div class="panel panel-default">
+			<div class="panel-heading">
+					<div class="row-fluid">
+						<div class="span8 control-group">
+							共计 {$total['num']} 条数据
+						</div>
+					</div>
+				</div>
+				<div class="panel-body table-responsive">
+				<table class="table table-hover">
+					<thead class="navbar-inner">
+						<tr>
+							<th style="width:65px;" align="center">头像</th>
+							<th>昵称/姓名</th>
+							<th>运营身份</th>
+							<th>上级</th>
+							<th align="center">操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						{loop $user $i $vo}
+							<tr>
+								<td><img alt="" src="{php echo tomedia($vo['avatar'])}" width='auto' style="max-width:50px; max-height:50px;" height='auto'></td>
+								<td>{if $vo['real_name']}{$vo['real_name']}{else}{$vo['nickname']}{/if}</td>
+								<td>
+									{if $vo['is_partner'] == 1}城市合伙人{/if}
+									{if $vo['is_boss'] == 1}运营总监{/if}
+									{if $vo['is_salesman']==1}业务经理{/if}
+								</td>
+								<td>{$vo['pname']}</td>
+								<td data="{$vo['id']}" data-type="yyzj">
+								 	<a class="btn btn-default" data-toggle="tooltip" data-placement="top" href="{php echo $this->createWebUrl('ask_users',array('op'=>'quyuList','uid'=>$vo['id'],type=>2))}"><i class="fa">查看区域</i></a>
+								 	<a id="ptzj{$vo['id']}" class="btn btn-default" onclick="pl({$vo['is_platform']},{$vo['id']})">
+										{if $vo['is_platform'] == 0}设为平台业务总监{else if $vo['is_platform'] == 1}取消平台业务总监{/if}
+									</a>
+								 	<a class="btn btn-default" data-toggle="tooltip" data-placement="top" href="javascript:" onclick="del(this)" title="删除"><i class="fa fa-times"></i></a>
+								</td>
+							</tr>
+						{/loop}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		{$pager}
+	</div>
+
+	<div class="modal fade" id="module-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="width:800px;">
+			<div class="modal-content">
+				<input type="hidden" name="m" value=""/>
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<span><h4>添加运营总监</h4></span>
+				</div>
+				<div class="modal-body" style="padding:50px 30px!important;">
+                   	<div class="row clearfix">
+						<!-- <div class="form-group">
+							<label class="col-xs-12 col-sm-3 col-md-2 control-label">上级合伙人</label>
+							<div class="col-sm-9 col-xs-12">
+								<select name="pid" style="width:550px!important" class="form-control">
+									{loop $hhr $i $vo}
+		                       			<option value="{$vo['id']}">
+		                       				{if $vo['real_name']}{$vo['real_name']}{else}{$vo['nickname']}{/if}
+		                       			</option>
+		                       		{/loop}
+	                       		</select>
+							</div>
+						</div> -->
+						<div class="form-group">
+							<label class="col-xs-12 col-sm-3 col-md-2 control-label">选择上级合伙人</label>
+							<div class="col-sm-9 col-xs-12">
+								<div class="input-group" style="float:left;width:50px">
+									<input type="hidden" id="hhr_id">
+		                           	<input type="text" style="width:550px!important" autocomplete="off" class="form-control" name="keyword" value="" id="keyword6" placeholder="请输入昵称/姓名/手机号">
+		                           	<span class="input-group-btn"><button type="button" class="btn btn-default" onclick="search_members('hehuoren');">搜索</button></span>
+		                       </div>
+							</div>
+						</div>
+						<br><br>
+						<div class="form-group">
+							<label class="col-xs-12 col-sm-3 col-md-2 control-label">选择用户</label>
+							<div class="col-sm-9 col-xs-12">
+								<div class="input-group" style="float:left;width:50px">
+		                           	<input type="text" style="width:550px!important" autocomplete="off" class="form-control" name="keyword" value="" id="keyword2" placeholder="请输入昵称/姓名/手机号">
+		                           	<span class="input-group-btn"><button type="button" class="btn btn-default" onclick="search_members('operate');">搜索</button></span>
+		                       </div>
+							</div>
+						</div>
+                   	</div>
+                   	<div id="module-menus" style="padding-top:5px;">
+                        <div style="max-height:500px;overflow:auto;min-width:750px;">
+							<table class="table table-hover" style="min-width:750px;">
+								<tbody id="search_list">
+								</tbody>
+							</table>
+					    </div>
+			    	</div>
+			 	</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="del" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="width:800px;">
+			<div class="modal-content">
+				<input type="hidden" name="m" value=""/>
+				<input type="hidden" name="duid"/>
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4>删除</h4>
+				</div>
+				<div class="modal-body">
+                       	<div class="row clearfix">
+                       		<div class="input-group" style="float:left;width:50px">
+	                       		<select name="delIdentity" style="width:550px!important" class="form-control">
+	                       			<option value='0'>请选择</option>
+	                       			<option value='1'>运营总监</option>
+	                       			<option value='2'>城市合伙人</option>
+	                       		</select>
+	                       		<span class="input-group-btn">
+	                       			<button type="button" class="btn btn-default" style="margin-left:25px;" onclick="del('delIdentity');">确定</button>
+                       			</span>
+                       		</div>
+                       	</div>
+
+				    </div>
+			 	</div>
+			</div>
+		</div>
+	</div>
+{/if}
+<!-- 运营总监管理 end -->
+
+<!-- 查看区域管理 start -->
+{if $op == 'quyuList'}
+	<div class="modal fade" id="zdqy-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="width:800px;">
+			<div class="modal-content">
+				<form>
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+						<span><h4>添加区域</h4></span>
+					</div>
+					<div class="modal-body" style="padding:50px 30px!important;">
+						{if $_GPC['type'] == '2'}
+						<div class="form-group">
+							<label class="col-xs-12 col-sm-3 col-md-2 control-label">上级合伙人</label>
+							<div class="col-sm-9 col-xs-12">
+								<select name="pid" style="width:550px!important" class="form-control">
+									{loop $hhr $i $vo}
+		                       			<option value="{$vo['id']}">
+		                       				{if $vo['real_name']}{$vo['real_name']}{else}{$vo['nickname']}{/if}
+		                       			</option>
+		                       		{/loop}
+	                       		</select>
+							</div>
+						</div>
+						{/if}
+						<!-- {if $_GPC['type'] == '3'}
+						<div class="form-group">
+							<label class="col-xs-12 col-sm-3 col-md-2 control-label">上级运营总监</label>
+							<div class="col-sm-9 col-xs-12">
+								<select name="pid" style="width:550px!important" class="form-control">
+									{loop $yyzj $i $vo}
+		                       			<option value="{$vo['id']}">
+		                       				{if $vo['real_name']}{$vo['real_name']}{else}{$vo['nickname']}{/if}
+		                       			</option>
+		                       		{/loop}
+	                       		</select>
+							</div>
+						</div>
+						{/if} -->
+						<div class="form-group">
+							<label class="col-xs-12 col-sm-3 col-md-2 control-label">代理等级</label>
+							<div class="col-sm-9 col-xs-12">
+								<select style="float:left;" onchange="daili()" name="level">
+		                   			<option value='0'>请选择</option>
+		                   			<option value='1'>省代理</option>
+		                   			<option value='2'>市代理</option>
+		                   			<option value='3'>区代理</option>
+		                   		</select>
+	                   		</div>
+						</div>
+						<div class="form-group">
+							<label class="col-xs-12 col-sm-3 col-md-2 control-label">区域</label>
+							<div class="col-sm-9 col-xs-12" id="ssq">
+								{php echo tpl_form_field_district('addaddress');}
+							</div>
+						</div>
+	           			<div class="form-group col-sm-12" style="padding-top:40px;">
+							<input onclick="quyu_submit({$_GPC['uid']},{$_GPC['type']},'add')" type="button" name="submit" value="确定" class="btn btn-primary col-lg-1">
+						</div>
+				    </div>
+			    </form>
+		 	</div>
+		</div>
+	</div>
+
+	<script>
+		//指定区域
+		function zdqy(id){
+			$('#zdqy-info').modal('show');
+		}
+	</script>
+
+
+	<div class="main">
+		<div class="panel-heading">
+		  	<div class="row-fluid">
+				<div class="span8 control-group">
+				{if $_GPC['type'] == 1}
+					<a class="btn btn-primary add_quyu" href="javascript:">
+					<i class="fa fa-plus"></i>添加区域</a>
+				{/if}
+				</div>
+			</div>
+		</div>
+		<div class="panel panel-default">
+			<div class="panel-heading">
+					<div class="row-fluid">
+						<div class="span8 control-group">
+							共计 {$total['num']} 条数据
+						</div>
+					</div>
+				</div>
+				<div class="panel-body table-responsive">
+				<table class="table table-hover">
+					<thead class="navbar-inner">
+						<tr>
+							{if $_GPC['type'] == 2 || $_GPC['type'] == 3}
+								<th>上级</th>
+							{/if}
+							<th style="width:65px;" align="center">等级</th>
+							<th>省份</th>
+							<th>城市</th>
+							<th style="width:170px;" align="center">地区</th>
+							{if $_GPC['type'] == 1}
+							<th style="width:170px;" align="center">操作</th>
+							{/if}
+						</tr>
+					</thead>
+					<tbody>
+						{loop $quyu $i $vo}
+							<tr>
+								{if $_GPC['type'] == 2 || $_GPC['type'] == 3}
+									<td>{$vo['pname']}</td>
+								{/if}
+								<td>
+									{if $vo['level'] == 1}省代理{/if}
+									{if $vo['level'] == 2}市代理{/if}
+									{if $vo['level'] == 3}区代理{/if}
+								</td>
+								<td>{$vo['province']}</td>
+								<td>{$vo['city']}</td>
+								<td>{$vo['area']}</td>
+								{if $_GPC['type'] == 1}
+									<td data="{$vo['upid']}" data-type="quyu">
+										<!-- <a class="btn btn-default edit_quyu" href="{php echo $this->createWebUrl('ask_users',array('op'=>'edit_quyu','upid'=>$vo['upid'],'type'=>$_GPC['type']))}" data-toggle="tooltip" data-placement="top"><i class="fa">编辑</i></a> -->
+
+									 	<a class="btn btn-default" data-toggle="tooltip" data-placement="top" href="javascript:" onclick="del(this)" title="删除"><i class="fa fa-times"></i></a>
+									</td>
+								{/if}
+							</tr>
+						{/loop}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		{$pager}
+	</div>
+{/if}
+<!-- 查看区域管理 end -->
+
+<!-- 录音员管理 start -->
+{if $op == 'tape'}
+	<style type="text/css">
+		.modal-body{padding:10px;}
+	</style>
+	<div class="main">
+		<div class="panel-heading">
+		  <div class="row-fluid">
+			<div class="span8 control-group">
+				<a class="btn btn-primary add_manager" href="javascript:">
+					<i class="fa fa-plus"></i>添加录音管理员</a>
+				</div>
+			</div>
+		</div>
+		<div class="panel panel-default">
+			<div class="panel-heading">
+					<div class="row-fluid">
+						<div class="span8 control-group">
+							共计 {$total['num']} 条数据
+						</div>
+					</div>
+				</div>
+				<div class="panel-body table-responsive">
+				<table class="table table-hover">
+					<thead class="navbar-inner">
+						<tr>
+							<th style="width:65px;" align="center">头像</th>
+							<th>真实姓名</th>
+							<th>手机号</th>
+							<th>添加时间</th>
+							<th style="width:170px;" align="center">操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						{loop $user $i $row}
+						<tr>
+							<td><img alt="" src="{php echo tomedia($row['avatar'])}" width='auto' style="max-width:50px; max-height:50px;" height='auto'></td>
+							<td>{$row['real_name']}</td>
+							<td>{$row['mobile']}</td>
+							<td>{php echo date('Y/m/d H:i:s', $row['create_time']);}</td>
+							<td data="{$row['id']}" data-type="tape">
+							 <a class="btn btn-default" data-toggle="tooltip" data-placement="top" href="javascript:" onclick="return del(this)" title="删除"><i class="fa fa-times"></i></a>
+							</td>
+						</tr>
+						{/loop}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		{$pager}
+	</div>
+
+	<div class="modal fade" id="module-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="width:800px;">
+			<div class="modal-content">
+				<input type="hidden" name="m" value=""/>
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4>添加录音管理员</h4>
+				</div>
+				<div class="modal-body">
+                       <div class="row">
+                           <div class="input-group">
+                               <input type="text" autocomplete="off" class="form-control" name="keyword" value="" id="keyword3" placeholder="请输入姓名/手机号">
+                               <span class="input-group-btn"><button type="button" class="btn btn-default" onclick="search_members('tape');">搜索</button></span>
+                           </div>
+                       </div>
+                       <div id="module-menus" style="padding-top:5px;">
+                        <div style="max-height:500px;overflow:auto;min-width:750px;">
+							<table class="table table-hover" style="min-width:750px;">
+								<tbody id="search_list">
+								</tbody>
+							</table>
+					    </div>
+				    </div>
+			 	</div>
+			</div>
+		</div>
+	</div>
+{/if}
+<!-- 录音员管理 end -->
+
+
+<script type="text/javascript">
+	function pl(is_platform,id){//改变平台专家状态
+		if(confirm('你确定要操作吗？') == false){
+			return false;
+		}
+		$.post("{php echo $this->createWebUrl('ask_manage',array('op'=>'plat'))}",{
+			id: id,
+			is_platform: is_platform
+		},function(data){
+			if (data.code == 200) {
+				util.message(data.msg);
+				setTimeout(function(){location.reload()},1000);
+	            return false;
+			}else if (data.code == 400) {
+				util.message(data.msg);
+	            return false;
+			}
+		},'json');
+	}
+
+	//编辑用户
+	require(['jquery', 'util'], function($, util) {
+	    $('#user-submit').submit(function () {
+	        if($('input[name="real_name"]').val() == ''){
+	            util.message('姓名不能为空');
+	            return false;
+	        }
+	        if($('input[name="nickname"]').val() == ''){
+	            util.message('昵称不能为空');
+	            return false;
+	        }
+	        if($('input[name="user_phone"]').val() == ''){
+	            util.message('联系方式不能为空');
+	            return false;
+	        }
+	    });
+	});
+
+
+	//搜索列表
+	$(function(){
+		$(".add_manager").click(function(){
+			$('#module-info').modal('show');
+		});
+		$(".add_quyu").click(function(){
+			$('#zdqy-info').modal('show');
+		});
+	});
+
+	//是否可以更换合伙人
+	function edit_manager(j_uid){
+		var search_ajax = "{php echo $this->createWebUrl('ask_users')}";
+		$.post(search_ajax,{
+			op:'is_editHhr',
+			j_uid:j_uid
+		},function(result){
+			if(result.code == 200){
+				$('#module-edit').modal('show');
+				$('#j_uid').val(j_uid);
+			}
+			if(result.code == 100){
+				util.message(result.msg);
+			}
+		},'json');
+	}
+
+	function appoint(user_id){
+		$("input[name=user_id]").val(user_id);
+		$('#module-info').modal('show');
+	}
+
+	//回车键搜索
+	$('#keyword').bind('keyup', function(event) {
+		if (event.keyCode == "13") {
+			search_members('salesmanList');
+		}
+	});
+
+	$('#keyword2').bind('keyup', function(event) {
+		if (event.keyCode == "13") {
+			search_members('operate');
+		}
+	});
+
+	$('#keyword3').bind('keyup', function(event) {
+		if (event.keyCode == "13") {
+			search_members('tape');
+		}
+	});
+
+	$('#keyword4').bind('keyup', function(event) {
+		if (event.keyCode == "13") {
+			search_members('display');
+		}
+	});
+
+	$('#keyword5').bind('keyup', function(event) {
+		if (event.keyCode == "13") {
+			search_members('partnerList');
+		}
+	});
+
+	$('#keyword6').bind('keyup', function(event) {
+		if (event.keyCode == "13") {
+			search_members('hehuoren');
+		}
+	});
+
+	$('#keyword8').bind('keyup', function(event) {
+		if (event.keyCode == "13") {
+			search_members('management_layer');
+		}
+	});
+
+	function xz_hhr(uid,real_name){
+		$('#keyword6').val(real_name);
+		$('#hhr_id').val(uid);
+		$('#search_list').hide();
+	}
+
+	//搜索结果
+	function getRows(data){
+		var html='';
+		for(i=0;i<data.length;i++){
+			html+='<tr>';
+			html+='<td><img src="'+data[i].avatar+'" style="width:30px;height:30px;padding1px;border:1px solid #ccc"> '+data[i].nickname+'</td>';
+			if(data[i].real_name != null){
+				html+='<td>'+data[i].real_name+'</td>';
+			}
+			if(data[i].mobile != null){
+				html+='<td>'+data[i].mobile+'</td>';
+			}
+			html+='<td style="width:80px;"><a href="javascript:;" onclick="select_member('+data[i].id+','+"'{$op}'"+')">选择</a></td>';
+		    html+='</tr>';
+		}
+		return html;
+	}
+
+	//合伙人搜索结果
+	function getHhr(data){
+		var html='';
+		for(i=0;i<data.length;i++){
+			html+='<tr>';
+			html+='<td><img src="'+data[i].avatar+'" style="width:30px;height:30px;padding1px;border:1px solid #ccc"> '+data[i].nickname+'</td>';
+			if(data[i].real_name != null){
+				html+='<td>'+data[i].real_name+'</td>';
+			}
+			if(data[i].mobile != null){
+				html+='<td>'+data[i].mobile+'</td>';
+			}
+			var real_name = data[i].real_name ? data[i].real_name : data[i].nickname;
+			html+='<td style="width:80px;"><a href="javascript:;" onclick="xz_hhr('+data[i].id+','+"'"+real_name+"'"+')">选择</a></td>';
+		    html+='</tr>';
+		}
+		return html;
+	}
+
+	//修改合伙人搜索结果
+	function editHhr(data){
+		var j_uid = $('#j_uid').val();
+		var html='';
+		for(i=0;i<data.length;i++){
+			html+='<tr>';
+			html+='<td><img src="'+data[i].avatar+'" style="width:30px;height:30px;padding1px;border:1px solid #ccc"> '+data[i].nickname+'</td>';
+			if(data[i].real_name != null){
+				html+='<td>'+data[i].real_name+'</td>';
+			}
+			if(data[i].mobile != null){
+				html+='<td>'+data[i].mobile+'</td>';
+			}
+			html+='<td style="width:80px;"><a href="javascript:;" onclick="select_member('+data[i].id+','+"'edit_partnerList'"+','+j_uid+')">选择</a></td>';
+		    html+='</tr>';
+		}
+		return html;
+	}
+
+	//搜索
+	function search_members(op,j_uid=''){
+		$('#search_list').show();
+		var keyword;
+		$("#search_list").empty();
+		var search_ajax = "{php echo $this->createWebUrl('ask_users')}";
+		if(op == 'salesmanList'){
+			keyword = $("#keyword").val();
+			search_ajax += "&op=salesmanList";
+		}else if(op == 'operate'){
+			keyword = $("#keyword2").val();
+			search_ajax += "&op=operate";
+		}else if(op == 'partnerList'){
+			keyword = $("#keyword5").val();
+			search_ajax += "&op=partnerList";
+		}else if(op == 'tape'){
+			keyword = $("#keyword3").val();
+			search_ajax += "&op=tape";
+		}else if(op == 'display'){
+			keyword = $("#keyword4").val();
+			search_ajax += "&op=display";
+		}else if(op == 'hehuoren'){
+			keyword = $("#keyword6").val();
+			search_ajax += "&op=hehuoren";
+		}else if(op == 'edit_partnerList'){
+			keyword = $("#keyword7").val();
+			search_ajax += "&op=edit_partnerList";
+		}else if(op == 'management_layer'){
+			keyword = $("#keyword8").val();
+			search_ajax += "&op=management_layer";
+		}
+
+		$.post(search_ajax,{
+			keyword:keyword
+		},function(result){
+			if(result.code == 200){
+				var html = getRows(result.data);
+				if(op == 'hehuoren'){
+					var html = getHhr(result.data);
+				}else if(op == 'edit_partnerList'){
+					var html = editHhr(result.data,j_uid);
+				}else{
+					var html = getRows(result.data);
+				}
+				if(op == 'edit_partnerList'){
+					$("#edit_partnerList").append(html);
+				}else{
+					$("#search_list").append(html);
+				}
+			}
+			if(result.code == 100){
+				util.message(result.data);
+			}
+		},'json');
+	}
+
+
+	//选择确定
+	function select_member(uid,op,j_uid=''){
+		var up_ajax,user_id,pid,province,city,district,addaddress;
+		user_id = $("input[name=user_id]").val();
+
+		up_ajax = "{php echo $this->createWebUrl('ask_users')}";
+		if(op == 'salesmanList'){//业务员
+            up_ajax += "&op=salesmanUpdate";
+		}else if(op == 'operate'){ //运营
+            up_ajax += "&op=operateUpdate";
+		}else if(op == 'partnerList'){ //城市合伙人
+            up_ajax += "&op=partnerUpdate";
+		}else if(op == 'tape'){//录音员
+			up_ajax += "&op=tapeUpdate";
+		}else if(op == 'display'){//指定推荐
+			up_ajax += "&op=appointRecommend";
+		}else if(op == 'edit_partnerList'){//指定推荐
+			up_ajax += "&op=eidt_partner";
+		}else if(op == 'management_layer'){ //管理层
+			up_ajax += "&op=management_layerUpdate";
+		}
+
+		var hehuoren = $("#keyword6").val();
+		var pid = $("#hhr_id").val();
+
+		if(op != 'partnerList' && op != 'appointRecommend' && op != 'tape' && op != 'display' && op != 'edit_partnerList' && op != 'management_layer'){
+			if(hehuoren == "" || !pid){
+				util.message('请先选择上级合伙人');
+				return false;
+			}
+		}
+
+
+		var is_salesman = $("select[name=is_salesman]").val();
+		if(is_salesman == 0){
+			util.message('请选择类型');
+			return false;
+		}
+
+		if(op == 'salesmanList' || (op == 'operate' && is_salesman == 2)){//业务员和运营选择区域
+			province = $("select[name='addaddress[province]']").val();
+			city = $("select[name='addaddress[city]']").val();
+			district = $("select[name='addaddress[district]']").val();
+			if(province == ''){
+				util.message('请选择区域');
+				return false;
+			}
+			if(city == ''){
+				addaddress = province;
+			}else if(district == ''){
+				addaddress = province + '|' + city;
+			}else{
+				addaddress = province + '|' + city + '|' + district;
+			}
+		}
+
+		// uid是选择用户的Id
+		// user_id是用户列表操作数据的id
+	   	$.post(up_ajax,{
+	   		uid:uid,
+	   		j_uid:j_uid,
+	   		pid:pid,
+	   		user_id: user_id,
+	   		addaddress: addaddress,
+	   		is_salesman: is_salesman
+	   	},function(result){
+		 	if(result.code == 200){
+		 		util.message(result.msg,setTimeout(function(){window.location.reload();},1000));
+		 		return false;
+		 	}
+		 	if(result.code == 400){
+		 		util.message(result.msg);
+		 		return false;
+		 	}
+	   	},'json');
+	}
+
+	//区域确定
+	function quyu_submit(uid,type,s_type,uuid=""){
+		var up_ajax,level,province,city,area,pid;
+		up_ajax = "{php echo $this->createWebUrl('ask_users')}";
+		if(s_type == 'edit'){
+			up_ajax += "&op=edit_quyu";
+		}else{
+			up_ajax += "&op=add_quyu";
+		}
+
+		var level = $("select[name='level'] option:checked").val();
+		var pid = $("select[name='pid'] option:checked").val();
+		if(type == 2 || type == 3){
+			if(!pid){
+				util.message('请选择上级');
+				return false;
+			}
+		}
+
+		if(level == 0){
+			util.message('请选择代理等级');
+			return false;
+		}
+		province = $("select[name='addaddress[province]']").val();
+		city = $("select[name='addaddress[city]']").val();
+		area = $("select[name='addaddress[district]']").val();
+		if(level == 1){
+			if(province == ''){
+				util.message('请选择省/直辖市');
+				return false;
+			}
+		}
+		if(level == 2){
+			if(province == ''){
+				util.message('请选择省/直辖市');
+				return false;
+			}
+			if(city == ''){
+				util.message('请选择市');
+				return false;
+			}
+		}
+		if(level == 3){
+			if(province == ''){
+				util.message('请选择省/直辖市');
+				return false;
+			}
+			if(city == ''){
+				util.message('请选择市');
+				return false;
+			}
+			if(area == ''){
+				util.message('请选择区/县');
+				return false;
+			}
+		}
+
+		// uid是选择用户的Id
+	   	$.post(up_ajax,{
+	   		uid:uid,
+	   		type:type,
+	   		level: level,
+	   		province: province,
+	   		city: city,
+	   		area: area,
+	   		pid: pid
+	   	},function(result){
+		 	if(result.code == 200){
+		 		if(s_type == 'edit'){
+		 			util.message(result.msg,up_ajax+"&op=quyuList&uid="+uuid+"&type="+type);
+		 		}else{
+		 			util.message(result.msg,setTimeout(function(){window.location.reload();},1000));
+		 		}
+		 		return false;
+		 	}
+		 	if(result.code == 400){
+		 		util.message(result.msg);
+		 		return false;
+		 	}
+	   	},'json');
+	}
+
+	function delFrame(duid){
+		$("input[name=duid]").val(duid);
+		$("#del").modal('show');
+	}
+
+	//删除业务员
+	function del(obj){
+		if(confirm('你确定要删除吗？') == false){
+			return false;
+		}
+		var duid,dtype;
+		if(obj == 'delIdentity'){
+			duid = $("input[name=duid]").val();
+			dtype = $("select[name=delIdentity]").val();
+			if(dtype == 0){
+				util.message('请选择类型');
+		 		return false;
+			}
+		}else{
+			duid = $(obj).parents('td').attr('data');
+			dtype = $(obj).parents('td').attr('data-type');
+		}
+		$.post("{php echo $this->createWebUrl('ask_users',array('op'=>'salesmanDel'))}",{
+			duid:duid,dtype:dtype
+		},function(result){
+			if(result.code == 200){
+		 		util.message(result.msg,setTimeout(function(){window.location.reload();},1000));
+		 		return false;
+		 	}
+		 	if(result.code == 400){
+		 		util.message(result.msg);
+		 		return false;
+		 	}
+		},'json');
+	}
+
+</script>
+{template 'common/footer'}

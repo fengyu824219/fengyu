@@ -1,0 +1,1474 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+	<li {if $_GPC['op'] == ''}class="active"{/if}><a href="{php echo $this->createWebUrl('setting', array('c'=>'module','a'=>'manage-account','version_id'=>0))}">基本设置</a></li>
+	<li {if $_GPC['op'] == 'pay_setting'}class="active"{/if}><a href="{php echo $this->createWebUrl('setting', array('c'=>'module','a'=>'manage-account','op' => 'pay_setting', 'version_id'=>0))}">发票设置</a></li>
+	<li {if $_GPC['op'] == 'chat_expert_list' || $_GPC['op'] == 'update_chat_expert'}class="active"{/if}><a href="{php echo $this->createWebUrl('setting', array('c'=>'module','a'=>'manage-account','op' => 'chat_expert_list', 'version_id'=>0))}">专家设置</a></li>
+	<!-- <li {if $_GPC['op'] == 'chat_manager'}class="active"{/if}><a href="{php echo $this->createWebUrl('setting', array('c'=>'module','a'=>'manage-account','op' => 'chat_manager', 'version_id'=>0))}">管理员设置</a></li> -->
+	{if empty($_GPC['set'])}
+		<li {if $_GPC['op'] == 'installment'}class="active"{/if}><a href="{php echo $this->createWebUrl('setting', array('c'=>'module','a'=>'manage-account','op' => 'installment', 'version_id'=>0))}">分期配置</a></li>
+	{else}
+		<li {if $_GPC['op'] == 'installmentSet'}class="active"{/if}><a href="{php echo $this->createWebUrl('setting', array('c'=>'module','a'=>'manage-account','op' => 'installmentSet', 'version_id'=>0))}">分期设置</a></li>
+	{/if}
+
+	{if empty($_GPC['recharges'])}
+		<li {if $_GPC['op'] == 'recharge_lst'}class="active"{/if}><a href="{php echo $this->createWebUrl('setting', array('c'=>'module','a'=>'manage-account','op' => 'recharge_lst', 'version_id'=>0))}">充值管理</a></li>
+	{else}
+		<li {if $_GPC['op'] == 'recharge'}class="active"{/if}><a href="{php echo $this->createWebUrl('setting', array('c'=>'module','a'=>'manage-account','op' => 'recharge', 'version_id'=>0))}">充值设置</a></li>
+	{/if}
+
+	{if empty($_GPC['position'])}
+		<li {if $_GPC['op'] == 'chat_position_lst'}class="active"{/if}><a href="{php echo $this->createWebUrl('setting', array('c'=>'module','a'=>'manage-account','op' => 'chat_position_lst', 'version_id'=>0))}">职务管理</a></li>
+	{else}
+		<li {if $_GPC['op'] == 'chat_position'}class="active"{/if}><a href="{php echo $this->createWebUrl('setting', array('c'=>'module','a'=>'manage-account','op' => 'chat_position', 'version_id'=>0))}">职务设置</a></li>
+	{/if}
+
+	<li {if $_GPC['op'] == 'certificate'}class="active"{/if}><a href="{php echo $this->createWebUrl('setting', array('c'=>'module','a'=>'manage-account','op' => 'certificate', 'version_id'=>0))}">资格证管理</a></li>
+
+	<li {if $_GPC['op'] == 'sensitive'}class="active"{/if}><a href="{php echo $this->createWebUrl('setting', array('c'=>'module','a'=>'manage-account','op' => 'sensitive', 'version_id'=>0))}">敏感词设置</a></li>
+	<li {if $_GPC['op'] == 'update_version_number'}class="active"{/if}><a href="{php echo $this->createWebUrl('setting', array('c'=>'module','a'=>'manage-account','op' => 'update_version_number', 'version_id'=>0))}">特殊功能</a></li>
+
+</ul>
+{if $operation == 'display'}
+<div class="main">
+	<form action="" method="post" class="form-horizontal form" id="setting-form">
+		<div class="panel panel-default">
+			<div class="panel-heading">七牛存储设置（<span style="color:red;">参考文档地址：</span><a href="https://www.kancloud.cn/duoguan/qiniu" style="color:blue;" target="_blank">点击进入</a>）</div>
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 col-lg-2 control-label"><span style="color:red;">*</span>七牛AccessKey</label>
+					<div class="col-sm-8">
+						<input type="text" name="qn_accesskey" class="form-control" value="{$settings['qn_accesskey']}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 col-lg-2 control-label"><span style="color:red;">*</span>七牛SecretKey</label>
+					<div class="col-sm-8">
+						<input type="text" name="qn_secretkey" class="form-control" value="{$settings['qn_secretkey']}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 col-lg-2 control-label"><span style="color:red;">*</span>七牛存储对象名</label>
+					<div class="col-sm-8">
+						<input type="text" name="qn_bucket" class="form-control" value="{$settings['qn_bucket']}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 col-lg-2 control-label"><span style="color:red;">*</span>七牛多媒体处理队列名</label>
+					<div class="col-sm-8">
+						<input type="text" name="qn_queuename" class="form-control" value="{$settings['qn_queuename']}" />
+					<div class="help-block">媒体转码队列名,声音文件需要转码后才能在安卓和苹果上使用</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 col-lg-2 control-label"><span style="color:red;">*</span>七牛访问域名</label>
+					<div class="col-sm-8">
+						<input type="text" name="qn_domain" class="form-control" value="{$settings['qn_domain']}" />
+					<div class="help-block">七牛上可以绑定自己的域名来访问资源,此处填写绑定到七牛的域名(必须以"http://"开头)</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<div class="panel panel-default">
+			<div class="panel-heading">收益设置</div>
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label"></label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon" style="color: red;">温馨提示：平台收益为平台用户所有收益扣除后剩下的全部算进平台收益，平台不参与收益设置为100%即可</span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">付费问答/悬赏专家收益</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">回答专家抽取</span>
+							<input type="text" class="form-control" name="expert_ask" value="{$settings['expert_ask']}">
+							<span class="input-group-addon">%</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">付费问答/悬赏提问收益</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">提问的用户抽取</span>
+							<input type="text" class="form-control" name="user_ask" value="{$settings['user_ask']}">
+							<span class="input-group-addon">%</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">付费文章专家收益</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">发布专家抽取</span>
+							<input type="text" class="form-control" name="expert_article" value="{$settings['expert_article']}">
+							<span class="input-group-addon">%</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">悬赏采纳专家收益</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">答案采纳专家抽取</span>
+							<input type="text" class="form-control" name="expert_reward" value="{$settings['expert_reward']}">
+							<span class="input-group-addon">%</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">赞赏专家收益</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">赞赏专家抽取</span>
+							<input type="text" class="form-control" name="expert_appreciate" value="{$settings['expert_appreciate']}">
+							<span class="input-group-addon">%</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">专家服务专家收益</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">专家服务专家抽取</span>
+							<input type="text" class="form-control" name="expert_service" value="{$settings['expert_service']}">
+							<span class="input-group-addon">%</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">专家团自开票服务收益</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">自开票抽取</span>
+							<input type="text" class="form-control" name="group_service" value="{$settings['group_service']}">
+							<span class="input-group-addon">%</span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">专家团税媒开票服务收益</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">平台开票抽取</span>
+							<input type="text" class="form-control" name="group_platform" value="{$settings['group_platform']}">
+							<span class="input-group-addon">%</span>
+						</div>
+					</div>
+				</div>
+				<!-- <div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">平台年度服务专家收益</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">平台年度服务专家抽取</span>
+							<input type="text" class="form-control" name="platform_expert_service" value="{$settings['platform_expert_service']}">
+							<span class="input-group-addon">%</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">平台年度服务业务员收益</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">平台业务员抽取</span>
+							<input type="text" class="form-control" name="platform_user_service" value="{$settings['platform_user_service']}">
+							<span class="input-group-addon">%</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">平台年度服务业务员收益</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">城市合伙人业务员抽取</span>
+							<input type="text" class="form-control" name="partner_user_service" value="{$settings['partner_user_service']}">
+							<span class="input-group-addon">%</span>
+						</div>
+					</div>
+				</div> -->
+			</div>
+		</div>
+
+		<div class="panel panel-default">
+			<div class="panel-heading">基本设置</div>
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 col-md-2  control-label">是否允许提现</label>
+					<div class="col-sm-8">
+						<label class="radio-inline">
+							<input type="radio" name="is_cash" value="1" {if $settings['is_cash']==1 }checked="checked"{/if}>允许提现
+						</label>
+						<label class="radio-inline">
+							<input type="radio" name="is_cash" {if $settings['is_cash']==2 }checked="checked"{/if} value="2">不允许提现
+						</label>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">提现限额设置</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">满</span>
+							<input type="text" class="form-control" name="cash_money" value="{$settings['cash_money']}">
+							<span class="input-group-addon">元可提现</span>
+						</div>
+						<div class="help-block">设置专家提现的最低金额，当收入大于等于此金额后方可申请提现</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">总部电话</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<input type="text" class="form-control" name="cash_phone" value="{$settings['cash_phone']}">
+						</div>
+						<div class="help-block">用于业务员联系总部</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">提现说明</label>
+					<div class="col-sm-9 col-xs-12">
+						<textarea style="height:300px;" id='ask_description' name="ask_description"  class="form-control richtext">{$settings['ask_description']}</textarea>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">温馨提示</label>
+					<div class="col-sm-9 col-xs-12">
+						<textarea style="height:300px;" id='reminder' name="reminder"  class="form-control richtext">{$settings['reminder']}</textarea>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="main" style="padding-top:5px;">
+			<div class="panel panel-default">
+			    <div class="panel-heading">分享设置</div>
+			    <div class="panel-body">
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label">分享标题</label>
+			            <div class="col-sm-9 col-xs-12 form-control-static">
+			               	<input type="text" id="share_title" name="share_title" class="form-control" value="{$share['share_title']}">
+			            </div>
+			        </div>
+			        <div class="form-group">
+						<label class="col-xs-12 col-sm-2 col-md-2  control-label">分享图片</label>
+						<div class="col-sm-9 form-control-static">
+							 {php echo tpl_form_field_image('share_img', $share['share_img'])}
+						</div>
+					</div>
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-2 col-md-2 control-label">分享简介</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			     			<input type="text" id="share_desc" name="share_desc" class="form-control" value="{$share['share_desc']}">
+			            </div>
+			        </div>
+			    </div>
+			</div>
+		</div>
+		<div class="form-group col-sm-12">
+			<input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+			<input type="hidden" name="token" value="{$_W['token']}" />
+		</div>
+	</form>
+</div>
+{elseif $operation == 'pay_setting'}
+
+<!-- <div class="main" style="padding-top:5px;">
+	<form id="payform" action="" method="post" enctype="multipart/form-data" method="post" class="form-horizontal form" onsubmit="return validate();">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				设置微信支付PEM
+			</div>
+			<div class="panel-body">
+				<div class="alert alert-info">
+                    上传以下文件前请到 <a href="./index.php?c=profile&amp;a=payment&amp;">支付参数</a> 去设置好微信支付参数。请确保本插件目录dg_ask必须是可写的,否则上传不成功
+                </div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span style="color:red;"> * </span>CERT证书(pem格式)</label>
+					<div class="col-sm-9 col-xs-12 form-control-static">
+						{if $wechat['signcertexists']}
+						证书已上传&nbsp;&nbsp;&nbsp;&nbsp;<input type="file" name="wechat[signcertpath]" id="amendsec" class="hidden">
+						<input type="button" value="修改" onclick="amendsec.click()" class="btn btn-success btn-sm" style="padding: .2em .6em;">
+						{else}
+						<input type="file" name="wechat[signcertpath]" value="">
+						{/if}
+						<span class="help-block">下载证书 cert.zip 中的 apiclient_cert.pem</span>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span style="color:red;"> * </span>KEY证书(pem格式)</label>
+					<div class="col-sm-9 col-xs-12 form-control-static">
+						{if $wechat['signkeyexists']}
+						证书已上传&nbsp;&nbsp;&nbsp;&nbsp;<input type="file" name="wechat[signkeypath]" id="amendkey" class="hidden">
+						<input type="button" value="修改" onclick="amendkey.click()" class="btn btn-success btn-sm" style="padding: .2em .6em;">
+						{else}
+						<input type="file" name="wechat[signkeypath]" value="">
+						{/if}
+						<span class="help-block">下载证书 cert.zip 中的 apiclient_key.pem</span>
+					</div>
+				</div>
+				<div class="form-group col-sm-12">
+					<input name="do-submit" type="submit" value="提交" class="btn btn-primary col-lg-1" />
+					<input type="hidden" name="token" value="{$_W['token']}" />
+				</div>
+			</div>
+		</div>
+	</form>
+</div> -->
+
+
+
+
+
+<div class="main">
+	<div class="form-horizontal form" id="setting-form">
+		<div class="panel panel-default">
+			<div class="panel-heading">诺诺接口配置</div>
+				<div class="panel-body">
+					
+					<div class="form-group">
+						<label class="col-xs-12 col-sm-3 col-md-2 control-label"></label>
+						<div class="col-sm-9 col-xs-6">
+							<div class="input-group">
+								<span class="input-group-addon" style="color: red;">温馨提示：诺诺接口配置，如不清楚请不要随意改动</span>
+							</div>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="col-xs-12 col-sm-3 col-md-2 control-label">app_key</label>
+						<div class="col-sm-9 col-xs-6">
+							<div class="input-group">
+								<span class="input-group-addon">app_key</span>
+								<input type="text" class="form-control" name="app_key" value="{$eleInvoiceConfig['app_key']}">
+							</div>
+							<span style="color:red;">沙箱环境：SDCSQejOsz</span>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="col-xs-12 col-sm-3 col-md-2 control-label">app_secret</label>
+						<div class="col-sm-9 col-xs-6">
+							<div class="input-group">
+								<span class="input-group-addon">app_secret</span>
+								<input type="text" class="form-control" name="app_secret" value="{$eleInvoiceConfig['app_secret']}">
+							</div>
+							<span style="color:red;">沙箱环境：SD3CDC7F61474950</span>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="col-xs-12 col-sm-3 col-md-2 control-label">access_token</label>
+						<div class="col-sm-9 col-xs-6">
+							<div class="input-group">
+								<span class="input-group-addon">access_token</span>
+								<input type="text" class="form-control" value="{$eleInvoiceConfig['access_token']}" readonly="readonly">
+							</div>
+							<a onclick="eliminate()" href="javascript:;" style="margin-left:1150px;float:left;margin-top:-32px;" class="btn btn-default btn-sm manage">
+                                清除
+                            </a>
+						</div>
+					</div>
+
+					<div class="form-group col-sm-12">
+						<input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" onclick="generateData()"/>
+						<input type="hidden" name="token" value="{$_W['token']}" />
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+        function generateData(){
+            var database_app_key = "{$eleInvoiceConfig['app_key']}";
+            var database_app_secret = "{$eleInvoiceConfig['app_secret']}";
+            var database_time = "{$eleInvoiceConfig['create_time']}";
+            var time = Math.round(new Date() / 1000);//获取当前时间戳
+
+            var app_key = $("input[name=app_key]").val();
+            var app_secret = $("input[name=app_secret]").val();
+
+            if(app_key == ''){
+                util.message('app_key不能为空');
+                return false;
+            }
+            if(app_secret == ''){
+                util.message('app_secret不能为空');
+                return false;
+            }
+            // generateAccessToken(app_key,app_secret);
+            if(database_app_key == app_key && database_app_secret == app_secret){
+                if(time - database_time >= 86400){
+                    generateAccessToken(app_key,app_secret);
+                }else{
+                    util.message('授权码未过期');
+                    return false;
+                }
+            }else if(database_app_key != app_key || database_app_secret != app_secret){
+                generateAccessToken(app_key,app_secret);
+            }
+        }
+
+        function generateAccessToken(app_key,app_secret){
+            var code = "";//获取auth_code（authorize.html）返回的code; 
+            var taxNum = "";//获取auth_code（authorize.html）返回的taxnum; 
+            
+            var _url = "https://open.jss.com.cn/accessToken"; //获取token地址
+            var client_id = app_key;  //创建应用后，分配给应用的appKey
+            var client_secret = app_secret; //创建应用后，分配给应用的appSecret
+            var grant_type = "client_credentials";
+            var redirect_uri = "http://open.jss.com.cn/";   //回调地址，必传且不能为空
+
+            var param = 'code=' + code + "&taxNum=" + taxNum + "&client_id=" + client_id + "&client_secret=" + client_secret + "&grant_type=" + grant_type + "&redirect_uri=" + redirect_uri;
+            // console.log(param);
+            //创建异步对象
+            var xhr = new XMLHttpRequest();
+            //设置请求的类型及url
+            // console.log(xhr);
+            xhr.open('post', _url,true);
+            // 需要设置请求报文
+            xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+            //发送请求
+            xhr.send(param);
+            xhr.onreadystatechange = function () {
+                // 这步为判断服务器是否正确响应
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    // console.info(xhr.responseText);
+                    var responseText = $.parseJSON(xhr.responseText);
+                    $.post("{php echo $this->createWebUrl('invoice',array('op'=>'invoiceConfig'))}",{
+                        requestType: 'obtain',
+                        app_key: app_key,
+                        app_secret: app_secret,
+                        responseText: responseText
+                    },function(data){
+                        if(data.code == 200){
+                            util.message(data.msg,setTimeout(function(){
+                            	window.location.reload();
+                            },1000),'success');
+                            return false;
+                        }else{
+                            util.message(data.msg,'','error');
+                            return false;
+                        }
+                    },'json');
+                } else {
+                    util.message('操作失败');
+                    return false;
+                }
+            };
+        }
+
+        function eliminate(){
+            var database_id = "{$eleInvoiceConfig['id']}";
+            $.post("{php echo $this->createWebUrl('invoice',array('op'=>'invoiceConfig'))}",{
+                requestType: 'eliminate',
+                id: database_id
+            },function(data){
+                util.message(data.msg);
+                setTimeout(function(){
+                    window.location.reload();
+                },1000);
+                return false;
+            },'json');
+        }
+    </script>
+
+	<form action="" method="post" class="form-horizontal form" id="setting-form" onsubmit="return judgeClick()">
+		<input type="hidden" name="icid" value="{$invoice['icid']}">
+		<div class="panel panel-default">
+			<div class="panel-heading">发票设置</div>
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label"></label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon" style="color: red;">温馨提示：开具电子发票设置，如不清楚请不要随意改动</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">商户联系方式</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">联系号码</span>
+							<input type="text" class="form-control" name="nsrdh" value="{$invoice['nsrdh']}">
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">销方地址</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">销方地址</span>
+							<input type="text" class="form-control" name="nsrdz" value="{$invoice['nsrdz']}">
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">销方银行</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">销方银行</span>
+							<input type="text" class="form-control" name="nsrbank" value="{$invoice['nsrbank']}">
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">开户账号</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">开户账号</span>
+							<input type="text" class="form-control" name="nsrbankid" value="{$invoice['nsrbankid']}">
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">税率</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">精确到两位小数如0.11</span>
+							<input type="text" class="form-control" name="sl" value="{$invoice['sl']}">
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">开票人</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">开票人</span>
+							<input type="text" class="form-control" name="kpr" value="{$invoice['kpr']}">
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">销方税号</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">销方税号</span>
+							<input type="text" class="form-control" name="nsrsbh" value="{$invoice['nsrsbh']}">
+						</div>
+						<span style="color:red;">沙箱环境：339901999999142</span>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">开放平台访问域名</label>
+					<div class="col-sm-9 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">开放平台访问域名</span>
+							<input type="text" class="form-control" name="invoice_url" value="{$invoice['invoice_url']}">
+						</div>
+						<span style="color:red;">沙箱环境：sandbox.jss.com.cn</span>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<div class="form-group col-sm-12">
+			<input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1"/>
+			<input type="hidden" name="token" value="{$_W['token']}" />
+		</div>
+	</form>
+</div>
+<script>
+	function judgeClick(){
+		if($("input[name=nsrdh]").val() == ''){
+			util.message('联系方式不能为空');
+			return false;
+		}
+		if($("input[name=nsrdz]").val() == ''){
+			util.message('销方地址不能为空');
+			return false;
+		}
+		if($("input[name=nsrbank]").val() == ''){
+			util.message('销方银行不能为空');
+			return false;
+		}
+		if($("input[name=nsrbankid]").val() == ''){
+			util.message('开户账号不能为空');
+			return false;
+		}
+		if($("input[name=sl]").val() == ''){
+			util.message('税率不能为空');
+			return false;
+		}
+		var kpr = $("input[name=kpr]").val();
+		if(kpr == ''){
+			util.message('开票人不能为空');
+			return false;
+		}
+		if(kpr.length > 8){
+			util.message('开票人不能大于8位');
+			return false;
+		}
+		if($("input[name=nsrsbh]").val() == ''){
+			util.message('税号不能为空');
+			return false;
+		}
+		if($("input[name=invoice_url]").val() == ''){
+			util.message('域名不能为空');
+			return false;
+		}
+		if($("input[name=invoice_url]").val() == ''){
+			util.message('域名不能为空');
+			return false;
+		}
+	}
+</script>
+
+{elseif $operation == 'chat_manager'}
+	<style type="text/css">
+		.modal-body{padding:10px;}
+	</style>
+	<div class="main">
+		<div class="panel-heading">
+		  <div class="row-fluid">
+			<div class="span8 control-group">
+				<a class="btn btn-primary add_manager" href="javascript:">
+					<i class="fa fa-plus"></i>添加管理员</a>
+				</div>
+			</div>
+		</div>
+		<div class="panel panel-default">
+			<div class="panel-heading">
+					<div class="row-fluid">
+						<div class="span8 control-group">
+							共计 {$total} 条数据
+						</div>
+					</div>
+				</div>
+				<div class="panel-body table-responsive">
+				<table class="table table-hover">
+					<thead class="navbar-inner">
+						<tr>
+							<th style="width:65px;" align="center">头像</th>
+							<th>昵称</th>
+							<th>添加时间</th>
+							<th style="width:170px;" align="center">操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						{loop $records $row}
+						<tr>
+							<td><img alt="" src="{$row['avatar']}" width='auto' style="max-width:50px; max-height:50px;" height='auto'></td>
+							<td>{$row['nickname']}</td>
+							<td>{php echo date('Y/m/d H:i:s', $row['create_time']);}</td>
+							<td data="{$row['id']}">
+							 <a class="btn btn-default" data-toggle="tooltip" data-placement="top" href="javascript:" onclick="return del(this)" title="删除"><i class="fa fa-times"></i></a>
+							</td>
+						</tr>
+						{/loop}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		{$pager}
+	</div>
+
+	<div class="modal fade" id="module-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="width:800px;top:100px;">
+			<div class="modal-content">
+				<form action="./index.php?c=extension&a=module&do=info&" method="post" enctype="multipart/form-data" class="form-horizontal form" id="form-info">
+					<input type="hidden" name="m" value=""/>
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+						<h4>添加管理员</h4>
+					</div>
+					<div class="modal-body">
+	                       <div class="row">
+	                           <div class="input-group">
+	                               <input type="text" class="form-control" name="keyword" value="" id="keyword" placeholder="请输入粉丝昵称/姓名">
+	                               <span class="input-group-btn"><button type="button" class="btn btn-default" onclick="search_members();">搜索</button></span>
+	                           </div>
+	                       </div>
+	                       <div id="module-menus" style="padding-top:5px;">
+	                        <div style="max-height:500px;overflow:auto;min-width:750px;">
+								<table class="table table-hover" style="min-width:750px;">
+									<tbody id="search_list">
+									</tbody>
+								</table>
+						    </div>
+					    </div>
+				 	</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+	function getRows(data){
+		var html='';
+		for(i=0;i<data.length;i++){
+			html+='<tr>';
+			html+='<td><img src="'+data[i].avatar+'" style="width:30px;height:30px;padding1px;border:1px solid #ccc"> '+data[i].nickname+'</td>';
+			html+='<td></td>';
+			html+='<td></td>';
+			html+='<td style="width:80px;"><a href="javascript:;" onclick="select_member('+data[i].id+')">选择</a></td>';
+		    html+='</tr>';
+		}
+		return html;
+	}
+	function search_members(){
+		var keyword=$("#keyword").val();
+		$("#search_list").empty();
+
+		$.post(location.href,{keyword:keyword},function(result){
+			var html=getRows(result.data);
+			$("#search_list").append(html);
+		});
+	}
+
+	function select_member(uid){
+	   $.post(location.href,{uid:uid},function(result){
+		  location.href=location.href;
+	   });
+	}
+
+	function del(obj){
+		var conf=confirm("确认删除吗？");
+		var duid=$(obj).parents('td').attr('data');
+		$.post(location.href,{del:true,duid:duid},function(result){
+			  location.href=location.href;
+		   });
+	}
+	$(function(){
+		$(".add_manager").click(function(){
+			$('#module-info').modal('show');
+		});
+	});
+
+	</script>
+{/if}
+
+{if $operation == "recharge_lst"}
+    <div class="panel-heading">
+		  <div class="row-fluid">
+			<div class="span8 control-group">
+				<a class="btn btn-primary add_manager" href="{php echo $this->createWebUrl('setting', array('c'=>'module','a'=>'manage-account','op' => 'recharge', 'recharges'=>'1', 'version_id'=>0))}">
+					<i class="fa fa-plus"></i>充值设置</a>
+				</div>
+			</div>
+	</div>
+	<div class="main">
+		<div class="panel panel-default">
+			<form method="post" class="form-horizontal" id="formfans">
+				<div style="position:relative">
+					<div class="panel-body table-responsive">
+						<table class="table we7-table table-hover vertical-middle" style="position:relative">
+							<thead class="navbar-inner">
+							<tr>
+								<th>充值金额</th>
+								<th>状态</th>
+								<th>添加时间</th>
+								<th>操作</th>
+							</tr>
+							</thead>
+							<tbody>
+							{loop $rech $i $v}
+							<tr>
+								<td style="overflow: hidden;white-space:nowrap;"><span>{$v['price']}</span></td>
+								<td style="white-space:nowrap;"><span >
+                            {if $v['status'] == '1'}<span style="color:green;">已上架</span>
+                            {else}<span style="color:red;">已下架</span>
+                            {/if}
+                            </span></td>
+								<td style="white-space:nowrap;"><span><?php echo date('Y-m-d H:i',$v['create_time'])?></span></td>
+								<td style="text-align:left;white-space:nowrap;">
+									<a href="{php echo $this->createWebUrl('setting', array('op' => 'recharge', 'cid' => $v['cid'],'a'=>$_GPC['a'],'c'=>$_GPC['c']))}" class="btn btn-default btn-sm manage"><i class="fa fa-edit"></i>修改</a>
+									<a href="{php echo $this->createWebUrl('setting', array('op' => 'shangjia', 'cid'=>$v['cid'],'a'=>$_GPC['a'],'c'=>$_GPC['c'],'status'=>$v['status'],'version_id'=>0))}" class="btn btn-default btn-sm manage"><i class="fa fa-edit"></i>{if $v['status'] == 1}下架{else}上架{/if}</a>
+
+									<a onclick="return confirm('你确定要删除该数据吗？');" href="{php echo $this->createWebUrl('setting', array('op' => 'del', 'cid'=>$v['cid'] , 'a'=>$_GPC['a'],'c'=>$_GPC['c']))}" class="btn btn-default btn-sm manage"><i class="fa fa-del"></i>删除</a>
+								</td>
+							</tr>
+							{/loop}
+
+							</tbody>
+						</table>
+						{$pager}
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+{/if}
+
+<!-- 分期配置 start -->
+{if $operation == "installment"}
+	<div class="panel-heading">
+		<div class="row-fluid">
+			<div class="span8 control-group">
+				{if $total != 11}
+					<a class="btn btn-primary add_manager" href="{php echo $this->createWebUrl('setting', array('c'=>'module','a'=>'manage-account','op' => 'installmentSet', 'set'=>'1', 'version_id'=>0))}">
+						<i class="fa fa-plus"></i>分期设置
+					</a>
+				{/if}
+			</div>
+		</div>
+	</div>
+	<div class="main">
+		<div class="panel panel-default">
+			<form method="post" class="form-horizontal" id="formfans">
+				<div style="position:relative">
+					<div class="panel-body table-responsive">
+						<table class="table we7-table table-hover vertical-middle" style="position:relative">
+							<thead class="navbar-inner">
+								<tr>
+									<th>总期数</th>
+									<th>分期参数</th>
+									<th>状态</th>
+									<th>操作</th>
+								</tr>
+							</thead>
+							<tbody>
+								{loop $orderConfig $i $vo}
+								<tr>
+									<td>{$vo['number']}</td>
+									<td>
+										{loop $vo['configData'] $i $v}
+											期数：{$v['num']}
+											占比：{$v['ratio']}%
+											<br>
+										{/loop}
+									</td>
+									<td>
+										{if $vo['status'] == 1}
+											<span style="color:green;">已开启</span>
+										{elseif $vo['status'] == 0}
+											<span style="color:red;">已关闭</span>
+										{/if}
+									</td>
+									<td>
+										{if $vo['status'] == 1}
+											<a href="{php echo $this->createWebUrl('setting', array('op' => 'setOrderConfigStatus', 'ocid'=>$vo['ocid'],'a'=>$_GPC['a'],'c'=>$_GPC['c'],'status'=>0,'version_id'=>0))}">
+												<label style="cursor:pointer;" class="btn btn-default btn-sm manage">
+													关闭
+												</label>
+											</a>
+										{elseif $vo['status'] == 0}
+											<a href="{php echo $this->createWebUrl('setting', array('op' => 'setOrderConfigStatus', 'ocid'=>$vo['ocid'],'a'=>$_GPC['a'],'c'=>$_GPC['c'],'status'=>1,'version_id'=>0))}">
+												<label style="cursor:pointer;" class="btn btn-default btn-sm manage">
+													开启
+												</label>
+											</a>
+										{/if}
+										<a href="{php echo $this->createWebUrl('setting', array('op' => 'installmentSet', 'ocid'=>$vo['ocid'],'a'=>$_GPC['a'],'c'=>$_GPC['c'],'version_id'=>0,'set'=>1))}">
+											<label style="cursor:pointer;" class="btn btn-default btn-sm manage">
+												编辑
+											</label>
+										</a>
+									</td>
+								</tr>
+								{/loop}
+							</tbody>
+						</table>
+						{$pager}
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+{/if}
+<!-- 分期配置 end -->
+<!-- 分期设置 start -->
+{if $operation == "installmentSet"}
+	<div class="main" style="padding-top:5px;">
+		<form  action="" method="post"   class="form-horizontal form" id="setting-form" onsubmit="return verificationData();">
+			<input type="hidden" name="ops" value="submit">
+			{if !empty($ocid)}<input type="hidden" name="ocid" value='{$ocid}'>{/if}
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					分期设置
+				</div>
+				<div class="panel-body">
+					<div class="form-group">
+						<label for="inputEmail3" class="col-sm-2 control-label">总期数</label>
+						<div class="col-sm-7">
+							{if empty($orderConfig['number'])}
+								<select id='number' class="form-control" name='number' onchange='dropDown()'>
+									<option value='0'>请选择</option>
+									{loop $number $i $vo}
+										<option value="{$vo['num']}">{$vo['num']}</option>
+									{/loop}
+								</select>
+							{else}
+								<input type="text" class="form-control" value="{$orderConfig['number']}" readonly="readonly">
+							{/if}
+						</div>
+					</div>
+
+					<div class='insert'></div>
+
+					<div class="form-group">
+						<label for="inputEmail3" class="col-sm-2 control-label">状态</label>
+						<div class="col-sm-7">
+							<select class="form-control" name='status'>
+								<option {if $orderConfig['status'] == 0}selected{/if} value='0'>关闭</option>
+								<option {if $orderConfig['status'] == 1}selected{/if} value='1'>开启</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="form-group col-sm-12">
+						<input name="do-submit" type="submit" value="提交" class="btn btn-primary col-lg-1" />
+						<input type="hidden" name="token" value="{$_W['token']}" />
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	<script>
+		var ocid = '{$ocid}';
+		$(function(){//编辑分期设置
+			if(ocid != ''){
+				//获取期数的占比值
+				var config = {$orderConfig['config']};
+				var ratioArr = [];
+				$.each(config,function(index,v){
+					ratioArr.push(v.ratio);
+				});
+				// console.log(ratioArr);
+
+				var ratioList = '';
+		        for (var i = 0; i < ratioArr.length; i++) {
+		        	// console.log(ratioArr[i]);
+		        	var i_total_ratio = i + 1;
+		        	ratioList += "<div class='form-group'>";
+					ratioList += 	"<label for='inputEmail3' class='col-sm-2 control-label'>第"+i_total_ratio+"期</label>";
+					ratioList += 	"<div class='col-sm-7'>";
+					ratioList += 		"<input type='number' class='form-control' name='data["+i_total_ratio+"]' value='"+ratioArr[i]+"' placeholder='请填写占比'/>";
+					ratioList += 	"</div>";
+					ratioList += "</div>";
+		        }
+		        $(".insert").html(ratioList);
+			}
+		})
+
+		function dropDown(){//添加分期设置
+			var number = $("select[name=number]").val();
+	        if(number > 12){
+	        	number = 12;
+	        }
+	        var dataList = '';
+	        for (var i = 0; i < number; i++) {
+	        	var i_number = i + 1;
+	        	dataList += "<div class='form-group'>";
+				dataList += 	"<label for='inputEmail3' class='col-sm-2 control-label'>第"+i_number+"期</label>";
+				dataList += 	"<div class='col-sm-7'>";
+				dataList += 		"<input type='number' class='form-control' name='data["+i_number+"]' placeholder='请填写占比'/>";
+				dataList += 	"</div>";
+				dataList += "</div>";
+	        }
+	        $(".insert").html(dataList);
+	    }
+
+	    function verificationData(){//进行判断
+	    	if(ocid == ''){
+		    	var num = $("select[name=number]").val();
+		    	var sum = 0;
+		    	if(num == ''){
+		    		util.message('总期数不能为空');
+	                return false;
+		    	}
+	    	}
+
+	    	for (var i = 0; i < num; i++) {
+	        	var i_num = i + 1;
+	        	var ratio = $("input[name='data["+i_num+"]']").val();
+	    		if(ratio == ''){
+	    			util.message('占比不能为空');
+                	return false;
+	    		}
+	    		if(!(/(^[1-9]\d*$)/.test(ratio))){
+	    			util.message('请输入正确的占比');
+                	return false;
+	    		}
+	    		sum += + ratio;
+	        }
+	    	if(sum > 100 || sum < 100){
+	    		util.message('占比总和必须100');
+                return false;
+	    	}
+	    }
+	</script>
+{/if}
+<!-- 分期设置 end -->
+
+{if $operation == "recharge"}
+	<div class="main" style="padding-top:5px;">
+		<form  action="" method="post"   class="form-horizontal form" id="setting-form" onsubmit="return validate();" >
+			<input type="hidden" name="ops" value="submit">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					设置充值金额
+				</div>
+				<div class="panel-body">
+					<div class="form-group">
+						<label for="inputEmail3" class="col-sm-2 control-label"><span style="color:red">*</span>充值金额</label>
+						<div class="col-sm-7">
+							<input type="number" class="form-control" name="recharge_price" value="{$price['price']}" placeholder="设置充值金额"/>
+						</div>
+					</div>
+
+					<div class="form-group col-sm-12">
+						<input name="do-submit" type="submit" value="提交" class="btn btn-primary col-lg-1" />
+						<input type="hidden" name="token" value="{$_W['token']}" />
+				</div>
+			</div>
+		</form>
+	</div>
+	<script>
+		function validate() {
+			if($("input[name='recharge_price']").val() == ""){
+                util.message('未填写金额.');
+                return false;
+			}
+        }
+	</script>
+{/if}
+{if $operation == "chat_expert_list"}
+	<div class="panel-heading">
+		  <div class="row-fluid">
+			<div class="span8 control-group">
+				<a class="btn btn-primary add_manager" href="{php echo $this->createWebUrl('setting', array('c'=>'module','a'=>'manage-account','op' => 'update_chat_expert', 'position'=>'1', 'version_id'=>0))}">
+					<i class="fa fa-plus"></i>专家等级设置</a>
+				</div>
+			</div>
+	</div>
+	<div class="main">
+		<div class="panel panel-default">
+			<form method="post" class="form-horizontal" id="formfans">
+				<div style="position:relative">
+					<div class="panel-body table-responsive">
+						<table class="table we7-table table-hover vertical-middle" style="position:relative">
+							<thead class="navbar-inner">
+							<tr>
+								<th>等级名称</th>
+								<th>图标</th>
+								<th>分数起始值</th>
+								<th>分数结束值</th>
+								<th>操作</th>
+							</tr>
+							</thead>
+							<tbody>
+							{loop $expert $i $v}
+                                <td style="white-space:nowrap;">{$v['name']}</td>
+								<td style="white-space:nowrap;"><img src="{media $v['icon']}" style="width:60px;"></span></td>
+								<td style="white-space:nowrap;">{$v['fraction_sta']}</span></td>
+								<td style="white-space:nowrap;">{$v['fraction_end']}</span></td>
+								<td style="text-align:left;white-space:nowrap;">
+									<a href="{php echo $this->createWebUrl('setting', array('op' => 'update_chat_expert', 'id' => $v['eid'],'a'=>$_GPC['a'],'c'=>$_GPC['c']))}" class="btn btn-default btn-sm manage"><i class="fa fa-edit"></i>修改</a>
+									<!-- <a onclick="return confirm('你确定要删除该数据吗？');" href="{php echo $this->createWebUrl('setting', array('op' => 'del_chat_expert', 'id'=>$v['eid'] , 'a'=>$_GPC['a'],'c'=>$_GPC['c']))}" class="btn btn-default btn-sm manage"><i class="fa fa-del"></i>删除</a> -->
+								</td>
+							</tr>
+							{/loop}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+{/if}
+{if $operation == "update_chat_expert"}
+	<div class="main" style="padding-top:5px;">
+		<form  action="" method="post"   class="form-horizontal form" id="setting-form" onsubmit="return validate();" >
+			<input type="hidden" name="ops" value="submit">
+			<input type="hidden" name="id" value="{$_GPC['id']}"/>
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					专家等级设置
+				</div>
+				<div class="panel-body">
+					<div class="form-group">
+						<label for="inputEmail3" class="col-sm-2 control-label"><span style="color:red">*</span>等级名称</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="name" placeholder="请输入等级名称" value="{$expert['name']}"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="inputEmail3" class="col-sm-2 control-label"><span style="color:red">*</span>图标</label>
+						<div class="col-sm-7">
+							{php echo tpl_form_field_image('icon', $expert['icon'])}
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="inputEmail3" class="col-sm-2 control-label"><span style="color:red">*</span>分数起始值</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="fraction_sta" placeholder="请输入分数起始值" value="{$expert['fraction_sta']}"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="inputEmail3" class="col-sm-2 control-label"><span style="color:red">*</span>分数结束值</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="fraction_end" placeholder="请输入分数结束值" value="{$expert['fraction_end']}"/>
+						</div>
+					</div>
+					<div class="form-group col-sm-12">
+						<input name="do-submit" type="submit" value="提交" class="btn btn-primary col-lg-1" />
+						<input type="hidden" name="token" value="{$_W['token']}" />
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+{/if}
+<!-- 职务管理 start -->
+{if $operation == "chat_position"}
+	<div class="main" style="padding-top:5px;">
+		<form  action="" method="post"   class="form-horizontal form" id="setting-form" onsubmit="return validate();" >
+			<input type="hidden" name="ops" value="submit">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					职务设置
+				</div>
+				<div class="panel-body">
+					<div class="form-group">
+						<label for="inputEmail3" class="col-sm-2 control-label"><span style="color:red">*</span>类型</label>
+						<div class="col-sm-7">
+							<select class="form-control" name="type">
+								<option value="1" {if $position['type']==1 } selected="selected"{/if}>职务</option>
+								<option value="2" {if $position['type']==2 } selected="selected"{/if}>职称</option>
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="panel-body">
+					<div class="form-group">
+						<label for="inputEmail3" class="col-sm-2 control-label"><span style="color:red">*</span>职务名称</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="position_name" placeholder="请输入职务名称" value="{$position['position_name']}"/>
+						</div>
+					</div>
+
+					<div class="form-group col-sm-12">
+						<input name="do-submit" type="submit" value="提交" class="btn btn-primary col-lg-1" />
+						<input type="hidden" name="token" value="{$_W['token']}" />
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	<script>
+		function validate() {
+			if($("input[name='position_name']").val() == ""){
+	            util.message('职务不能为空！');
+	            return false;
+			}
+	    }
+	</script>
+{/if}
+<!-- 职务管理 end -->
+<!-- 资格证管理 start -->
+{if $operation == "certificate"}
+	<div class="panel-heading">
+		<div class="row-fluid">
+			<div class="span8 control-group">
+				<a class="btn btn-primary" href="javascript:;" onclick="submitModify('add')">
+					<i class="fa fa-plus"></i>添加资格证
+				</a>
+			</div>
+		</div>
+	</div>
+	<div class="main">
+		<div class="panel panel-default">
+		<div class="panel-heading">
+			共有{$total}条数据
+		</div>
+			<form method="post" class="form-horizontal" id="formfans">
+				<div style="position:relative">
+					<div class="panel-body table-responsive">
+						<table class="table we7-table table-hover vertical-middle" style="position:relative">
+							<thead class="navbar-inner">
+							<tr>
+								<th>资格证名称</th>
+								<th>操作</th>
+							</tr>
+							</thead>
+							<tbody>
+								{loop $certificateData $i $v}
+									<tr>
+		                                <td>{$v['cert_name']}</td>
+										<td style="text-align:left;white-space:nowrap;">
+											<a href="javascript:;" onclick="submitModify({$v['cid']})">
+												<label style="cursor:pointer;" class="btn btn-default btn-sm manage">编辑</label>
+											</a>
+										</td>
+									</tr>
+								{/loop}
+							</tbody>
+						</table>
+						{$pager}
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div class="modal fade" id="module-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="width:800px;">
+			<div class="modal-content">
+				<input type="hidden" name="m" value=""/>
+				<input type="hidden" name='cid' value=""/>
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4 id="title"></h4>
+				</div>
+				<div class="modal-body" style="padding:50px 30px!important;">
+                       	<div class="row clearfix">
+                           	<div class="input-group" style="float:left;width:50px">
+                               	<input type="text" style="width:650px!important" autocomplete="off" class="form-control" name="cert_name" placeholder="请输入资格证名称">
+                               	<span class="input-group-btn">
+                               		<button type="button" class="btn btn-default" style="margin-left:25px;"" onclick="sureSubmit()">确定</button>
+                           		</span>
+                           </div>
+                       	</div>
+                       	<div id="module-menus" style="padding-top:5px;">
+                        <div style="max-height:500px;overflow:auto;min-width:750px;">
+							<table class="table table-hover" style="min-width:750px;">
+								<tbody id="search_list">
+								</tbody>
+							</table>
+					    </div>
+				    </div>
+			 	</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		function submitModify(id){
+			if(id == 'add'){
+				$("#title").text('添加资格证');
+				$("input[name=cid]").val('');
+				$("input[name=cert_name]").val('');
+			}else{
+				$("#title").text('编辑资格证');
+				$.post("{php echo $this->createWebUrl('setting',array('c'=>'module','a'=>'manage-account','op'=>'certificate','version_id'=>0))}",{
+					cid: id,
+					msg: 'select'
+				},function(data){
+					if(data.code == 200){
+						$("input[name=cid]").val(data.content.cid);
+						$("input[name=cert_name]").val(data.content.cert_name);return false;
+					}
+				},'json');
+			}
+			$('#module-info').modal('show');
+		}
+
+		function sureSubmit(){
+			var cid = $("input[name=cid]").val();
+			var cert_name = $("input[name=cert_name]").val();
+
+			if(cert_name == ''){
+				util.message('请填写资格证名称');
+				return false;
+			}
+
+			$.post("{php echo $this->createWebUrl('setting',array('c'=>'module','a'=>'manage-account','op'=>'certificate','version_id'=>0))}",{
+				cid: cid,
+				msg: 'update',
+				cert_name, cert_name
+			},function(data){
+				if(data.code == 200){
+					util.message(data.msg,setTimeout(function(){window.location.reload();},1000));
+		 			return false;
+				}
+				if(data.code == 400){
+					util.message(data.msg);
+		 			return false;
+				}
+			},'json');
+		}
+	</script>
+{/if}
+<!-- 资格证管理 end -->
+{if $operation == "sensitive"}
+	<div class="main" style="padding-top:5px;">
+		<form  action="" method="post"   class="form-horizontal form" id="setting-form" onsubmit="return validate();" >
+			<input type="hidden" name="ops" value="submit">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					敏感词编辑
+				</div>
+				<div class="panel-body">
+					<span style="color:red">说明：单词必须以中文逗号分割。敏感词分割且敏感词之间不能出现英文逗号!</span>
+				</div>
+				<div class="panel-body">
+					<div class="form-group">
+						<label for="inputEmail3" class="col-sm-2 control-label"><span style="color:red">*</span>敏感单词</label>
+						<div class="col-sm-7">
+							<textarea name="sens" style="width:600px;height:600px;">{$contents}</textarea>
+						</div>
+					</div>
+
+					<div class="form-group col-sm-12">
+						<input name="do-submit" type="submit" value="提交" class="btn btn-primary col-lg-1" />
+						<input type="hidden" name="token" value="{$_W['token']}" />
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	<script>
+		function validate() {
+			if($("textarea[name='sens']").val() == ""){
+	            util.message('单词不能为空！');
+	            return false;
+			}
+			if($("textarea[name='sens']").val().indexOf(",") != -1){
+	            util.message('对不起，单词必须以中文逗号分割开,且单词中不能存在英文逗号!');
+	            return false;
+			}
+
+
+
+
+	    }
+	</script>
+{/if}
+{if $operation == "chat_position_lst"}
+    <div class="panel-heading">
+		<div class="row-fluid">
+			<div class="span8 control-group">
+				<a class="btn btn-primary add_manager" href="{php echo $this->createWebUrl('setting', array('c'=>'module','a'=>'manage-account','op' => 'chat_position', 'position'=>'1', 'version_id'=>0))}">
+				<i class="fa fa-plus"></i>职务设置</a>
+			</div>
+		</div>
+	</div>
+	<div class="main">
+		<div class="panel panel-default">
+		<div class="panel-heading">
+			共有{$total}条数据
+		</div>
+			<form method="post" class="form-horizontal" id="formfans">
+				<div style="position:relative">
+					<div class="panel-body table-responsive">
+						<table class="table we7-table table-hover vertical-middle" style="position:relative">
+							<thead class="navbar-inner">
+							<tr>
+								<th>职务类型</th>
+								<th>职务名称</th>
+								<th>操作</th>
+							</tr>
+							</thead>
+							<tbody>
+							{loop $records $i $v}
+                                <td>{if $v['type']==1}职务{elseif $v['type']==2}职称{/if}</td>
+								<td style="white-space:nowrap;">{$v['position_name']}</span></td>
+								<td style="text-align:left;white-space:nowrap;">
+									<a href="{php echo $this->createWebUrl('setting', array('op' => 'chat_position', 'did' => $v['id'],'a'=>$_GPC['a'],'c'=>$_GPC['c']))}" class="btn btn-default btn-sm manage"><i class="fa fa-edit"></i>修改</a>
+									<a onclick="return confirm('你确定要删除该数据吗？');" href="{php echo $this->createWebUrl('setting', array('op' => 'delp', 'did'=>$v['id'] , 'a'=>$_GPC['a'],'c'=>$_GPC['c']))}" class="btn btn-default btn-sm manage"><i class="fa fa-del"></i>删除</a>
+								</td>
+							</tr>
+							{/loop}
+
+							</tbody>
+						</table>
+						{$pager}
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+{/if}
+{if $operation == "update_version_number"}
+<form action="" method="post" class="form-horizontal form" id="setting-form">
+<div class="main">
+	<div class="form-horizontal form">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				版本号
+			</div>
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">当前版本号</label>
+					<div class="col-sm-5 col-xs-12">
+						<input type="text" class="form-control" name="version_number" value="{$share_data['version_number']}" readonly="readonly" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">APP测试失效时间</label>
+					<div class="col-sm-5 col-xs-6">
+						<!-- <input type="text" class="form-control" name="appcssx_time" value="{$share_data['appcssx_time']}"/> -->
+						{php echo tpl_form_field_date('appcssx_time', $value = $share_data['appcssx_time'], $withtime = true);}
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">APP测试入口IP</label>
+					<div class="col-sm-5 col-xs-6">
+						<input type="text" class="form-control" name="appcsrk_ip" value="{$share_data['appcsrk_ip']}"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">APP测试地址</label>
+					<div class="col-sm-5 col-xs-6">
+						<input type="text" class="form-control" name="appce_dz" value="{$share_data['appce_dz']}"/>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">登录会员账号</label>
+					<div class="col-sm-5 col-xs-6">
+						<div class="input-group">
+							<span class="input-group-addon">目前ID</span>
+							<input type="number" class="form-control" name="myuid" value="{$update_user['myuid']}">
+							<span class="input-group-addon">目标ID</span>
+							<input type="number" class="form-control" name="useruid" value="{$update_user['useruid']}">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group col-sm-12">
+		<input name="do-submit" onclick="gxbb()" type="submit" value="提交" class="btn btn-primary col-lg-1" />
+		<input type="hidden" name="token" value="{$_W['token']}" />
+	</div>
+</div>
+</form>
+{/if}
+<script>
+	function save_fraction(eid){
+		var fraction_sta = $('.sta_'+eid).val(); //分数开始值
+		var fraction_end = $('.end_'+eid).val(); //分数结束值
+		//分数结束值
+		$.post(location.href, { eid: eid,fraction_sta: fraction_sta,fraction_end: fraction_end },
+		function(data){
+
+		},"json");
+	  	return false;
+    }
+
+
+</script>
+
+{template 'common/footer'}

@@ -1,0 +1,112 @@
+{template 'common/header'}
+<style type="text/css">
+.table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+  white-space:normal;
+}
+</style>
+<ul class="nav nav-tabs">
+	<li {if $op == 'totaldata' || $op == ''}class="active"{/if}><a href="{php echo $this->createWebUrl('ask_summary',array('op'=>'totaldata','version_id'=>0))}">数据统计</a></li>
+	<li {if $op == 'display'}class="active"{/if}><a href="{php echo $this->createWebUrl('ask_summary',array('op'=>'display','version_id'=>0))}">收益统计</a></li>
+	<li><a href="{php echo $this->createWebUrl('ask_summary_detail',array('version_id'=>0))}">收益日志</a></li>
+</ul>
+{if $op == 'display'}
+<div id="action_list" class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-xs-12 col-sm-11" style="width:99%;"> 
+			<form action="{php echo $this->createWebUrl('ask_payment',array('issucc' => $_GPC['status']))}" method="get" class="form-horizontal" role="form" id="form1">
+			    <div class="input-group">		
+					<input type="hidden" name="version_id" value="0">
+					<input type="hidden" name="c" value="site">
+					<input type="hidden" name="a" value="entry">
+					<input type="hidden" name="do" value="ask_summary_detail">
+					<input type="hidden" name="m" value="dg_ask">
+					<input type="hidden" name="op" id="ops" value="display">
+					<span class="input-group-addon">类目</span>
+					<select name="type" class="form-control input-medium">
+						<option value="9" <?php if($_GPC['type'] == 9){echo 'selected';} ?> >全部</option>
+                        <option value="1" <?php if($_GPC['type'] == 1){echo 'selected';} ?> >悬赏收益</option>
+                        <option value="2" <?php if($_GPC['type'] == 2){echo 'selected';} ?> >文章收益</option>
+                        <option value="3" <?php if($_GPC['type'] == 3){echo 'selected';} ?> >问答收益</option>
+                        <option value="4" <?php if($_GPC['type'] == 4){echo 'selected';} ?> >赞赏收益</option>
+                        <option value="5" <?php if($_GPC['type'] == 5){echo 'selected';} ?> >服务收益</option>
+                    </select>
+                    <span class="input-group-addon">收益角色</span>
+					<select name="role" class="form-control input-medium">
+                        <option value="9" <?php if($_GPC['role'] == 9){echo 'selected';} ?> >全部</option>
+                        <option value="1" <?php if($_GPC['role'] == 1){echo 'selected';} ?> >税媒平台</option>
+                        <option value="2" <?php if($_GPC['role'] == 2){echo 'selected';} ?> >税媒用户</option>
+                        <option value="3" <?php if($_GPC['role'] == 3){echo 'selected';} ?> >普通专家</option>
+                        <option value="4" <?php if($_GPC['role'] == 4){echo 'selected';} ?> >平台专家</option>
+                    </select>
+					<span class="input-group-addon">时间范围</span>
+					{php echo tpl_form_field_daterange('time', array('start'=>date('Y-m-d', $starttime),'end'=>date('Y-m-d', $endtime)));}
+					<script type="text/javascript">
+                    $(function(){
+                        $("#action_list .input-group .daterange-date").addClass("form-control");
+                    })
+                    </script>
+                    <span class="input-group-addon">关键词</span>
+					<input name="keyword" type="text" value="{$_GPC['keyword']}" placeholder="请输入收益人名称" class="form-control ac_name">
+	                <span class="input-group-btn">
+		            	<input onclick="tj()" type="button" class="btn" value="提交筛选" style="border:1px solid #ccc;"/>
+                    	<input onclick="dc()" type="button" class="btn" value="导出" style="border:1px solid #ccc;background-color: #fff;"/>
+		            </span>
+			    </div>
+			</form>
+		</div>
+	</div>
+</div>
+<div class="panel panel-default">
+	<div class="panel-heading">	
+		<div class="row-fluid">
+			<div class="span8 control-group">
+				<span>共计 {$total} 条数据，总收益 {$totalmoney} 元</span>
+			</div>
+		</div>
+	</div>
+    <div class="table-responsive panel-body">
+        <table class="table table-hover">
+			<thead class="navbar-inner">
+				<tr>
+					<th style="width:50px;">编号</th>
+					<th>收益类目</th>
+					<th>收益角色</th>
+					<th>收益人名称</th>
+					<th>总金额</th>
+					<th>收益金额</th>
+					<th>收益比</th>
+					<th>添加时间</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				{loop $records $row}
+				<tr>
+					<td>{$row['prid']}</td>
+					<td>{if $row['type']==1}悬赏收益{elseif $row['type']==2}文章收益{elseif $row['type']==3}问答收益{elseif $row['type']==4}赞赏收益{elseif $row['type']==5}服务收益{/if}</td>
+					<td>{if $row['role']==1}税媒平台{elseif $row['role']==2}税媒会员{elseif $row['role']==3}普通专家{elseif $row['role']==4}平台专家{/if}</td>
+					<td>{if $row['role']==1}税媒平台{else}{$row['real_name']}{/if}</td>
+					<td>{$row['total_price']}</td>
+					<td>{$row['get_price']}</td>
+					<td>{if $row['type'] != 9}{php echo @round($row['get_price'] / $row['total_price'],2)*100}%{else}分期付{/if}</td>
+					<td><?php echo date('Y-m-d H:i:s',$row['create_time'])?></td>
+					<td><a class="btn btn-default btn-sm manage"  href="{$row['go_url']}">查看</a></td>
+				</tr>
+				{/loop}
+			</tbody>
+		</table>
+    </div>
+</div>
+{$pager}
+<script type="text/javascript">
+function tj(){
+    $('#ops').val('display');
+    $('#form1').submit();    
+}
+function dc(){
+    $('#ops').val('download');
+    $('#form1').submit();    
+}
+</script>
+{/if}
+{template 'common/footer'}

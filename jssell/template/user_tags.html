@@ -1,0 +1,103 @@
+{template 'common/header'}
+
+<ul class="nav nav-tabs">
+	<li {if $_GPC['op'] =='' || $_GPC['op'] =='display' && $_GPC['do'] == 'user_tags' }class="active"{/if}><a href="{php echo $this->createWebUrl('user_tags', array('rid' => $rid,'version_id'=>0))}">标签管理</a></li>
+	{if empty($_GPC['id'])}
+	<li {if $_GPC['op'] == 'post'}class="active"{/if}><a href="{php echo $this->createWebUrl('user_tags', array('rid' => $rid, 'op' => 'post' ,'version_id'=>0))}">添加标签</a></li>
+	{else}
+	<li {if $_GPC['op'] == 'post'}class="active"{/if}><a href="{php echo $this->createWebUrl('user_tags', array('rid' => $rid, 'op' => 'post' ,'version_id'=>0))}">编辑标签</a></li>
+	{/if}
+
+</ul>
+{if $operation == 'post'}
+<div class="main">
+	<form action="" method="post" class="form-horizontal form"	enctype="multipart/form-data">
+
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				标签设置
+			</div>
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">排序</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="displayorder" class="form-control" value="{$banner['displayorder']}" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">图标</label>
+					<div class="col-sm-9 col-xs-12">
+						{php echo tpl_form_field_image('image', $banner['image'])}
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span style="color:red">*</span>标签</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="tag_name" class="form-control" value="{$banner['tag_name']}" />
+					</div>
+				</div>
+				 <div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">是否显示</label>
+					<div class="col-sm-9 col-xs-12">
+						<label class='radio-inline'>
+							<input type='radio' name='enabled' value=1' {if $banner['enabled']==1}checked{/if} /> 是
+						</label>
+						<label class='radio-inline'>
+							<input type='radio' name='enabled' value=0' {if $banner['enabled']==0}checked{/if} /> 否
+						</label>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="form-group col-sm-12">
+			<input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+			<input type="hidden" name="token" value="{$_W['token']}" />
+		</div>
+	</form>
+</div>
+
+{elseif $operation == 'display'}
+<div class="main">
+
+		<div class="panel panel-default">
+
+			<form method="post" class="form-horizontal" id="formfans">
+			<input type="hidden" name="op" value="del" />
+			<div style="position:relative">
+				<div class="panel-body table-responsive">
+					<table class="table table-hover" style="position:relative">
+					<thead class="navbar-inner">
+						<tr>
+							<!-- <th style="width:70px;">标签id</th> -->
+							<th>显示顺序</th>
+							<th>标签</th>
+							<th>图标</th>
+							<th>状态</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						{loop $list $banner}
+							<tr>
+								<!-- <td>{$banner['id']}</td> -->
+								<td>{$banner['displayorder']}</td>
+								<td>{$banner['tag_name']}</td>
+								<td><img src="{media $banner['image']}" style="width:30px;"></td>
+								<td>{if $banner['enabled']}显示{else}隐藏{/if}</td>
+								<td style="text-align:left;">
+									<a href="{php echo $this->createWebUrl('user_tags', array('op' => 'post', 'id' => $banner['id'], 'rid' => $rid,'version_id'=>0))}" data-toggle="tooltip" data-placement="top"  class="btn btn-default btn-sm manage"><i class="fa fa-edit"></i></a>
+									<a onclick="return confirm('确认要删除吗？删除将不能恢复！');" href="{php echo $this->createWebUrl('user_tags', array('op' => 'delete', 'id' => $banner['id'],'rid' => $rid,'version_id'=>0))}" data-toggle="tooltip" data-placement="top"  class="btn btn-default btn-sm manage"><i class="fa fa-trash-o"></i></a>
+								</td>
+							</tr>
+						{/loop}
+
+					</tbody>
+					</table>
+				</div>
+			</div>
+			</form>
+			{$pager}
+		</div>
+    </div>
+{/if}
+{template 'common/footer'}

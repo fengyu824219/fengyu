@@ -1,0 +1,333 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li {if $_GPC['op'] =='' || $_GPC['op'] == 'display'}class="active"{/if}><a
+        href="{php echo $this->createWebUrl('helper',array('op'=>'display','eid'=>$_GPC['eid'],'version_id'=>0))}">帮助中心</a></li>
+    <li {if $_GPC['op'] == 'help'}class="active"{/if}><a
+        href="{php echo $this->createWebUrl('helper', array('op' => 'help','eid'=>$_GPC['eid'],'version_id'=>0))}">{if $_GPC['hid'] ==''}添加问题{else}修改问题{/if}</a></li>
+    <li {if  $_GPC['op'] == 'userfeedback'}class="active"{/if}><a
+        href="{php echo $this->createWebUrl('helper',array('op'=>'userfeedback','eid'=>$_GPC['eid'],'version_id'=>0))}">用户反馈</a></li>
+    {if  $_GPC['op'] == 'answer'}
+        <li {if  $_GPC['op'] == 'answer'}class="active"{/if}><a
+            href="{php echo $this->createWebUrl('helper',array('op'=>'answer','eid'=>$_GPC['eid'],'version_id'=>0))}">回答</a></li>
+    {/if}
+</ul>
+<!-- 活动列表 start -->
+{if $operation == 'display'}
+<div id="action_list" class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-xs-12 col-sm-11" style="width:99%;">
+            <form action="" method="get" class="form-horizontal" role="form" id="form1">
+                <input type="hidden" name="op" value="display">
+                <input type="hidden" name="c" value="{$_GPC['c']}">
+                <input type="hidden" name="a" value="{$_GPC['a']}">
+                <input type="hidden" name="eid" value="{$_GPC['eid']}">
+                <input type="hidden" name="version_id" value="0">
+                <div class="input-group">
+                    <span class="input-group-addon">状态</span>
+                    <select name="status" class="form-control input-medium">
+                      <option value="7" <?php if($_GPC['status'] == 7){echo 'selected';} ?> >全部</option>
+                      <option value="1" <?php if($_GPC['status'] == 1){echo 'selected';} ?> >已上架</option>
+                      <option value="2" <?php if($_GPC['status'] == 2){echo 'selected';} ?> >已下架</option>
+                    </select>
+                    <span class="input-group-addon">问题</span>
+                    <input type="text" name="ask" class="form-control ac_name" value="{$_GPC['ask']}" placeholder="输入问题查询"/>
+                    <span class="input-group-btn">
+                    <input type="submit" class="btn" value="提交筛选" style="border:1px solid #ccc;"/>
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="row-fluid">
+            <div class="span8 control-group">
+                共计 {$total['num']} 条数据
+            </div>
+        </div>
+    </div>
+    <div class="panel-body table-responsive">
+        <table class="table table-hover">
+            <thead class="navbar-inner">
+                <tr>
+                    <th>类型</th>
+                    <th width="30%">问题</th>
+                    <th>状态</th>
+                    <th>添加时间</th>
+                    <th>排序</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {loop $adv $i $v}
+                    <tr>
+                        <td style="overflow: hidden;white-space:nowrap;"><span >
+                        {if $v['type'] == '1'}<span>帮助与反馈</span>
+                        {elseif $v['type'] == '8'}<span>税媒大使政策</span>
+                        {elseif $v['type'] == '9'}<span>城市合伙人政策</span>
+                        {elseif $v['type'] == '2'}<span>关于税媒声明</span>
+                        {elseif $v['type'] == '3'}<span>税媒用户协议</span>
+                        {elseif $v['type'] == '4'}<span>税媒用户隐私协议</span>
+                        {elseif $v['type'] == '5'}<span>税媒知识产权声明</span>
+                        {elseif $v['type'] == '6'}<span>税媒网站免责声明</span>
+                        {/if}
+                        </span></td>
+                        <td><span>{$v['ask']}</span></td>
+                        <td style="white-space:nowrap;"><span >
+                        {if $v['status'] == '1'}<span style="color:green;">已上架</span>
+                        {elseif $v['status'] == '2'}<span style="color:red;">已下架</span>
+                        {/if}
+                        </span></td>
+                        <td style="white-space:nowrap;"><span><?php echo date('Y-m-d H:i',$v['create_time'])?></span></td>
+                        <td style="overflow: hidden;white-space:nowrap;"><span >{$v['sort']}</span></td>
+                        <td style="text-align:left;white-space:nowrap;">
+                            <a href="{php echo $this->createWebUrl('helper', array('op' => 'help', 'hid' => $v['hid'],'eid'=>$_GPC['eid'],'version_id'=>0))}" class="btn btn-default btn-sm manage"><i class="fa fa-edit"></i>修改</a>
+                            {if $v['status'] == 2}
+                                <a href="{php echo $this->createWebUrl('helper', array('op' => 'status', 'hid'=>$v['hid'] , 'status'=>1,'eid'=>$_GPC['eid'],'version_id'=>0))}" class="btn btn-default btn-sm manage"><i class="fa fa-del"></i>上架</a>
+                            {/if}
+                            {if $v['status'] == 1}
+                                <a href="{php echo $this->createWebUrl('helper', array('op' => 'status', 'hid'=>$v['hid'] , 'status'=>2,'eid'=>$_GPC['eid'],'version_id'=>0))}"  class="btn btn-default btn-sm manage"><i class="fa fa-del"></i>下架</a>
+                            {/if}
+                            <a onclick="return confirm('你确定要删除该数据吗？');" href="{php echo $this->createWebUrl('helper', array('op' => 'del', 'hid'=>$v['hid'],'eid'=>$_GPC['eid'], 'version_id'=>0, 'is_del'=>1))}" class="btn btn-default btn-sm manage"><i class="fa fa-del"></i>删除</a>
+                        </td>
+                    </tr>
+                {/loop}
+            </tbody>
+        </table>
+    </div>
+</div>
+{$pager}
+{/if}
+{if $operation == 'userfeedback'}
+<div id="action_list" class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-xs-12 col-sm-11" style="width:99%;">
+            <form action="" method="get" class="form-horizontal" role="form" id="form1">
+                <input type="hidden" name="op" value="userfeedback">
+                <input type="hidden" name="c" value="{$_GPC['c']}">
+                <input type="hidden" name="a" value="{$_GPC['a']}">
+                <input type="hidden" name="eid" value="{$_GPC['eid']}">
+                <input type="hidden" name="version_id" value="0">
+                <div class="input-group">
+                    <select name="status_select" class="form-control input-medium">
+                        <option value="1" <?php if($status_select == 1){echo 'selected';} ?> >不按时间</option>
+                        <option value="create_time" <?php if($_GPC['status_select'] == 'create_time'){echo 'selected';} ?> >反馈日期</option>
+                    </select>
+                    <span class="input-group-addon" style="padding: 0; width: 0;border:none;">
+                    </span>
+                    {php echo tpl_form_field_daterange('time',array('start'=>$_GPC['time']['start'],'end'=>$_GPC['time']['end']));}
+                    <script type="text/javascript">
+                        $(function(){
+                            $("#action_list .input-group .daterange-date").addClass("form-control");
+                        })
+                    </script>
+                    <span class="input-group-addon">联系方式</span>
+                    <input type="text" name="title" class="form-control ac_name" placeholder="输入用户名丶联系方式" value="{$_GPC['title']}"/>
+                    <span class="input-group-btn">
+                    <input type="submit" class="btn" value="提交筛选" style="border:1px solid #ccc;"/>
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="row-fluid">
+            <div class="span8 control-group">
+                共计 {$total['num']} 条数据
+            </div>
+        </div>
+    </div>
+    <div class="panel-body table-responsive">
+        <table class="table table-hover">
+            <thead class="navbar-inner">
+                <tr>
+                    <th>用户名</th>
+                    <th width="8%">真实姓名</th>
+                    <th>联系方式</th>
+                    <th width="20%">意见</th>
+                    <th width="20%">回答</th>
+                    <th>图片</th>
+                    <th>反馈日期</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {loop $adv $i $v}
+                    <tr>
+                        <td>{$v['nickname']}</span></td>
+                        <td>{$v['real_name']}</span></td>
+                        <td><span>{$v['contact']}</span></td>
+                        <td><span>{$v['opinion']}</span></td>
+                        <td><span>{$v['answer']}</span></td>
+                        <td><span><img style="height:60px;width:60px;" src="{php echo tomedia($v['photo'])}"></span></td>
+                        <td><span><?php echo date('Y-m-d H:i:s',$v['create_time'])?></span></td>
+                        <td><span>
+                            <a href="{php echo $this->createWebUrl('helper', array('op' => 'answer','suid'=>$v['suid'],'version_id'=>0))}"><label style="cursor:pointer;"  class="btn btn-default btn-sm manage"><i class="fa fa-edit"></i>回答</label></a>
+                        </span></td>
+                    </tr>
+                {/loop}
+            </tbody>
+        </table>
+    </div>
+</div>
+{/if}
+{if $operation == 'answer'}
+<div class="main">
+<form class="form-horizontal" role="form" action="" method="post" onsubmit="return checkform();" id="frm" name="myForm">
+    <div class="panel panel-info">
+        <div class="panel-heading">回答</div>
+        <div class="panel-body">
+            <div class="form-group">
+                <label for="inputEmail3" class="col-sm-2 control-label"><span style="color:red">*</span>回答</label>
+                <div class="col-sm-7">
+                  <textarea type="text" class="form-control" name="user_answer" style="height:150px;" placeholder="请填写回答内容" {if $user_suggest['answer']}readonly="readonly"{/if} ></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{if $user_suggest['answer'] == ''}
+<div class="form-group">
+    <div class="col-sm-12 col-xs-12">
+        <input type="submit" name="submit" class="btn btn-primary col-lg-1 submit" value="提交"/>
+        <input type="hidden" name="token" value="{$_W['token']}" />
+    </div>
+</div>
+{/if}
+</form>
+{/if}
+<!-- 活动列表 end -->
+<!-- 添加/编辑活动 start -->
+{if $operation == 'help'}
+<span style="color:red;">类型提示：选择【帮助与反馈】不填平台介绍；选择【关于税媒声明】【税媒用户协议】【税媒用户隐私协议】【税媒知识产权声明】【税媒网站免费声明】不填问题和回答。</span>
+
+
+<!-- {if $v['type'] == '1'}<span>帮助与反馈</span>
+{elseif $v['type'] == '2'}<span>关于税媒声明</span>
+{elseif $v['type'] == '3'}<span>税媒用户协议</span>
+{elseif $v['type'] == '4'}<span>税媒用户隐私协议</span>
+{elseif $v['type'] == '5'}<span>税媒知识产权声明</span>
+{elseif $v['type'] == '6'}<span>税媒网站免费声明</span>
+{/if}
+ -->
+
+<div class="main">
+<form class="form-horizontal" role="form" action="" method="post" onsubmit="return checkform();" id="frm" name="myForm">
+	<div class="panel panel-info">
+		<div class="panel-heading">{if $_GPC['hid'] ==''}添加问题{else}修改问题{/if}</div>
+		<div class="panel-body">
+			<ul class="nav nav-tabs" role="tablist">
+			    <li role="presentation" class="active"><a href="#tab_helpcontent" aria-controls="tab_helpcontent" role="tab" data-toggle="tab">帮助说明</a></li>
+			  </ul>
+			  <!-- Tab panes -->
+			  <div class="tab-content">
+			  	<!-- 活动基本信息start -->
+			    <div role="tabpanel" class="tab-pane active" id="tab_helpcontent">{template 'helpcontent'}</div>
+			    <!-- 活动基本信息end -->
+			  </div>
+
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-12 col-xs-12">
+			<input type="submit" name="submit" class="btn btn-primary col-lg-1 submit" value="提交"/>
+			<input type="hidden" name="token" value="{$_W['token']}" />
+		</div>
+	</div>
+</form>
+</div>
+{/if}
+<script type="text/javascript">
+var answer = "{$user_suggest['answer']}";
+var v_answer = "{$v['answer']}";
+
+    window.onload =function ()
+    {
+
+        if(answer){
+           var cont = answer.replace(/<br\s*\/?>/ig,"\n");
+           $('textarea[name=user_answer]').val(cont);
+        }
+        if(v_answer){
+           var v_cont = v_answer.replace(/<br\s*\/?>/ig,"\n");
+           $('textarea[name=answer]').val(v_cont);
+        }
+    }
+
+    $("#answer").blur(function() {
+       var sele = $('#testSelect option:selected') .val();
+        var ask = $('input[name=ask]').val();
+        var url = "{php echo $this->createWebUrl('helper', array('op' => 'ask','eid'=>$_GPC['eid'],'version_id'=>0))}"
+
+        $.ajax({
+            url: url,
+            data: {ask: ask,sele:sele},
+            success: function (res) {
+                if(res == 2){
+                        util.message("该问题已经添加过,请修改!", "", "error");
+                        return false;
+                }
+            }
+        });
+    });
+
+
+    $(".submit").click(function() {
+
+        var selectvalue=document.myForm.type.value;
+
+        var answer = $('textarea[name=answer]').val();
+
+        if(selectvalue == 2 || selectvalue == 3 || selectvalue == 4 || selectvalue == 5 || selectvalue == 6 || selectvalue == 9 || selectvalue == 8) {
+            if ($.trim($('.form-group .content textarea')).val() == "") {
+                util.message("没有填写平台简介", "", "error");
+                return false;
+            }
+        }else {
+
+            if ($.trim($('input[name="ask"]').val()) == "") {
+                util.message("请填写问题", "", "error");
+                return false;
+            }
+            if ($.trim($('.form-group .content textarea')).val() == "") {
+                util.message("没有填写平台简介", "", "error");
+                return false;
+            }
+
+        }
+    });
+    function showSelectValue(){
+        var textobjs=document.getElementsByName('ask');
+        var textobjr=document.getElementById('sor');
+        var textobj=document.getElementById('ses');
+        var textobj1=document.getElementById('ses1');
+        var textobj2=document.getElementById('ses2');
+
+        var selectvalue=document.myForm.type.value;
+        if(selectvalue==1){
+          //  for(i=0;i<textobjs.length;i++){
+                textobj.style.display="block";
+                textobj1.style.display="block";
+                textobjr.style.display="block";
+
+                if(textobj2.style.display="block") {
+                    textobj2.style.display = "none";
+               // }
+
+            }
+        }else{
+            for(i=0;i<textobjs.length;i++){
+                textobjr.style.display="none";
+                textobj.style.display="none";
+                textobj1.style.display="none";
+                textobj2.style.display="block";
+            }
+        }
+
+    }
+</script>
+
+{template 'common/footer'}

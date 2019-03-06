@@ -1,0 +1,994 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+	<li {if $_GPC['op'] =='' || $_GPC['op'] == 'display'}class="active"{/if}>
+		<a href="{php echo $this->createWebUrl('ask_payment',array('op'=>'display','eid'=>$_GPC['eid'],'version_id'=>0))}">提现列表</a>
+	</li>
+	{if $_GPC['op'] == 'handle'}
+		<li {if $_GPC['op'] =='' || $_GPC['op'] == 'handle'}class="active"{/if}>
+			<a href="{php echo $this->createWebUrl('ask_payment',array('op'=>'handle','eid'=>$_GPC['eid'],'version_id'=>0))}">提现处理</a>
+		</li>
+	{/if}
+
+	<li {if $_GPC['op'] == 'agent_put_forward_list'}class="active"{/if}>
+		<a href="{php echo $this->createWebUrl('ask_payment',array('op'=>'agent_put_forward_list','eid'=>$_GPC['eid'],'version_id'=>0))}">代理提现列表</a>
+	</li>
+	{if $_GPC['op'] == 'set_apf_status'}
+        <li {if $_GPC['op'] == 'set_apf_status'}class="active"{/if}>
+        	<a href="javascript:;">编辑代理提现</a>
+        </li>
+    {/if}
+
+	<li {if $_GPC['op'] == 'recharge_manage'}class="active"{/if}>
+		<a href="{php echo $this->createWebUrl('ask_payment', array('op' => 'recharge_manage','version_id'=>0))}">充值记录</a>
+	</li>
+	{if $_GPC['op'] == 'check_recharge'}
+		<li {if $_GPC['op'] =='' || $_GPC['op'] == 'check_recharge'}class="active"{/if}>
+			<a href="{php echo $this->createWebUrl('ask_payment',array('op'=>'check_recharge','eid'=>$_GPC['eid'],'version_id'=>0))}">转账处理</a>
+		</li>
+	{/if}
+	<li {if $_GPC['op'] == 'zs_manage'}class="active"{/if}>
+		<a href="{php echo $this->createWebUrl('ask_payment', array('op' => 'zs_manage','version_id'=>0))}">赞赏记录</a>
+	</li>
+	<li {if $_GPC['op'] == 'art_ask'}class="active"{/if}>
+		<a href="{php echo $this->createWebUrl('ask_payment', array('op' => 'art_ask','version_id'=>0))}">文章/问答付费记录</a>
+	</li>
+	<li {if $_GPC['op'] == 'ask_group'}class="active"{/if}>
+		<a href="{php echo $this->createWebUrl('ask_payment', array('op' => 'ask_group','version_id'=>0))}">专家团结算</a>
+	</li>
+</ul>
+<!-- 提现列表 start -->
+{if $operation == "display"}
+<div class="main">
+	<div id="action_list" class="panel panel-default">
+        <div class="panel-body">
+            <div class="col-xs-12 col-sm-11" style="width:99%;">
+			<form action="" method="get" class="form-horizontal" role="form">
+				<div class="input-group">
+					<input type="hidden" name="c" value="site">
+					<input type="hidden" name="version_id" value="0">
+					<input type="hidden" name="a" value="entry">
+					<input type="hidden" name="do" value="ask_payment">
+					<input type="hidden" name="m" value="dg_ask">
+					<input type="hidden" name="version_id" value="0">
+					<select name="status_select" class="form-control input-medium">
+						<option value="" selected="selected">不按时间</option>
+						<option value="1" {if $_GPC['status_select'] == 1}selected="selected"{/if}>申请时间</option>
+					</select>
+					<span class="input-group-addon" style="padding: 0; width: 0;border:none;"></span>
+					{php echo tpl_form_field_daterange('time',array('start'=>$_GPC['time']['start'],'end'=>$_GPC['time']['end']));}
+					<script type="text/javascript">
+	                    $(function(){
+	                        $("#action_list .input-group .daterange-date").addClass("form-control");
+	                    })
+                    </script>
+					<span class="input-group-addon"></span>
+						<select name="status" class="form-control input-medium">
+							<option value="" selected="selected">处理状态</option>
+							<option value="1"{if $_GPC['status'] == 1}selected="selected"{/if}>处理中</option>
+							<option value="2"{if $_GPC['status'] == 2}selected="selected"{/if}>已打款</option>
+							<option value="3"{if $_GPC['status'] == 3}selected="selected"{/if}>已拒绝</option>
+						</select>
+					<span class="input-group-btn">
+	                	<button class="btn btn-default"><i class="fa fa-search"></i>搜索</button>
+	                </span>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<div class="row-fluid">
+			<div class="span8 control-group">
+				<span>共计 {$total} 条数据  </span>&nbsp;
+				申请金额：<span style="color:red;">{$price}</span>元
+			</div>
+		</div>
+	</div>
+ 	<div class="table-responsive panel-body">
+        <table class="table table-hover">
+            <thead class="navbar-inner">
+            <tr>
+                <th>姓名</th>
+                <th style="width:15%">单号</th>
+                <th style="text-align: center;">提现方式</th>
+                <th style="text-align: right;">申请金额</th>
+                <th style="text-align: right;">打款金额</th>
+                <th style="text-align: center;">申请时间</th>
+                <th style="text-align: right;">当前状态</th>
+                <th width=25%>备注</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody id="level-list">
+            {loop $ask_summary_last $i $row}
+            <tr>
+            	<td><div class="type-parent">{$row['real_name']}</div></td>
+            	<td><div class="type-parent">{$row['order_sn']}</div></td>
+                <td style="text-align: center;"><div class="type-parent">{if $row['tx_type']=="微信钱包"}<i class="fa fa-wechat"></i>{else}{$row['tx_type']}{/if}</div></td>
+            	<td style="text-align: right;"><div class="type-parent">{$row['pay_amount']}</div></td>
+                <td style="text-align: right;"><div class="type-parent">{$row['last_amount']}</div></td>
+                <td style="text-align: center;"><div class="type-parent">{php echo date('Y/m/d H:i', $row['create_time']);}&nbsp;&nbsp;</div></td>
+                <td style="text-align: right;" id="row_status_{$row['id']}">
+                	<div class="type-parent">
+                	{if $row['status'] == 1}<span style="color:red;">等待处理</span>{elseif $row['status'] == 2}<span style="color:#449D44;">已打款</span>{elseif $row['status'] == 3}<span style="color:#aaa;">已拒绝</span>{/if}&nbsp;&nbsp;
+                	</div>
+            	</td>
+            	<td><div class="type-parent">{$row['remakes']}&nbsp;&nbsp;</div></td>
+                <td id="row_last_{$row['id']}">
+                    {if $row['status'] == 1 }
+                    	<a href="{php echo $this->createWebUrl('ask_payment',array('op'=>'handle','eid'=>$_GPC['eid'],'version_id'=>0,'id'=>$row['id'],'pay_amount'=>$row['pay_amount'],'uid'=>$row['uid']))}" class="btn btn-default btn-sm manage">处理</a>
+                    {/if}
+                    {if $row['status'] != 1 }
+                    	<a title="查看详情" href="{php echo $this->createWebUrl('ask_payment',array('op'=>'handle','eid'=>$_GPC['eid'],'version_id'=>0,'id'=>$row['id'],'pay_amount'=>$row['pay_amount'],'uid'=>$row['uid']))}" class="btn btn-default btn-sm manage"><i class="fa fa-file-text-o"></i></a>
+                    {/if}
+                </td>
+            </tr>
+            {/loop}
+            </tbody>
+        </table>
+    </div>
+</div>
+{$pager}
+{/if}
+<!-- 提现列表 end -->
+<!-- 代理提现列表 start -->
+{if $operation == 'agent_put_forward_list'}
+<div id="action_list" class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-xs-12 col-sm-11" style="width:99%;">
+            <form action="" method="get" class="form-horizontal" role="form" id="form1">
+                <input type="hidden" name="op" value="agent_put_forward_list">
+                <input type="hidden" name="c" value="{$_GPC['c']}">
+                <input type="hidden" name="a" value="{$_GPC['a']}">
+                <input type="hidden" name="eid" value="{$_GPC['eid']}">
+                <input type="hidden" name="version_id" value="0">
+                <div class="input-group">
+                    <select name="status_select" class="form-control input-medium">
+                        <option value="1" <?php if($status_select == 1){echo 'selected';} ?> >不按时间</option>
+                        <option value="create_time" <?php if($_GPC['status_select'] == 'create_time'){echo 'selected';} ?> >创建时间</option>
+                    </select>
+                    <span class="input-group-addon" style="padding: 0; width: 0;border:none;">
+                    </span>
+                    {php echo tpl_form_field_daterange('time',array('start'=>$_GPC['time']['start'],'end'=>$_GPC['time']['end']));}
+                    <script type="text/javascript">
+                        $(function(){
+                            $("#action_list .input-group .daterange-date").addClass("form-control");
+                        })
+                    </script>
+                    <span class="input-group-addon"></span>
+                    <select name="status" class="form-control"><!-- input-medium -->
+                        <option value="10" <?php if($_GPC['status'] == 10){echo 'selected';} ?> >提现状态</option>
+                        <option value="1" <?php if($_GPC['status'] == 1){echo 'selected';} ?> >申请中</option>
+                        <option value="2" <?php if($_GPC['status'] == 2){echo 'selected';} ?> >已打款</option>
+                        <option value="3" <?php if($_GPC['status'] == 3){echo 'selected';} ?> >拒绝打款</option>
+                    </select>
+                    <span class="input-group-addon">关键字</span>
+                    <input type="text" name="content" class="form-control ac_name" value="{$_GPC['content']}" placeholder="姓名 | 手机号 | 订单号"/>
+                    <span class="input-group-btn">
+                    <input type="submit" class="btn" value="提交筛选" style="border:1px solid #ccc;"/>
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="row-fluid">
+            <div class="span8 control-group">
+                共计 {$total['num']} 条数据
+            </div>
+        </div>
+    </div>
+    <div class="panel-body table-responsive">
+        <table class="table table-hover">
+            <thead class="navbar-inner">
+                <tr>
+                    <th>代理人</th>
+                    <th>手机号</th>
+                    <th>订单号</th>
+                    <th>提现金额</th>
+                    <th>创建时间</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {loop $ap_forward $i $v}
+                    <tr>
+                        <td>{$v['name']}</td>
+                        <td>{$v['mobile']}</td>
+                        <td>{$v['order_sn']}</td>
+                        <td>{$v['price']}</td>
+                        <td>{php echo date('Y-m-d H:i',$v['create_time'])}</td>
+                        <td>
+                            {if $v['status'] == 1}
+                                <span>申请中</span>
+                            {elseif $v['status'] == 2}
+                                <span style="color:green;">已打款</span>
+                            {elseif $v['status'] == 3}
+                                <span style="color:red;">拒绝打款</span>
+                            {/if}
+                        </td>
+                        <td>
+                            {if $v['status'] == 1}
+                                <a class="btn btn-default" href="#">同意</a>
+                                <a class="btn btn-default" href="{php echo $this->createWebUrl('ask_payment',array('op'=>'set_apf_status','apfid'=>$v['apfid'],'version_id'=>0,'eid'=>$_GPC['eid']))}">
+                                	拒绝
+                            	</a>
+                            {/if}
+                        </td>
+                    </tr>
+                {/loop}
+            </tbody>
+        </table>
+    </div>
+</div>
+{$pager}
+{/if}
+<!-- 代理提现列表 end -->
+<!-- 更改代理提现状态 start -->
+{if $operation == 'set_apf_status'}
+<div class="main">
+    <div class="form-horizontal form">
+        <div class="panel panel-default">
+            <div class="panel-heading">编辑代理提现</div>
+            <div class="panel-body">
+                <input type="hidden" name="c" value="{$_GPC['c']}">
+                <input type="hidden" name="a" value="{$_GPC['a']}">
+                <input type="hidden" name="eid" value="{$_GPC['eid']}">
+                <input type="hidden" name="version_id" value="0">
+                <div class="form-group">
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">备注</label>
+                    <div class="col-sm-5 col-xs-6 form-control-static">
+                        <textarea style="height:150px;" name="remarks" id='user_desc' class="form-control" cols="60"></textarea>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="form-group col-sm-12">
+        <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" onclick="zt({$apf_data['apfid']},{$apf_data['parent_id']},{$apf_data['price']},3)" />
+        <input type="hidden" name="token" value="{$_W['token']}" />
+    </div>
+</div>
+<script>
+function zt(apfid,parent_id,price,status){
+    var remarks = $("textarea[name=remarks]").val();
+    if(remarks == ''){
+        util.message('备注不能为空',"","error");
+        return false;
+    }
+
+    $.post("{php echo $this->createWebUrl('ask_payment',array('op'=>'set_apf_status'))}",{
+        apfid: apfid,
+        price: price,
+        status: status,
+        remarks: remarks,
+        parent_id: parent_id
+    },function(data){
+        if(data.code == 1){
+            util.message(data.msg,"{php echo $this->createWebUrl('ask_payment',array('op'=>'agent_put_forward_list','version_id'=>0,'eid'=>$_GPC['eid']))}", "success");
+            return false;
+        }
+        if(data.code == 2){
+            util.message(data.msg, "", "error");
+            return false;
+        }
+    },'json');
+}
+</script>
+{/if}
+<!-- 专家团结算 start -->
+{if $operation == "ask_group"}
+<div class="modal fade" id="module-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog" style="width:800px;">
+		<div class="modal-content">
+			<input type="hidden" name="m" value=""/>
+			<input type="hidden" name="is_top">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">
+					<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+				</button>
+				<h4>备注</h4>
+			</div>
+			<div class="modal-body" style="padding:50px 30px!important;">
+                   	<div class="row clearfix">
+                       	<div class="input-group" style="float:left;width:50px">
+                           	<input type="text" style="width:650px!important" autocomplete="off" class="form-control" name="content" placeholder="请输入备注">
+                           	<span class="input-group-btn">
+                           		<button type="button" class="btn btn-default" style="margin-left:25px;" onclick="to_examine()">
+                           			确定
+                       			</button>
+                           	</span>
+                       </div>
+                   	</div>
+                   	<div id="module-menus" style="padding-top:5px;">
+                    <div style="max-height:500px;overflow:auto;min-width:750px;">
+						<table class="table table-hover" style="min-width:750px;">
+							<tbody id="search_list">
+							</tbody>
+						</table>
+				    </div>
+			    </div>
+		 	</div>
+		</div>
+	</div>
+</div>
+
+<div class="main" style="padding-top:5px;">
+	<div id="action_list" class="panel panel-default">
+        <div class="panel-body">
+            <div class="col-xs-12 col-sm-11" style="width:99%;">
+			<form action="" role="form">
+				<div class="input-group">
+					<select name="status_select" class="form-control input-medium">
+						<option value="" selected="selected">不按时间</option>
+						<option value="1" {if $_GPC['status_select'] == 1}selected="selected"{/if}>申请时间</option>
+					</select>
+					<span class="input-group-addon" style="padding: 0; width: 0;border:none;"></span>
+					{php echo tpl_form_field_daterange('time',array('start'=>$_GPC['time']['start'],'end'=>$_GPC['time']['end']));}
+					<script type="text/javascript">
+	                    $(function(){
+	                        $("#action_list .input-group .daterange-date").addClass("form-control");
+	                    })
+                    </script>
+					<span class="input-group-addon"></span>
+					<input type="hidden" name="c" value="site">
+					<input type="hidden" name="version_id" value="0">
+					<input type="hidden" name="a" value="entry">
+					<input type="hidden" name="do" value="ask_payment">
+					<input type="hidden" name="m" value="dg_ask">
+					<input type="hidden" name="op" value="ask_group">
+						<select name="status" class="form-control input-medium">
+							<option value="" selected="selected">处理状态</option>
+							<option value="1"{if $_GPC['status'] == 1}selected="selected"{/if}>处理中</option>
+							<option value="2"{if $_GPC['status'] == 2}selected="selected"{/if}>已打款</option>
+							<option value="3"{if $_GPC['status'] == 3}selected="selected"{/if}>已拒绝</option>
+						</select>
+					<span class="input-group-btn">
+	                	<button class="btn btn-default"><i class="fa fa-search"></i>搜索</button>
+	                </span>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<div class="row-fluid">
+			<div class="span8 control-group">
+				<span>共计 {$total} 条数据  </span>&nbsp;
+				申请金额：<span style="color:red;">{$price}</span>元
+			</div>
+		<br><span style="color:red">说明：专家团自开票需要人工线下打款</span>
+		</div>
+	</div>
+ 	<div class="table-responsive panel-body">
+        <table class="table table-hover">
+            <thead class="navbar-inner">
+	            <tr>
+	            	<th style="width:65px;" align="center">头像</th>
+	                <th>真实姓名</th>
+	                <th>订单号</th>
+	                <th>打款金额</th>
+	                <th>申请时间</th>
+	                <th>当前状态</th>
+	                <th style="width:20%;">说明</th>
+	                <th>操作</th>
+	            </tr>
+            </thead>
+            <tbody id="level-list">
+	            {loop $ask_summary_last $i $row}
+		            <tr>
+		                <td><img alt="" src="{$row['avatar']}" width='auto' style="max-width:50px; max-height:50px;" height='auto'></td>
+		                <td><div class="type-parent">{$row['real_name']}</div></td>
+		                <td><div class="type-parent">{$row['order_sn']}</div></td>
+		                <td><div class="type-parent">{$row['price']}</div></td>
+		                <td><div class="type-parent">{php echo date('Y/m/d H:i', $row['create_time']);}&nbsp;&nbsp;</div></td>
+		                <td id="row_status_{$row['id']}">
+		                	<div class="type-parent">
+		                	{if $row['status'] == 1}处理中{elseif $row['status'] == 2}<span style="color:green">已打款</span>{elseif $row['status'] == 3}<span style="color:red">拒绝打款</span>{/if}&nbsp;&nbsp;
+		                	</div>
+		            	</td>
+		                <td><div class="type-parent">{$row['content']}</div></td>
+
+
+		                <td id="row_last_{$row['id']}">
+		                    {if $row['status']== 1}
+		                    	<label onclick="frame({$row['epid']},2);" class="btn btn-default btn-sm manage">已打款</label>
+		                    {/if}
+		                    {if $row['status']== 1}
+		                    	<label onclick="frame({$row['epid']},3);" class="btn btn-default btn-sm manage">拒绝</label>
+		                    {/if}
+		                </td>
+		            </tr>
+	            {/loop}
+            </tbody>
+        </table>
+    </div>
+</div>
+{$pager}
+<script>
+	var grid,status;
+	//弹出框
+	function frame(id,sta){
+		grid = id;
+		status = sta;
+		$("#module-info").modal('show');
+	}
+
+	function to_examine()
+	{
+		if(!confirm("确认要操作吗?")){
+			return false;
+		}
+	   	var content = $("input[name='content']").val();
+	   	if(content == ''){
+	   		util.message("请填写备注");
+	        return false;
+	   	}
+       	location.href = "{php echo $this->createWebUrl('ask_payment',array('op'=>'group_handle','eid'=>$_GPC['eid'],'version_id'=>0))}"+"&grid="+grid+"&content="+content+"&status="+status;
+	}
+</script>
+{/if}
+<!-- 提现处理 start -->
+{if $operation == 'handle'}
+<div class="main">
+	<form action="" method="post" class="form-horizontal form" id="setting-form">
+		<div class="main" style="padding-top:5px;">
+			<div class="panel panel-default">
+			    <div class="panel-heading">提现处理</div>
+			    <div class="panel-body">
+			    	<div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label">提现人</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			               	<input type="text" class="form-control" cols="60" readonly="readonly" name="" value="{$user['real_name']}">
+			            </div>
+			        </div>
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label">手机号</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			               	<input type="text" class="form-control" cols="60" readonly="readonly" name="" value="{$user['mobile']}">
+			            </div>
+			        </div>
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label">提现状态</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			               	<input type="text" class="form-control" cols="60" readonly="readonly" name="" value="{$tx_data['status']}">
+			            </div>
+			        </div>
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label">提现方式</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			               	<input type="text" class="form-control" cols="60" readonly="readonly" name="" value="{$tx_data['tx_type']}">
+			            </div>
+			        </div>
+			        {if $tx_data['status'] == '处理中'}
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label"><span style='color:red'>*</span>状态</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			               	<select id="tx_status" name='status' class="form-control" cols="60">
+			               		<option value='2'>通过</option>
+			               		<option value='3'>拒绝</option>
+			               	</select>
+			            </div>
+			        </div>
+			        {/if}
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label"><span style='color:red'>*</span>申请提现金额</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			               	<input type="text" class="form-control" readonly="readonly" cols="60"  value="{$tx_data['pay_amount']}">
+			            </div>
+			        </div>
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label">银行卡号</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			               	<input type="text" class="form-control" readonly="readonly" cols="60"  value="{$tx_data['xhkh']}">
+			            </div>
+			        </div>
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label">所属银行</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			               	<input type="text" class="form-control" readonly="readonly" cols="60"  value="{$tx_data['ssyh']}">
+			            </div>
+			        </div>
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label">持卡人</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			               	<input type="text" class="form-control" readonly="readonly" cols="60"  value="{$tx_data['ckr']}">
+			            </div>
+			        </div>
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label">社保公积金</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			               	<input type="text" class="form-control" readonly="readonly" cols="60"  value="{$tx_data['sbgjj']}">
+			            </div>
+			        </div>
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label">子女教育</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			               	<input type="text" class="form-control" readonly="readonly" cols="60"  value="{$tx_data['znjy']}">
+			            </div>
+			        </div><div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label">继续教育</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			               	<input type="text" class="form-control" readonly="readonly" cols="60"  value="{$tx_data['jxjy']}">
+			            </div>
+			        </div>
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label">大病医疗</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			               	<input type="text" class="form-control" readonly="readonly" cols="60"  value="{$tx_data['dbyl']}">
+			            </div>
+			        </div>
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label">住房贷款</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			               	<input type="text" class="form-control" readonly="readonly" cols="60"  value="{$tx_data['zfdk']}">
+			            </div>
+			        </div>
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label">住房租金</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			               	<input type="text" class="form-control" readonly="readonly" cols="60"  value="{$tx_data['zfzj']}">
+			            </div>
+			        </div>
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label">赡养老人支出</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			               	<input type="text" class="form-control" readonly="readonly" cols="60"  value="{$tx_data['sylrzc']}">
+			            </div>
+			        </div>
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label">代缴税费</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			               	<input type="text" class="form-control" readonly="readonly" cols="60"  value="{$tx_data['djsf']}">
+			            </div>
+			        </div>
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label">是否平台代缴</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			               	<input type="text" class="form-control" readonly="readonly" cols="60"  value="{$tx_data['is_ptdj']}">
+			            </div>
+			        </div>
+
+
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-3 col-md-2 control-label"><span style='color:red'>*</span>打款金额</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			               	<input {if !empty($tx_data['status'] != '处理中')} readonly="readonly" value="{$tx_data['last_amount']}" {/if} type="text" class="form-control" cols="60" name="last_amount" placeholder="建议打款金额{$pay_money}元">
+			            </div>
+			        </div>
+			        <div class="form-group">
+			            <label class="col-xs-12 col-sm-2 col-md-2 control-label"><span style='color:red'>*</span>备注</label>
+			            <div class="col-sm-8 col-xs-12 form-control-static">
+			     			<textarea {if !empty($tx_data['status'] != '处理中')} readonly="readonly" {/if} style="height:200px;" name="remakes" class="form-control" cols="60" placeholder="..."></textarea>
+			            </div>
+			        </div>
+			    </div>
+			</div>
+		</div>
+		{if $tx_data['status'] == '处理中'}
+		<div class="form-group col-sm-12">
+			<input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1 submit" />
+			<input type="hidden" name="token" value="{$_W['token']}" />
+		</div>
+		{/if}
+	</form>
+</div>
+<script>
+	$(".submit").click(function(){
+		var status = $("select[name=status]").val();
+		var remakes = $("textarea[name=remakes]").val();
+		var last_amount = $("input[name=last_amount]").val();
+
+		if(status == 3 && remakes == ''){
+			util.message("请填写备注");
+	        return false;
+		}
+
+		if(status == 2 && last_amount==""){
+			util.message("请填写打款金额");
+	        return false;
+		}
+
+		if(status == 2){
+			var reg = new RegExp("^\\d+(\\.\\d{0,2})?$");
+	        if(!reg.test(last_amount)){//只能输入两位小数
+	            util.message("请填写正确的金额");return false;
+	        }
+		}
+		
+		var tx_type = "{$tx_data['tx_type']}";
+
+		if(status == 2){
+			var msg = "确定要打款吗？"; 
+		}
+		if(status == 3){
+			var msg = "确定要拒绝吗？"; 
+		}
+		if (confirm(msg)==true){ 
+			
+		}else{ 
+			return false; 
+		}
+	});
+</script>
+{/if}
+<!-- 提现处理 end -->
+
+<!-- 转账列表 start -->
+{if $operation == 'recharge_manage'}
+<style type="text/css">
+.table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+  white-space:normal;
+}
+</style>
+<div id="action_list" class="panel panel-default">
+	<div class="panel-body">
+	    <div class="col-xs-12 col-sm-11" style="width:99%;">
+	        <form action="" method="get" class="form-horizontal" role="form" id="form1">
+	            <input type="hidden" name="c" value="site">
+				<input type="hidden" name="version_id" value="0">
+				<input type="hidden" name="a" value="entry">
+				<input type="hidden" name="do" value="ask_payment">
+				<input type="hidden" name="op" value="recharge_manage">
+				<input type="hidden" name="m" value="dg_ask">
+	            <div class="input-group">
+	                <select name="timeType" class="form-control input-medium">
+						<option value="10" <?php if($_GPC['timeType'] == 10){echo 'selected';} ?> >不按时间</option>
+                        <option value="time" <?php if($_GPC['timeType'] == 'time'){echo 'selected';} ?> >充值时间</option>
+                    </select>
+                    <span class="input-group-addon" style="padding: 0; width: 0;border:none;">
+                    </span>
+	                {php echo tpl_form_field_daterange('time', array('start'=>date('Y-m-d', $starttime),'end'=>date('Y-m-d', $endtime)));}
+	                <script type="text/javascript">
+		                $(function(){
+		                    $("#action_list .input-group .daterange-date").addClass("form-control");
+		                })
+	                </script>
+	                <span class="input-group-addon"></span>
+					<select name="type" class="form-control input-medium">
+						<option value="0" <?php if($_GPC['type'] == 0){echo 'selected';} ?> >全部支付类型</option>
+                        <option value="wx" <?php if($_GPC['type'] == 'wx'){echo 'selected';} ?> >微信支付</option>
+                        <option value="yh" <?php if($_GPC['type'] == 'yh'){echo 'selected';} ?> >银行转账</option>
+                    </select>
+	                <span class="input-group-addon"></span>
+					<select name="pay_status" class="form-control input-medium">
+						<option value="10" <?php if($_GPC['pay_status'] == 10){echo 'selected';} ?> >全部支付状态</option>
+                        <option value="1" <?php if($_GPC['pay_status'] == 1){echo 'selected';} ?> >支付中</option>
+                        <option value="2" <?php if($_GPC['pay_status'] == 2){echo 'selected';} ?> >支付成功</option>
+                    </select>
+	                <span class="input-group-addon">关键字</span>
+	                <input type="text" name="keyword" class="form-control ac_name" value="{$_GPC['keyword']}" placeholder="昵称 | 真实姓名 | 订单号"/>
+	                <span class="input-group-btn">
+	                	<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+	                </span>
+	            </div>
+	        </form>
+	    </div>
+	</div>
+</div>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<div class="row-fluid">
+				<div class="span8 control-group">
+					共计 {$total} 条数据&nbsp;
+					总计金额 <span style="color:red;">{$price['money']}</span>元
+				</div>
+			</div>
+		</div>
+		<div class="panel-body table-responsive">
+		<table class="table table-hover" style="font-size:14px;">
+			<thead class="navbar-inner">
+				<tr>
+					<th align="center">头像</th>
+					<th>昵称/姓名</th>
+					<th>充值金额</th>
+					<th>充值方式</th>
+					<th>订单号</th>
+					<th>状态</th>
+					<th>时间</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				{loop $records $row}
+					<tr id="row_{$row['id']}">
+						<td><img alt="" src="{$row['avatar']}" style="width:50px; height:50px;"></td>
+						<td>{if $row['real_name']}{$row['real_name']}{else}{$row['nickname']}{/if}</td>
+						<td>{$row['money']}</td>
+						<td>{if $row['type']=='wx'}微信{elseif $row['type']=='yh'}银行卡转账{/if}</td>
+						<td>{$row['out_trade_no']}</td>
+						<td>
+							{if $row['pay_status'] == 1}
+								<span>支付中</span>
+							{elseif $row['pay_status'] == 2}
+								<span style="color:green">支付成功</span>
+							{elseif $row['pay_status'] == 3}
+								<span style="color:red">支付失败</span>
+							{/if}
+						</td>
+						<td>{php echo date('Y/m/d H:i:s', $row['time']);}</td>
+						{if $row['pay_status']== 1 && $row['type']=='yh'}
+						<td>
+							<a href="{php echo $this->createWebUrl('ask_payment', array('op' => 'check_recharge','id'=>$row['id'],'version_id'=>0))}">
+								<label style="cursor:pointer;" data="{$row['id']}" class="btn btn-default btn-sm manage" >
+									<i class="fa fa-edit"></i>处理
+								</label>
+							</a>
+						</td>
+						{/if}
+					</tr>
+				{/loop}
+			</tbody>
+		</table>
+	</div>
+</div>
+{$pager}
+{/if}
+<!-- 转账列表 end -->
+
+<!-- 转账处理 start -->
+{if $operation == 'check_recharge'}
+<div class="main">
+<form action="" method="post" class="form-horizontal form"	id="user-submit"  enctype="multipart/form-data" onsubmit="return checkform();">
+
+	<input type="hidden" name="c" value="site">
+	<input type="hidden" name="version_id" value="0">
+	<input type="hidden" name="a" value="entry">
+	<input type="hidden" name="do" value="ask_payment">
+	<input type="hidden" name="op" value="check_recharge">
+	<input type="hidden" name="m" value="dg_ask">
+	<input type="hidden" name="openid" value="{$checkre['openid']}">
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			查看充值
+		</div>
+		<div class="panel-body">
+			<div class="form-group">
+				<label class="col-xs-12 col-sm-3 col-md-2 control-label">订单号</label>
+				<div class="col-sm-9 col-xs-12">
+					<input type="text" name="out_trade_no" class="form-control" value="{$checkre['out_trade_no']}" readonly="readonly"/>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-12 col-sm-3 col-md-2 control-label">订单状态</label>
+				<div class="col-sm-9 col-xs-12">
+			    <select name="pay_status" class="form-control input-medium">
+			       <!-- <option value="1">支付中</option> -->
+			       <option value="2">支付通过</option>
+			       <option value="3">支付不通过</option>
+			    </select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-12 col-sm-3 col-md-2 control-label">充值方式</label>
+				<div class="col-sm-9 col-xs-12">
+					<input type="text" name="type" class="form-control" value="银行卡转账" readonly="readonly" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-12 col-sm-3 col-md-2 control-label">充值金额</label>
+				<div class="col-sm-9 col-xs-12">
+					<input type="number" name="money" class="form-control" value="{$checkre['money']}" readonly="readonly"/>
+				</div>
+			</div>
+			<div class="form-group">
+                <label for="inputEmail3" class="col-sm-2 control-label">备注</label>
+                <div class="col-sm-9 col-xs-12">
+                	<textarea  name="remarks" class="form-control" value="{$checkre['remarks']}" style="min-height:150px;" placeholder="这里填写备注"></textarea>
+                </div>
+            </div>
+		</div>
+	</div>
+
+	<div class="form-group col-sm-12">
+		<input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+		<input type="hidden" name="token" value="{$_W['token']}" />
+	</div>
+
+</form>
+</div>
+
+<script>
+	function checkform(){
+		var pay_status = $("select[name=pay_status]").val();
+		var remarks = $("textarea[name=remarks]").val();
+		if(pay_status == 3){
+			if(remarks == ''){
+				util.message('请填写备注');
+            	return false;
+			}
+		}
+	}
+</script>
+{/if}
+<!-- 转账处理 end -->
+
+<!-- 赞赏记录 start -->
+{if $operation == 'zs_manage'}
+<div id="action_list" class="panel panel-default">
+	<div class="panel-body">
+	    <div class="col-xs-12 col-sm-11" style="width:99%;">
+			<form  method="get" class="form-horizontal" role="form">
+				<input type="hidden" name="version_id" value="0">
+				<input type="hidden" name="c" value="site">
+				<input type="hidden" name="a" value="entry">
+				<input type="hidden" name="do" value="ask_payment">
+				<input type="hidden" name="op" value="zs_manage">
+				<input type="hidden" name="m" value="dg_ask">
+				<div class="input-group">
+					<select name="status_select" class="form-control input-medium">
+						<option value="" selected="selected">不按时间</option>
+						<option value='create_time' {if $_GPC['status_select'] == 'create_time'}selected="selected"{/if}>申请时间</option>
+					</select>
+					<span class="input-group-addon" style="padding: 0; width: 0;border:none;"></span>
+	                {php echo tpl_form_field_daterange('time',array('start'=>$_GPC['time']['start'],'end'=>$_GPC['time']['end']));}
+	                <script type="text/javascript">
+	                    $(function(){
+	                        $("#action_list .input-group .daterange-date").addClass("form-control");
+	                    })
+	                </script>
+	                <span class="input-group-addon"></span>
+					<select name="pay_type" class="form-control input-medium">
+						<option value="0" <?php if($_GPC['pay_type'] == 0){echo 'selected';} ?> >支付类型</option>
+                        <option value="wx" <?php if($_GPC['pay_type'] == 'wx'){echo 'selected';} ?> >微信支付</option>
+                        <option value="ye" <?php if($_GPC['pay_type'] == 'ye'){echo 'selected';} ?> >余额支付</option>
+                    </select>
+	                <span class="input-group-addon"></span>
+	            		<input type="text" name="keyword" class="form-control ac_name" value="{$_GPC['keyword']}"  placeholder="订单号"/>
+	            	<span class="input-group-btn">
+
+	                <span class="input-group-btn">
+	                	<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+	                </span>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<div class="panel panel-default">
+	<div class="panel-heading">
+			<div class="row-fluid">
+				<div class="span8 control-group">
+					共计 {$total['num']} 条数据&nbsp;
+					总计金额 <span style="color:red;">{$price['money']}</span>元
+				</div>
+			</div>
+		</div>
+		<div class="panel-body table-responsive">
+		<table class="table table-hover" style="font-size:14px;">
+			<thead class="navbar-inner">
+				<tr>
+					<th align="center">赞赏人头像</th>
+					<th>赞赏人姓名</th>
+					<th>赞赏金额</th>
+					<th align="center">被赞赏人头像</th>
+					<th>被赞赏人姓名</th>
+					<th>订单号</th>
+					<th>支付方式</th>
+					<th>状态</th>
+					<th>时间</th>
+				</tr>
+			</thead>
+			<tbody>
+				{loop $reward $i $v}
+				<tr>
+					<td><img alt="" src="{$v['avatar']}" style="width:50px; height:50px;"></td>
+					<td>{if $v['real_name']}{$v['real_name']}{else}{$v['nickname']}{/if}</td>
+					<td>{$v['money']}</td>
+					<td><img alt="" src="{$v['be_admired']['avatar']}" style="width:50px; height:50px;"></td>
+					<td>{if $v['be_admired']['real_name']}{$v['be_admired']['real_name']}{else}{$v['be_admired']['nickname']}{/if}</td>
+					<td>{$v['out_trade_no']}</td>
+					<td>{if $v['pay_type'] == 'wx'}微信支付{elseif $v['pay_type'] == 'ye'}余额支付{/if}</td>
+					<td>{if $v['status'] == 0}未支付{elseif $v['status'] == 1}已支付{/if}</td>
+					<td>{php echo date('Y/m/d H:i:s', $v['create_time']);}</td>
+				</tr>
+				{/loop}
+			</tbody>
+		</table>
+	</div>
+</div>
+{$pager}
+{/if}
+<!-- 赞赏记录 end -->
+
+<!-- 文章/问答付费记录 start -->
+{if $operation == 'art_ask'}
+<div id="action_list" class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-xs-12 col-sm-11" style="width:99%;">
+			<form  method="get" class="form-horizontal" role="form">
+				<input type="hidden" name="version_id" value="0">
+				<input type="hidden" name="c" value="site">
+				<input type="hidden" name="a" value="entry">
+				<input type="hidden" name="do" value="ask_payment">
+				<input type="hidden" name="op" value="art_ask">
+				<input type="hidden" name="m" value="dg_ask">
+				<div class="input-group">
+					<select name="status_select" class="form-control input-medium">
+						<option value="" selected="selected">不按时间</option>
+						<option value='create_time' {if $_GPC['status_select'] == 'create_time'}selected="selected"{/if}>添加时间</option>
+					</select>
+					<span class="input-group-addon" style="padding: 0; width: 0;border:none;"></span>
+	                {php echo tpl_form_field_daterange('time',array('start'=>$_GPC['time']['start'],'end'=>$_GPC['time']['end']));}
+	                <script type="text/javascript">
+	                    $(function(){
+	                        $("#action_list .input-group .daterange-date").addClass("form-control");
+	                    })
+	                </script>
+	                <span class="input-group-addon"></span>
+					<select name="type" class="form-control input-medium">
+						<option value="0" <?php if($_GPC['type'] == 0){echo 'selected';} ?> >记录类型</option>
+						<option value="1" <?php if($_GPC['type'] == 1){echo 'selected';} ?> >文章</option>
+                        <option value="2" <?php if($_GPC['type'] == 2){echo 'selected';} ?> >问答</option>
+                        <option value="3" <?php if($_GPC['type'] == 3){echo 'selected';} ?> >悬赏</option>
+                    </select>
+	                <span class="input-group-addon"></span>
+					<select name="pay_type" class="form-control input-medium">
+						<option value="0" <?php if($_GPC['pay_type'] == 0){echo 'selected';} ?> >支付类型</option>
+						<option value="1" <?php if($_GPC['pay_type'] == 1){echo 'selected';} ?> >余额支付</option>
+                        <option value="2" <?php if($_GPC['pay_type'] == 2){echo 'selected';} ?> >微信支付</option>
+                    </select>
+					<span class="input-group-addon">关键词</span>
+                	<input type="text" name="keyword" class="form-control ac_name" placeholder='标题 | 会员姓名 | 订单号' value="{$_GPC['keyword']}"/>
+                    <span class="input-group-btn">
+                    	<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+                    </span>
+				</div>
+			</form>
+		</div>
+    </div>
+</div>
+
+<div class="panel panel-default">
+	<div class="panel-heading">
+			<div class="row-fluid">
+				<div class="span8 control-group">
+					共计 {$total} 条数据&nbsp;
+					总计金额 <span style="color:red;">{$price['money']}</span>元
+				</div>
+			</div>
+		</div>
+		<div class="panel-body table-responsive">
+		<table class="table table-hover" style="font-size:14px;">
+			<thead class="navbar-inner">
+				<tr>
+					<th>编号</th>
+					<th>标题</th>
+					<th>类型</th>
+					<th>会员姓名</th>
+					<th>金额</th>
+					<th>支付方式</th>
+					<th>订单号码</th>
+					<th>添加时间</th>
+				</tr>
+			</thead>
+			<tbody>
+				{loop $reflect $i $v}
+				<tr>
+					<td>{$v['id']}</td>
+					<td>{$v['title']}</td>
+					<td>{if $v['type'] == 1}文章{elseif $v['type'] == 2}问答{else}悬赏{/if}</td>
+					<td>{$v['nickname']}</td>
+					<td>{php echo round($v['money'] / 100,2)}</td>
+					<td>{if $v['pay_type'] == 1}余额支付{else}微信支付{/if}</td>
+					<td>{$v['order_sn']}</td>
+					<td>{php echo date('Y/m/d H:i:s', $v['create_time']);}</td>
+				</tr>
+				{/loop}
+			</tbody>
+		</table>
+	</div>
+</div>
+{$pager}
+{/if}
+<!-- 文章/问答付费记录 end -->
+{template 'common/footer'}

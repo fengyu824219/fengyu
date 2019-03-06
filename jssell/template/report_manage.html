@@ -1,0 +1,90 @@
+{template 'common/header'}
+<style type="text/css">
+.table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+  white-space:normal;
+}
+</style>
+<ul class="nav nav-tabs">
+	<li {if $_GPC['op'] =='' || $_GPC['op'] == 'display'}class="active"{/if}><a
+		href="{php echo $this->createWebUrl('report_manage',array('op'=>'display','eid'=>$_GPC['eid'],'version_id'=>0))}">举报列表</a></li>
+</ul>
+<!-- 举报列表 start -->
+{if $op == 'display'}
+<div id="action_list" class="panel panel-default">
+
+    <div class="panel-body">
+
+        <div class="col-xs-12 col-sm-11" style="width:99%;"> 
+			<form  method="get" class="form-horizontal" role="form">
+				<input type="hidden" name="version_id" value="0">
+				<input type="hidden" name="c" value="site">
+				<input type="hidden" name="a" value="entry">
+				<input type="hidden" name="do" value="report_manage">
+				<input type="hidden" name="m" value="dg_ask">		
+				<div class="input-group">
+					<span class="input-group-addon">查询关键词</span>
+					<input class="form-control ac_name" name="keyword" id="" type="text" value="{$_GPC['keyword']}" placeholder="请输入用户昵称关键字">
+					<span class="input-group-addon">时间范围</span>
+					{php echo tpl_form_field_daterange('time', array('start'=>date('Y-m-d', $starttime),'end'=>date('Y-m-d', $endtime)));}
+					<script type="text/javascript">
+
+                    $(function(){
+
+                        $("#action_list .input-group .daterange-date").addClass("form-control");
+
+                    })
+
+                    </script>
+					<span class="input-group-btn">
+
+		            <button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+
+		            </span>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+	<div class="panel panel-default">
+		<div class="panel-heading">	
+				<div class="panel-heading-filter">
+					共计 {$total} 条数据
+				</div>
+			</div>
+			<div class="panel-body table-responsive">
+			<table class="table table-hover" style="font-size:14px;">
+				<thead class="navbar-inner">
+					<tr>
+						<th style="width:65px;" align="center">举报人头像</th>
+						<th style="width:75px;">举报人昵称</th>
+						<th style="width:100px;">被举报问题</th>
+						<th style="width:85px;">举报类型</th>
+						<th style="width:150px;">举报内容</th>
+						<th style="width:65px;">举报时间</th>
+						<th style="width:85px;">快捷操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					{loop $records $row}
+					<tr id="row_{$row['id']}">
+						<td><img alt="" src="{$row['avatar']}" width='auto' style="max-width:50px; max-height:50px;" height='auto'></td>
+						<td>{$row['nickname']}</td>
+						<td>{$row['ask_content']}</td>
+						<td>{$row['type_content']}</td>
+						<td>{$row['content']}</td>
+						<td>{php echo date('Y/m/d H:i:s', $row['create_time']);}</td>
+						<td>
+							<a href="{php echo $this->createWebUrl('view_answer', array('askid'=>$row['ask_id'],'version_id'=>0))}">
+								<label style="cursor:pointer;" class="btn btn-default btn-sm manage">查看详情</label>
+							</a>
+						</td>
+					</tr>
+					{/loop}
+				</tbody>
+			</table>
+		</div>
+	{$pager}
+</div>
+{/if}
+<!-- 举报列表 end -->
+{template 'common/footer'}

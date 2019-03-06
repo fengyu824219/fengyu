@@ -1,0 +1,276 @@
+{template 'common/header'}
+<style type="text/css">
+	.table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+		white-space:normal;
+	}
+	.input-group{
+		position:relative;border-collapse:separate
+	}
+	.code{
+		color: red;
+	}
+	.col-sm-4 {
+		width: 23.333333%;
+	}
+
+	.fonwenzhang{
+		font-size: 14.4px;
+	}
+	.tags-name{float: left;padding: 8px;}
+	#container{
+		min-width:112%;
+		min-height:400px;
+	}
+
+	.checkbox-custom {
+		position: relative;
+		padding: 0 0 0 25px;
+		margin-bottom: 7px;
+		margin-top: 0;
+	}
+	/*
+    将初始的checkbox的样式改变
+    */
+	.checkbox-custom input[type="checkbox"] {
+		opacity: 0;/*将初始的checkbox隐藏起来*/
+		position: absolute;
+		cursor: pointer;
+		z-index: 2;
+		margin: -6px 0 0 0;
+		top: 50%;
+		left: 3px;
+	}
+	/*
+    设计新的checkbox，位置
+    */
+	.checkbox-custom label:before {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 0;
+		margin-top: -9px;
+		width: 19px;
+		height: 18px;
+		display: inline-block;
+		border-radius: 2px;
+		border: 1px solid #bbb;
+		background: #fff;
+	}
+	/*
+    点击初始的checkbox，将新的checkbox关联起来
+    */
+	.checkbox-custom input[type="checkbox"]:checked +label:after {
+		position: absolute;
+		display: inline-block;
+		font-family: 'FontAwesome';
+		content: '\F00C';
+		top: 50%;
+		left: 4px;
+		margin-top: -5px;
+		font-size: 11px;
+		line-height: 1;
+		width: 16px;
+		height: 16px;
+		color: #333;
+	}
+	.checkbox-custom label {
+		cursor: pointer;
+		line-height: 1.2;
+		font-weight: normal;/*改变了rememberme的字体*/
+		margin-bottom: 0;
+		text-align: left;
+	}
+</style>
+<script type="text/javascript" src="resource/components/clockpicker/clockpicker.min.js?v=20170526"></script>
+
+<link rel="stylesheet" href="resource/components/clockpicker/clockpicker.min.css"/>
+<ul class="nav nav-tabs">
+	<li {if $_GPC['do'] =='' ||$_GPC['do'] == 'question_manage'}class="active"{/if}><a href="{php echo $this->createWebUrl('question_manage',array('version_id'=>0))}">普通问题管理</a></li>
+	{if $_GPC['op'] == 'ques_edit'}
+	<li {if $_GPC['op'] =='ques_edit'}class="active"{/if}><a href="#">问题设置</a></li>
+	{/if}
+	{if $_GPC['op'] == 'reward_edit'}
+	<li {if $_GPC['op'] =='reward_edit'}class="active"{/if}><a href="#">编辑问题</a></li>
+	{/if}
+	<li {if $_GPC['do'] == 'reward_manage'}class="active"{/if}><a href="{php echo $this->createWebUrl('reward_manage',array('version_id'=>0))}">悬赏问题管理</a></li>
+</ul>
+<!-- {if $_GPC['op'] == 'ques_edit'}
+<div class="main">
+	<form action="{php echo $this->createWebUrl('question_edit',array('op'=>'ques_edit'))}" method="post" class="form-horizontal form"	enctype="multipart/form-data" onsubmit="return checkform();">
+		<input type="hidden" name="quest" value="1">
+		<input type="hidden" name="reid" value="{$row_id}">
+		<input type="hidden" name="content" value="{$ask['ask_content']}">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				问题设置
+			</div>
+			<div class="panel-body">
+				<div class="form-group" >
+					<label  style="padding-bottom: 10px;" class="col-xs-12 col-sm-3 col-md-2 control-label" for="author"><span style="color:red">*</span>栏目选择</label>
+					{loop $menus $menus}
+						<div class="col-xs-9 col-sm-2" style="padding-top: 10px;padding-right: 0.1%;width: 13.888%">
+							<div class="checkbox-custom checkbox-default" >
+								<input {if $menus['price'] != "0.00"} class="RememberMe"  onclick="diape(this);"{/if} type="checkbox"
+								{if $strs !=""}
+									<?php if(in_array($menus['imid'],$strs)){echo 'checked="checked"';}?>
+								{/if}
+								name="cmid[]" value="{$menus['imid']}"  ids="{$menus['price']}">
+								<label   for="RememberMe" style=" pointer-events: none;cursor: default;opacity: 0.6;"><span style="color: black" > {$menus['name']}{$menus['price']}</span></label>
+							</div>
+						</div>
+					{/loop}
+				</div>
+
+				<div class="form-group" id="dis" style="display:{if $ask['steal_money'] == "0.00" || $ask['steal_money'] == ""}none{/if}">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span style="color:red">*</span>查看价格</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="price" class="form-control" value="{$ask['steal_money']}" />
+						<input type="hidden" value=""  name="yes" id="guang">
+					</div>
+				</div>
+
+
+			</div>
+		</div>
+		<div class="form-group col-sm-12">
+			<input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+			<input type="hidden" name="token" value="{$_W['token']}" />
+		</div>
+	</form>
+</div>
+<script>
+
+function diape(e) {
+$("#dis").css("display", "block");
+
+var checks = document.getElementsByClassName("RememberMe");
+var price = $(e).attr("ids");
+
+n = 0;
+if (price) {
+for (i = 0; i < checks.length; i++) {
+if (checks[i].checked)
+n++;
+}
+}
+
+if(n >= 1) {
+$("#guang").val(1111);
+}
+
+if(n == 0){
+$("#dis").css("display", "none");
+
+$("#guang").val(null);
+$("#pri").val(null);
+
+}
+
+}
+
+function checkform() {
+
+    var checks = document.getElementsByClassName("RememberMe");
+    n =0;
+    for (i = 0; i < checks.length; i++) {
+        if (checks[i].checked)
+            n++;
+    }
+
+
+    if (n != 0) {
+        if ($('input[name="price"]').val() == "" || $('input[name="price"]').val() == "0.00") {
+            util.message("勾选了付费栏目必须填写金额", "", "error");
+            return false;
+        }
+
+    }else{
+        $('input[name="price"]').val(null);
+    }
+
+
+
+
+
+}
+
+</script>
+{/if} -->
+{if $_GPC['op'] == 'reward_edit'}
+<div class="main">
+    <form action="{php echo $this->createWebUrl('question_edit',array('op'=>'reward_edit'))}" method="post" class="form-horizontal form"	enctype="multipart/form-data" onsubmit="return checkform();">
+        <input type="hidden" name="quest" value="1">
+        <input type="hidden" name="reid" value="{$row_id}">
+        <input type="hidden" name="content" value="{$ask['ask_content']}">
+        <input type="hidden" name="fuid" value="{$ask['fuid']}">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                {if $ask['ask_type'] == 1}普通{elseif $ask['ask_type'] == 2}悬赏{/if}问题编辑
+            </div>
+            <input type="hidden" name="ask_type" value="{$ask['ask_type']}">
+            <div class="panel-body">
+                <div class="form-group">
+                    <label  style="padding-bottom: 10px;" class="col-xs-12 col-sm-3 col-md-2 control-label" for="author">
+                    	<span style="color:red">*</span>栏目选择
+                	</label>
+                    {loop $menus $i $vo}
+	                    <div class="col-xs-9 col-sm-2" style="padding-top: 10px;padding-right: 0.1%;width: 13.888%">
+	                        <div class="checkbox-custom checkbox-default" >
+	                            <input onclick="fx({$vo['imid']})" type="checkbox" name="cmid[]" value="{$vo['imid']}" id="dx{$vo['imid']}" 
+	                            {if $strs != ''}
+	                            	{if in_array($vo['imid'],$strs)}checked=checked class="RememberMe art"{else}class="RememberMe"{/if}
+	                            {/if}
+	                            pr="{$vo['price']}">
+	                            <label  for="RememberMe" id="im{$menu['imid']}" style=" pointer-events: none;cursor: default;opacity: 0.6;">
+	                            	<span style="color: black" > {$vo['name']}{$vo['price']}</span>
+                            	</label>
+	                        </div>
+	                    </div>
+                    {/loop}
+                    <input type="hidden" name="price" value="">
+                    <input type="hidden" name="imids" value="">
+                </div>
+            </div>
+        </div>
+		<div class="form-group col-sm-12">
+		    <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+		    <input type="hidden" name="token" value="{$_W['token']}" />
+		</div>
+	</form>
+</div>
+<script>
+	fx();
+	function fx(imid){
+		var price = '';
+		var cmid = '';
+		if($("#dx"+imid).hasClass('art')){
+			// alert(1);
+			$("#dx"+imid).removeClass('art');
+		}else{
+			// alert(2);
+			$("#dx"+imid).addClass('art');
+		};
+
+		$(".art").each(function(){
+			price += $(this).attr('pr');
+			price += ',';
+			cmid += $(this).val();
+			cmid += ',';
+
+		});
+		price = price.substr(0, price.lastIndexOf(","));
+		cmid = cmid.substr(0, cmid.lastIndexOf(","));
+        $("input[name=price]").val(price);
+		$("input[name=imids]").val(cmid);
+	}
+
+    function checkform() {
+        if($("input[name=imids]").val() == 0 ){
+        	util.message("请勾选栏目", "", "error");
+            return false;
+        }
+    }
+
+</script>
+{/if}
+{template 'common/footer'}

@@ -1,0 +1,180 @@
+{template 'common/header'}
+<style type="text/css">
+.table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+  white-space:normal;
+}
+</style>
+<ul class="nav nav-tabs">
+
+	{if $type==1}
+	   <li><a href="{php echo $this->createWebUrl('question_manage',array('version_id'=>0))}">普通问题管理</a></li>
+	{else}
+	   <li><a href="{php echo $this->createWebUrl('reward_manage',array('version_id'=>0))}">悬赏问题管理</a></li>
+	{/if}
+        <li {if $_GPC['do'] =='question_manage' && $_GPC['op'] == 'peep'}class="active"{/if}><a href="{php echo $this->createWebUrl('question_manage',array('op'=>'peep','version_id'=>0,'type'=>1))}">偷瞄问答管理</a></li>
+   <li class="active"><a href="#">查看回答</a></li>
+</ul>
+<div class="tab-content">
+    <!-- 文章信息start -->
+    <div class="panel-body table-responsive">
+        <span>问答信息</span>
+        <p></p>
+        <table class="table we7-table table-hover vertical-middle" style="position:relative">
+            <thead class="navbar-inner">
+                <tr><th>询问内容</th><td colspan="3">{$ks['ask_content']}</td></tr>
+                <tr><th>提问者昵称</th><td>{$ks['pay_nickname']}</td><th>创建时间</th><td>{if $ks['create_time'] != 0}{php echo date('Y-m-d H:i:s',$ks['create_time'])}{/if}</td></tr>
+                <tr><th>类目名称</th><td>{loop $rec $v1} {$v1['name']} {/loop}</td><th>回答时间</th><td>{if $ks['answer_time'] != 0}{php echo date('Y-m-d H:i:s',$ks['answer_time'])}{/if}</td></tr>
+                <tr><th>问答类型</th><td>{if $ks['ask_type']==1}问答{else}悬赏{/if}</td><th>截止日期</th><td>{if $ks['reward_expirytime'] != 0}{php echo date('Y-m-d H:i:s',$ks['reward_expirytime'])}{/if}</td></tr>
+                <tr><th>公开状态</th><td>{if $ks['open'] == 1}私密{elseif $ks['open'] == 2}公开{/if}
+                </td><th>悬赏结束时间</th><td>{if $ks['reward_overtime'] != 0}{php echo date('Y-m-d H:i:s',$ks['reward_overtime'])}{/if}</td></tr>
+                <tr><th>问答价</th><td>{$ks['pay_money']}</td><th>退款时间</th><td>{if $ks['refund_time'] != 0}{php echo date('Y-m-d H:i:s',$ks['refund_time'])}{/if}</td></tr>
+
+            </thead>
+        </table>
+    </div>
+
+    {loop $res $vo}
+        {if $ks['payto_uid'] == $vo['answer_uid']}<input type="hidden" name="answer_id" value="{$vo['answer_id']}">{/if}
+        <div class="panel-body table-responsive" style="border: 0.1px solid #F8F8F8">
+            <h4>专家回答</h4>
+            <span>{if $vo['real_name'] == ""}{$vo['nickname']}{else}{$vo['real_name']}{/if}&nbsp;</span>| <span>{$vo['level']}</span>&nbsp;&nbsp;&nbsp;&nbsp;
+            {if $vo['status'] != 1 && $ks['reward_status'] != 1}
+                <button onclick="caina({$vo['answer_id']},{$vo['uid']},{$ks['id']})"><b>采纳</b></button>
+            {/if}
+            <br>
+            {if $vo['user_type']==2}
+                <span style="color:red">专业回答</span>{if $ks['payto_uid'] == $vo['answer_uid'] && $vo['status'] == 1}<span style="float:right;color:green">已采纳</span>{/if}
+                <table class="table we7-table table-hover vertical-middle" style="position:relative">
+                    <thead class="navbar-inner">
+
+                        <div class="input-group">
+                            <span class="input-group-addon">问题提炼</span>
+                            <textarea class="form-control" style="height:100px;" {if $ks['payto_uid'] != $vo['answer_uid'] && $vo['status'] != 1}readonly="readonly"{else}name="answer_problem_refining"{/if}>{$vo['answer_problem_refining']}</textarea>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon">分析解答</span>
+                            <textarea class="form-control" style="height:100px;" {if $ks['payto_uid'] != $vo['answer_uid'] && $vo['status'] != 1}readonly="readonly"{else}name="answer_content_down"{/if}>{$vo['answer_content_down']}</textarea>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon">政策依据</span>
+                            <textarea class="form-control" style="height:100px;" {if $ks['payto_uid'] != $vo['answer_uid'] && $vo['status'] != 1}readonly="readonly"{else}name="policy_basis"{/if}>{$vo['policy_basis']}</textarea>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon">专家结论</span>
+                            <textarea class="form-control" style="height:100px;" {if $ks['payto_uid'] != $vo['answer_uid'] && $vo['status'] != 1}readonly="readonly"{else}name="expert_conclusion"{/if}>{$vo['expert_conclusion']}</textarea>
+                        </div>
+
+                    </thead>
+                </table>
+                {if $ks['payto_uid'] == $vo['answer_uid'] && $vo['status'] == 1}
+                    <input type="submit" onclick="changeAnswer({$vo['answer_id']},{$ks['id']})" value="修改" class="btn btn-primary">
+                {/if}
+            {else if $vo['user_type']==1}
+                <span style="color:red">快捷回答</span>{if $ks['payto_uid'] == $vo['answer_uid']}<span style="float:right;color:green">已采纳</span>{/if}
+                <table class="table we7-table table-hover vertical-middle" style="position:relative">
+                    <thead class="navbar-inner">
+                        <textarea class="form-control" style="height:150px;" {if $ks['payto_uid'] != $vo['answer_uid'] && $vo['status'] != 1}readonly="readonly"{else}name="answer_wenzi"{/if}>{$vo['answer_wenzi']}</textarea>
+                    </thead>
+                </table>
+                {if $ks['payto_uid'] == $vo['answer_uid'] && $vo['status'] == 1}
+                    <input type="submit" onclick="changeAnswer({$vo['answer_id']},{$ks['id']})" value="修改" class="btn btn-primary">
+                {/if}
+            {/if}
+            <!-- 追问不等于空显示 -->
+            {if $vo['wen'] != []}
+                <h6><b>追问与回答</b></h6>
+            {/if}
+            {loop $vo['wen'] $vos}
+                <table class="table we7-table table-hover vertical-middle" style="position:relative">
+                    <thead class="navbar-inner">
+                        {$ks['pay_nickname']}：<tr>追问<td colspan="3">{$vos['ask_content']}</td></tr>
+                    </thead>
+                </table>
+                {if $vos['answer_wenzi']!=""}
+                    <table class="table we7-table table-hover vertical-middle" style="position:relative">
+                        <thead class="navbar-inner">
+                            {if $vo['real_name'] == ""}{$vo['nickname']}{else}{$vo['real_name']}{/if}：回答
+                            <textarea class="form-control" {if $ks['payto_uid'] != $vo['answer_uid'] && $vo['status'] != 1}readonly="readonly"{else}id="answer{$vos['Nsid']}"{/if}>{$vos['answer_wenzi']}</textarea>
+                        </thead>
+                    </table>
+                    {if $ks['payto_uid'] == $vo['answer_uid'] && $vo['status'] == 1}
+                        <input type="submit" onclick="changeAnswer({$vos['Nsid']},{$vos['ask_id']})" value="修改" class="btn btn-primary">
+                    {/if}
+                    <br>
+                {/if}
+            {/loop}
+        </div>
+    {/loop}
+    {$pager}
+</div>
+<script>
+    function caina (answer_id,uid,ask_id) {
+       if(!confirm("确认操作吗?")){return false;}
+        var pay_uid = "{$ks['pay_uid']}";
+        var money = "{$ks['pay_money']}";
+
+        var url = "{php echo $this->createWebUrl('view_answer')}";
+        $.ajax({
+            url:url,
+            type: 'POST',
+            data: {answer:answer_id,zuid:uid,ask_id,cl_ajax:'cl',pay_uid:pay_uid,money:money},
+            success:function(data){
+            var type = "{$_GPC['type']}";
+               if(data==3){
+                   util.message("不能重复采纳", "", "error");
+               }else if(data==2){
+                   util.message("采纳成功", "", "success");
+               }
+               if(type=='1'){
+                   setTimeout(function(){window.location.href="{php echo $this->createWebUrl('question_manage',array('type'=>1,'version_id'=>0,'askid'=>$_GPC['askid'],'page'=>$page_num))}";},3000);
+               }else if(type=='2'){
+                   setTimeout(function(){window.location.href="{php echo $this->createWebUrl('reward_manage',array('type'=>2,'version_id'=>0,'askid'=>$_GPC['askid'],'page'=>$page_num))}";},3000);
+               }
+            }
+        })
+    }
+
+    var click_num = 1;
+    function changeAnswer(answer_id,ask_id){
+        if(confirm('你确定要修改吗？') == false){
+            return false;
+        }
+        //快捷回答
+        var answer_wenzi = $("textarea[name=answer_wenzi]").val();
+        //专业回答
+        var answer_problem_refining = $("textarea[name=answer_problem_refining]").val();
+        var answer_content_down = $("textarea[name=answer_content_down]").val();
+        var policy_basis = $("textarea[name=policy_basis]").val();
+        var expert_conclusion = $("textarea[name=expert_conclusion]").val();
+        //追问的回答
+        var inquiriesAnswer = $("#answer"+answer_id).val();
+
+        if(answer_wenzi == '' || answer_problem_refining == '' || answer_content_down == '' || policy_basis == '' || expert_conclusion == '' || inquiriesAnswer == '' ){
+            util.message('已采纳的回答不能为空');
+            return false;
+        }
+        if(click_num == 1){
+            click_num = 0;
+            $.post("{php echo $this->createWebUrl('view_answer',array('cl_ajax'=>'answer_update'))}",{
+                answer_id: answer_id,
+                ask_id: ask_id,
+                answer_wenzi: answer_wenzi,
+                answer_problem_refining: answer_problem_refining,
+                answer_content_down: answer_content_down,
+                policy_basis: policy_basis,
+                expert_conclusion: expert_conclusion,
+                inquiriesAnswer: inquiriesAnswer
+            },function(data){
+                if(data.code == 200){
+                    util.message(data.msg,setTimeout(function(){location.reload()},1000), "success");
+                    return false;
+                }
+                if(data.code == 400){
+                    util.message(data.msg,"", "error");
+                    return false;
+                }
+            },'json');
+        }
+    }
+</script>
+{template 'common/footer'}

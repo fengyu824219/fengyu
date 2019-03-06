@@ -1,0 +1,57 @@
+{template 'common/header'}
+<style type="text/css">
+.table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+  white-space:normal;
+}
+</style>
+<ul class="nav nav-tabs">
+	<li><a href="{php echo $this->createWebUrl('talk_manage',array('version_id'=>0))}">讨论管理</a></li>
+	<li><a href="{php echo $this->createWebUrl('talk_manage', array('rid' => $rid, 'op' => 'post','version_id'=>0))}">添加讨论</a></li>
+	<li class="active"><a href="#">查看回答</a></li>
+</ul>
+<div class="main">
+	<div class="panel panel-default">
+		<div class="panel-body table-responsive">
+			<table class="table table-hover">
+				<thead class="navbar-inner">
+					<tr>
+						<th style="width:65px;" align="center">头像</th>
+						<th style="width:65px;">昵称</th>
+						<th style="width:65px;">姓名</th>
+						<th style="width:102px;">回答语音</th>
+						<th style="width:150px;">回答文字</th>
+						<th style="width:100px;">回答图片</th>
+						<th style="width:85px;" align="center">回答时间</th>
+					</tr>
+				</thead>
+				<tbody>
+					{loop $records $row}
+					<tr id="row_{$row['id']}">
+						<td><img alt="" src="{$row['avatar']}" width='auto' style="max-width:50px; max-height:50px;" height='auto'></td>
+						<td>{$row['nickname']}</td>
+						<td>{$row['real_name']}</td>
+						<td>
+							<audio src="{$row['answer_content']}" controls="controls">您的浏览器不支持 audio 标签。</audio>
+						</td>
+						<?php $wenzi=nl2br($row['answer_wenzi']); ?>
+						<td>{$wenzi}</td>
+						<td>
+							{if !empty($row['answer_imgs'])}
+								<?php $imgs=explode(",",$row['answer_imgs']) ?>
+								{loop $imgs $img}
+									<?php $img=str_replace("../attachment/","",$img); ?>
+									<img alt="" src="{$_W['attachurl']}{$img}" width='auto' style="max-width:60px; max-height:50px;" height='auto'>
+								{/loop}
+							{/if}
+						</td>
+						<?php $date=date("Y-m-d H:i", $row['create_time']); ?>
+						<td>{$date}</td>
+					</tr>
+					{/loop}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	{$pager}
+</div>
+{template 'common/footer'}

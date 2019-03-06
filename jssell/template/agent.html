@@ -1,0 +1,771 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li {if $_GPC['op'] == '' || $_GPC['op'] == 'display'}class="active"{/if}>
+        <a href="{php echo $this->createWebUrl('agent',array('op'=>'display','eid'=>$_GPC['eid'],'version_id'=>0))}">专家团管理</a>
+    </li>
+    {if $_GPC['op'] == 'examine'}
+        <li {if $_GPC['op'] == 'examine'}class="active"{/if}>
+            <a href="javascript:;">专家团审核</a>
+        </li>
+    {/if}
+    {if $_GPC['op'] == 'details'}
+        <li {if $_GPC['op'] == 'details'}class="active"{/if}>
+            <a href="javascript:;">专家团详情</a>
+        </li>
+    {/if}
+
+    <li {if $_GPC['op'] == 'expertGroupService'}class="active"{/if}>
+        <a href="{php echo $this->createWebUrl('agent',array('op'=>'expertGroupService','version_id'=>0))}">专家团服务</a>
+    </li>
+    {if $_GPC['op'] == 'groupServiceExamine'}
+        <li {if $_GPC['op'] == 'groupServiceExamine'}class="active"{/if}>
+            <a href="javascript:;">专家团审核</a>
+        </li>
+    {/if}
+    {if $_GPC['op'] == 'editGroupService'}
+        <li {if $_GPC['op'] == 'editGroupService'}class="active"{/if}>
+            <a href="javascript:;">编辑专家团服务</a>
+        </li>
+    {/if}
+</ul>
+<!-- 专家团管理 start -->
+{if $operation == 'display'}
+<div id="action_list" class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-xs-12 col-sm-11" style="width:99%;">
+            <form action="" method="get" class="form-horizontal" role="form" id="form1">
+                <input type="hidden" name="op" value="display">
+                <input type="hidden" name="c" value="{$_GPC['c']}">
+                <input type="hidden" name="a" value="{$_GPC['a']}">
+                <input type="hidden" name="eid" value="{$_GPC['eid']}">
+                <input type="hidden" name="version_id" value="0">
+                <div class="input-group">
+                    <select name="status_select" class="form-control input-medium">
+                        <option value="1" <?php if($status_select == 1){echo 'selected';} ?> >不按时间</option>
+                        <option value="create_time" <?php if($_GPC['status_select'] == 'create_time'){echo 'selected';} ?> >创建时间</option>
+                    </select>
+                    <span class="input-group-addon" style="padding: 0; width: 0;border:none;">
+                    </span>
+                    {php echo tpl_form_field_daterange('time',array('start'=>$_GPC['time']['start'],'end'=>$_GPC['time']['end']));}
+                    <script type="text/javascript">
+                        $(function(){
+                            $("#action_list .input-group .daterange-date").addClass("form-control");
+                        })
+                    </script>
+                    <span class="input-group-addon"></span>
+                    <select name="status" class="form-control input-medium">
+                        <option value="10" <?php if($_GPC['status'] == 10){echo 'selected';} ?> >专家团状态</option>
+                        <option value="0" <?php if($_GPC['status'] == '0'){echo 'selected';} ?> >审核中</option>
+                        <option value="1" <?php if($_GPC['status'] == 1){echo 'selected';} ?> >已审核</option>
+                        <option value="2" <?php if($_GPC['status'] == 2){echo 'selected';} ?> >已拒绝</option>
+                    </select>
+                    <span class="input-group-addon">关键字</span>
+                    <input type="text" name="content" class="form-control ac_name" value="{$_GPC['content']}" placeholder="团名称 | 团长姓名 | 团队邀请码"/>
+                    <span class="input-group-btn">
+                    <input type="submit" class="btn" value="提交筛选" style="border:1px solid #ccc;"/>
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="row-fluid">
+            <div class="span8 control-group">
+                共计 {$total['num']} 条数据
+            </div>
+        </div>
+    </div>
+    <div class="panel-body table-responsive">
+        <table class="table table-hover">
+            <thead class="navbar-inner">
+                <tr>
+                    <th>团名称</th>
+                    <th>头像</th>
+                    <th>团长</th>
+                    <th>性质</th>
+                    <th style="text-align: center;">平台开票</th>
+                    <th style="text-align: center;">邀请码</th>
+                    <th style="text-align: right;">总营业额</th>
+                    <th>省市区</th>
+                    <th style="text-align: center;">状态</th>
+                    <th>专家团状态</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {loop $expertGroup $i $vo}
+                    <tr>
+                        <td>{$vo['name']}</td>
+                        <td><img style="width: 30px;" src="{php echo tomedia($vo['headimg'])}"></td>
+                        <td>{$vo['real_name']}</td>
+                        <td>{if $vo['type'] == 1}事务所{elseif $vo['type'] == 2}个人团队{/if}</td>
+                        <td style="text-align: center;">{if $vo['is_open'] == 0}<i class="fa fa-check"></i>{/if}</td>
+                        <td style="text-align: center;">{$vo['eg_code']}</td>
+                        <td style="text-align: right;">{$vo['total_price']}</td>
+                        <td>{$vo['province']} {$vo['city']} {$vo['area']}</td>
+                        <td style="text-align: center;">
+                            {if $vo['status'] == 0}
+                                <span>审核中</span>
+                            {elseif $vo['status'] == 1}
+                                <span style="color:green;">正常</span>
+                            {else}
+                                <span style="color:red;">拒绝</span>
+                            {/if}
+                        </td>
+                        <td>
+                            {if $vo['operation'] == 0}
+                                <span style="color:green;">已上线</span>
+                            {elseif $vo['status'] == 1}
+                                <span style="color:red;">已下线</span>
+                            {/if}
+                        </td>
+                        <td title="{php echo date('Y-m-d H:i',$vo['create_time'])}">{if $vo['create_time'] != 0}{php echo date('Y-m-d',$vo['create_time'])}{/if}</td>
+                        <td>
+                            {if $vo['status'] == 0}
+                                <a href="{php echo $this->createWebUrl('agent',array('op'=>'examine','egid'=>$vo['egid'],'version_id'=>0,'eid'=>$_GPC['eid'],'page'=>$_GPC['page']))}" class="btn btn-default btn-sm manage">
+                                    审核
+                                </a>
+                            {/if}
+                            {if $vo['status'] == 1}
+                                <a href="{php echo $this->createWebUrl('agent',array('op'=>'setOperation','egid'=>$vo['egid'],'version_id'=>0,'eid'=>$_GPC['eid'],'page'=>$_GPC['page'],'is_operation'=>$vo['operation'],'uid'=>$vo['uid']))}" class="btn btn-default btn-sm manage">
+                                    {if $vo['operation'] == 0}下线{else}上线{/if}
+                                </a>
+                            {/if}
+                            <a target="_blank" href="{php echo $this->createWebUrl('agent',array('op'=>'details','egid'=>$vo['egid'],'version_id'=>0,'eid'=>$_GPC['eid'],'page'=>$_GPC['page']))}" class="btn btn-default btn-sm manage">详情</a>
+                        </td>
+                    </tr>
+                {/loop}
+            </tbody>
+        </table>
+    </div>
+</div>
+{$pager}
+{/if}
+<!-- 专家团管理 end -->
+<!-- 专家团审核 start -->
+{if $operation == 'examine'}
+    <div class="main">
+        <div class="form-horizontal">
+            <input type="hidden" name="egid" value="{$egid}">
+            <input type="hidden" name="pageNum" value="{$pageNum}">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    专家团审核
+                </div>
+
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">审核状态</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <select class="form-control" name="status">
+                                <option value="1">通过</option>
+                                <option value="2">拒绝</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">备注</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <textarea class="form-control" style='height:100px;' name='content'></textarea>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="form-group col-sm-12">
+                <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" onclick="submitContent()" />
+            </div>
+        </div>
+    </div>
+    <script>
+        function submitContent(){
+            var content = $("textarea[name=content]").val();
+            if($("select[name=status]").val() == 2){
+                if(content == ''){
+                    util.message('备注不能为空');
+                    return false;
+                }
+            }
+            $.post("{php echo $this->createWebUrl('agent',array('op'=>'examine'))}",{
+                egid: $("input[name=egid]").val(),
+                status: $("select[name=status]").val()
+            },function(data){
+                if(data.code == 200){
+                    util.message(data.msg,setTimeout(function(){location.href="{php echo $this->createWebUrl('agent',array('op' => 'display','version_id' =>0,'page'=>$pageNum))}"},1000),'success');
+                    return false;
+                }
+                if(data.code == 400){
+                    util.message(data.msg,'','error');
+                    return false;
+                }
+            },'json');
+        }
+    </script>
+{/if}
+<!-- 专家团审核 end -->
+<!-- 专家团详情 start -->
+{if $operation == 'details'}
+    <div class="main">
+        <div class="form-horizontal">
+            <input type="hidden" name="egid" value="{$_GPC['egid']}">
+            <input type="hidden" name="pageNum" value="{$pageNum}">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    专家团详情
+                </div>
+
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">专家团名称</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <input type="text" class="form-control" name="name" value="{$expertGroup['name']}">
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">头像</label>
+                        <div class="col-sm-5 col-xs-6">
+                            {php echo tpl_form_field_image('headimg', $expertGroup['headimg'])}
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">专家团简介</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <textarea class="form-control" name="explain" style="height:150px;">{$expertGroup['explain']}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">团长名称</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <input type="text" class="form-control" name="real_name" value="{$expertGroup['real_name']}">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">营业执照</label>
+                        <div class="col-sm-5 col-xs-6">
+                            {php echo tpl_form_field_multi_image('yyzz', $expertGroup['yyzz'])}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">专家团性质</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <select name="type" class="form-control">
+                                <option {if $expertGroup['type'] == 1}selected{/if} value="1">事务所团队</option>
+                                <option {if $expertGroup['type'] == 2}selected{/if} value="2">个人团队</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">是否自己开票</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <select name="is_open" class="form-control">
+                                <option {if $expertGroup['is_open'] == 1}selected{/if} value="1">是</option>
+                                <option {if $expertGroup['is_open'] == 0}selected{/if} value="0">否</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">团队邀请码</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <input type="text" class="form-control" value="{$expertGroup['eg_code']}"  readonly="readonly">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">区域</label>
+                        <div class="col-sm-5 col-xs-6">
+                            {php echo tpl_form_field_district('address',array('province'=>$expertGroup['province'],'city'=>$expertGroup['city'],'district'=>$expertGroup['area']));}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">总营业额</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <input type="text" class="form-control" value="{$expertGroup['total_price']}" readonly="readonly">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">审核状态</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <input type="text" class="form-control" {if $expertGroup['status'] == 0}value="审核中"{elseif $expertGroup['status'] == 1}value="已审核"{else}value="已拒绝"{/if} readonly="readonly">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">创建时间</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <input type="text" class="form-control" {if $expertGroup['create_time'] != 0}value="{php echo date('Y-m-d H:i',$expertGroup['create_time'])}"{/if} readonly="readonly">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">专家团状态</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <select name="operation" class="form-control">
+                                <option {if $expertGroup['operation'] == 0}selected{/if} value="0">上线</option>
+                                <option {if $expertGroup['operation'] == 1}selected{/if} value="1">下线</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {if $expertGroup['status'] != 2}
+                        <div class="form-group col-sm-12" style="margin-top:50px;">
+                            <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" onclick="submitContent()" />
+                        </div>
+                    {/if}
+
+                    {if !empty($expertUsers)}
+                        <div style="margin-top:150px;">
+                            <center style="font-size:20px;">团员信息</center>
+                            <table class="table we7-table table-hover vertical-middle" style="position:relative">
+                                <thead class="navbar-inner">
+                                <tr>
+                                    <th>真实姓名</th>
+                                    <th>手机号</th>
+                                    <th>是否团长</th>
+                                    <th>状态</th>
+                                    <th>创建时间</th>
+                                </tr>
+                                </thead>
+                                {loop $expertUsers $i $vo}
+                                    <tr>
+                                        <td>{$vo['real_name']}</td>
+                                        <td>{$vo['mobile']}</td>
+                                        <td>{if $vo['is_head'] == 1}是{else}否{/if}</td>
+                                        <td>{if $vo['status'] == 1}未确定{elseif $vo['status'] == 2}正常{else}已删除{/if}</td>
+                                        <td>{if $vo['create_time'] != 0}{php echo date('Y-m-d H:i',$vo['create_time'])}{/if}</td>
+                                    </tr>
+                                {/loop}
+                            </table>
+                        </div>
+                    {/if}
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function submitContent(){
+            var egid = $("input[name=egid]").val();
+            var name = $("input[name=name]").val();//专家团名称
+            var headimg = $("input[name=headimg]").val();//头像
+            var explain = $("textarea[name=explain]").val();//专家团简介
+            var real_name = $("input[name=real_name]").val();//团长姓名
+            var type = $("select[name=type]").val();//专家团性质
+            var is_open = $("select[name=is_open]").val();//是否自己开票
+            var province = $("select[name='address[province]']").val();//省份
+            var city = $("select[name='address[city]']").val();//城市
+            var district = $("select[name='address[district]']").val();//县区
+            var operation = $("select[name=operation]").val();//专家团状态
+            var remarks = $("textarea[name=remarks]").val();//专家团备注
+            var dataBast_operation = "{$expertGroup['operation']}";//本身的专家团状态
+            var yyzz = '';//营业执照
+            $("input[name='yyzz[]']").each(function(){
+               yyzz += $(this).val();
+               yyzz += ',';
+            });
+            yyzz = yyzz.substr(0, yyzz.lastIndexOf(","));
+            if(name == ''){
+                util.message('专家团名称不能为空');
+                return false;
+            }
+            if(headimg == ''){
+                util.message('头像不能为空');
+                return false;
+            }
+            if(explain == ''){
+                util.message('专家团简介不能为空');
+                return false;
+            }
+            if(real_name == ''){
+                util.message('团长姓名不能为空');
+                return false;
+            }
+            if(type == 1){
+                if(yyzz == ''){
+                    util.message('营业执照不能为空');
+                    return false;
+                }
+            }
+            if(province == ''){
+                util.message('省份不能为空');
+                return false;
+            }
+            // if(city == ''){
+            //     util.message('城市不能为空');
+            //     return false;
+            // }
+            // if(district == ''){
+            //     util.message('县区不能为空');
+            //     return false;
+            // }
+
+            $.post("{php echo $this->createWebUrl('agent',array('op'=>'details'))}",{
+                egid: egid,
+                name: name,
+                headimg: headimg,
+                explain: explain,
+                real_name: real_name,
+                yyzz: yyzz,
+                type: type,
+                is_open: is_open,
+                province: province,
+                city: city,
+                district: district,
+                operation: operation,
+                remarks: remarks
+            },function(data){
+                if(data.code == 200){
+                    util.message(data.msg,"{php echo $this->createWebUrl('agent',array('op'=>'display','version_id'=>0,'eid'=>$_GPC['eid'],'page'=>$pageNum))}");
+                    return false;
+                }
+                if(data.code == 400){
+                    util.message(data.msg);
+                    return false;
+                }
+            },'json');
+        }
+    </script>
+{/if}
+<!-- 专家团详情 end -->
+<!-- 专家团服务 start -->
+{if $operation == 'expertGroupService'}
+<div id="action_list" class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-xs-12 col-sm-11" style="width:99%;">
+            <form  method="get" class="form-horizontal" role="form" action="">
+                <div class="input-group">
+                    <input type="hidden" name="c" value="site">
+                    <input type="hidden" name="a" value="entry">
+                    <input type="hidden" name="do" value="agent">
+                    <input type="hidden" name="op" value="expertGroupService">
+                    <input type="hidden" name="m" value="dg_ask">
+                    <input type="hidden" name="version_id" value="0">
+                    <select name="status_select" class="form-control input-medium">
+                        <option value="1" <?php if($status_select == 1){echo 'selected';} ?> >不按时间</option>
+                        <option value="create_time" <?php if($_GPC['status_select'] == 'create_time'){echo 'selected';} ?> >创建时间</option>
+                    </select>
+                    <span class="input-group-addon" style="padding: 0; width: 0;border:none;">
+                    </span>
+                    {php echo tpl_form_field_daterange('time',array('start'=>$_GPC['time']['start'],'end'=>$_GPC['time']['end']));}
+                    <script type="text/javascript">
+                        $(function(){
+                            $("#action_list .input-group .daterange-date").addClass("form-control");
+                        })
+                    </script>
+                    <span class="input-group-addon"></span>
+                    <select name="status" class="form-control input-medium">
+                        <option value="10" <?php if($_GPC['status'] == 10){echo 'selected';} ?> >服务状态</option>
+                        <option value="1" <?php if($_GPC['status'] == 1){echo 'selected';} ?> >已下架</option>
+                        <option value="2" <?php if($_GPC['status'] == 2){echo 'selected';} ?> >已上架</option>
+                        <option value="3" <?php if($_GPC['status'] == 3){echo 'selected';} ?> >审核中</option>
+                        <option value="4" <?php if($_GPC['status'] == 4){echo 'selected';} ?> >已拒绝</option>
+                    </select>
+                    <span class="input-group-addon">关键词</span>
+                    <input name="fwtitle" id="" type="text" value="{$_GPC['fwtitle']}" placeholder="请输入服务名称 | 专家团名称 | 团长名称" class="form-control ac_name">
+                    <span class="input-group-btn">
+                    <button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="row-fluid">
+            <div class="span8 control-group">
+                共计 {$total} 条数据
+            </div>
+        </div>
+    </div>
+    <div class="panel-body table-responsive">
+        <table class="table table-hover">
+            <thead class="navbar-inner">
+            <tr>
+                <th>团名称</th>
+                <th>团长</th>
+                <th>名称</th>
+                <th>价格</th>
+                <th>审核状态</th>
+                <th>状态</th>
+                <th>支付分期</th>
+                <th>购买模式</th>
+                <th>服务期限/月</th>
+                <th>创建时间</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {loop $expertGroupService $i $vo}
+                <tr>
+                    <td>{$vo['name']}</td>
+                    <td>{$vo['real_name']}</td>
+                    <td>{$vo['title']}</td>
+                    <td>{$vo['price']}</td>
+                    <td>
+                        {if $vo['status'] == 1 || $vo['status'] == 2}
+                            <span style="color:green;">已审核</span>
+                        {else if $vo['status'] == 3}
+                            <span>审核中</span>
+                        {else if $vo['status'] == 4}
+                            <span style="color:red;">未通过</span>
+                        {/if}
+                    </td>
+                    <td>
+                        {if $vo['status'] == 1}
+                            <span style="color:red;">已下架</span>
+                        {elseif $vo['status'] == 2}
+                            <span style="color:green;">已上架</span>
+                        {/if}
+                    </td>
+                    <td>
+                        {if $vo['is_by_stages'] == 1}是{else}否{/if}
+                    </td>
+                    <td>{if $vo['is_price'] == 1}一口价{else}议价{/if}</td>
+                    <td>{$vo['service_time']}</td>
+                    <td>{if $vo['create_time'] != 0}{php echo date('Y-m-d H:i',$vo['create_time'])}{/if}</td>
+                    <td>
+                        <a href="{php echo $this->createWebUrl('agent', array('op'=>'editGroupService','sid'=>$vo['sid'],'version_id'=>0,'page'=>$_GPC['page']))}">
+                            <label style="cursor:pointer;" class="btn btn-default btn-sm manage" >编辑</label>
+                        </a>
+                        {if $vo['status'] == 1 || $vo['status'] == 2}
+                            <a onclick="return confirm('你确定要操作吗？')" href="{php echo $this->createWebUrl('agent', array('op'=>'groupServiceDel','sid'=>$vo['sid'],'version_id'=>0,'page'=>$_GPC['page']))}">
+                                <label style="cursor:pointer;" class="btn btn-default btn-sm manage" >删除</label>
+                            </a>
+                        {/if}
+                        {if $vo['status'] == 3}
+                            <a href="{php echo $this->createWebUrl('agent', array('op'=>'groupServiceExamine','sid'=>$vo['sid'],'version_id'=>0,'page'=>$_GPC['page']))}">
+                                <label style="cursor:pointer;" class="btn btn-default btn-sm manage" >审核</label>
+                            </a>
+                        {/if}
+                        {if $vo['status'] == 1}
+                            <a onclick="return confirm('你确定要操作吗？')" href="{php echo $this->createWebUrl('agent', array('op'=>'setStatus','sid'=>$vo['sid'],'version_id'=>0,'page'=>$_GPC['page'],'status'=>2))}">
+                                <label style="cursor:pointer;" class="btn btn-default btn-sm manage" >上架</label>
+                            </a>
+                        {/if}
+                        {if $vo['status'] == 2}
+                            <a onclick="return confirm('你确定要操作吗？')" href="{php echo $this->createWebUrl('agent', array('op'=>'setStatus','sid'=>$vo['sid'],'version_id'=>0,'page'=>$_GPC['page'],'status'=>1))}">
+                                <label style="cursor:pointer;" class="btn btn-default btn-sm manage" >下架</label>
+                            </a>
+                        {/if}
+                    </td>
+                </tr>
+            {/loop}
+            </tbody>
+        </table>
+    </div>
+</div>
+{$pager}
+{/if}
+<!-- 专家团服务 end -->
+<!-- 专家团服务审核 start -->
+{if $operation == 'groupServiceExamine'}
+<div class="main">
+    <form action="" method="post" class="form-horizontal form"  id="user-submit"  enctype="multipart/form-data">
+        <input type="hidden" name="op" value="groupServiceExamine">
+        <input type="hidden" name="c" value="site">
+        <input type="hidden" name="a" value="entry">
+        <input type="hidden" name="do" value="agent">
+        <input type="hidden" name="m" value="dg_ask">
+        <input type="hidden" name="version_id" value="0">
+        <input type="hidden" name="sid" value="{$sid}">
+        <input type="hidden" name="pageNum" value="{$pageNum}">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                专家团服务审核
+            </div>
+            <div class="panel-body">
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">审核</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <select class="form-control" name="status">
+                            <option value="2">通过</option>
+                            <option value="4">拒绝</option>
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="form-group col-sm-12">
+            <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+            <input type="hidden" name="token" value="{$_W['token']}" />
+        </div>
+    </form>
+</div>
+{/if}
+<!-- 专家团服务审核 end -->
+<!-- 编辑专家团服务 start -->
+{if $operation == 'editGroupService'}
+<div class="main">
+    <form action="" method="post" class="form-horizontal form"  id="user-submit"  enctype="multipart/form-data">
+        <input type="hidden" name="op" value="editGroupService">
+        <input type="hidden" name="c" value="site">
+        <input type="hidden" name="a" value="entry">
+        <input type="hidden" name="do" value="agent">
+        <input type="hidden" name="m" value="dg_ask">
+        <input type="hidden" name="version_id" value="0">
+        <input type="hidden" name="sid" value="{$sid}">
+        <input type="hidden" name="pageNum" value="{$pageNum}">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                编辑专家团服务
+            </div>
+            <div class="panel-body">
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">专家团名称</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <input type="text" class="form-control" value="{$expertGroup['name']}" readonly="readonly">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">团长姓名</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <input type="text" class="form-control" value="{$expertGroup['real_name']}" readonly="readonly">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">专家团服务名称</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <input type="text" class="form-control" name="title" value="{$groupService['title']}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">服务简介</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <textarea class="form-control" style="height:150px;" name='service_desc'>{$groupService['service_desc']}</textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">服务价格</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <input type="number" class="form-control" value="{$groupService['price']}" name='price'>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">是否可以分期支付</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <select class="form-control" name="is_by_stages">
+                            <option {if $groupService['is_by_stages'] == 1}selected{/if} value="1">是</option>
+                            <option {if $groupService['is_by_stages'] == 0}selected{/if} value="0">否</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">购买模式</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <!-- <input type="number" class="form-control" value="{$groupService['service_time']}" name='service_time'> -->
+                        <select class="form-control" name="is_price">
+                            <option value="1" {if $groupService['is_price'] == 1}selected{/if}>一口价</option>
+                            <option value="2" {if $groupService['is_price'] == 2}selected{/if}>议价</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">服务期限</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <input type="number" class="form-control" value="{$groupService['service_time']}" name='service_time'>
+                    </div>
+                </div>
+
+                {if $groupService['status'] == 1 || $groupService['status'] == 2}
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">状态</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <select class="form-control" name="status">
+                                <option {if $groupService['status'] == 1}selected{/if} value="1">下架</option>
+                                <option {if $groupService['status'] == 2}selected{/if} value="2">上架</option>
+                            </select>
+                        </div>
+                    </div>
+                {/if}
+
+                {if $groupService['status'] == 3}
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">审核状态</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <select class="form-control" name="status">
+                                <option {if $groupService['status'] == 1}selected{/if} value="1">通过</option>
+                                <option {if $groupService['status'] == 3}selected{/if} value="3">审核中</option>
+                                <option {if $groupService['status'] == 4}selected{/if} value="4">拒绝</option>
+                            </select>
+                        </div>
+                    </div>
+                {else}
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">审核状态</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <input type="text" class="form-control" {if $groupService['status'] == 1 || $groupService['status'] == 2 }value="已审核"{elseif $groupService['status'] == 3}value="审核中"{elseif $groupService['status'] == 4}value="未通过"{/if} readonly="readonly">
+                        </div>
+                    </div>
+                {/if}
+
+            </div>
+        </div>
+        <div class="form-group col-sm-12">
+            <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" onclick="return yz()"/>
+            <input type="hidden" name="token" value="{$_W['token']}" />
+        </div>
+    </form>
+</div>
+<script>
+    var is_open = "{$expertGroup['is_open']}";
+    function yz(){
+        if($("textarea[name=service_desc]").val() == ''){
+            util.message('服务简介不能为空');
+            return false;
+        }
+        if($("textarea[name=service_desc]").val().length > 50){
+            util.message('服务简介请在50字内介绍');
+            return false;
+        }
+        if($("input[name=price]").val() == ''){
+            util.message('服务金额不能为空');
+            return false;
+        }
+        if($("input[name=price]").val() < 0){
+            util.message('请填写正确的服务金额');
+            return false;
+        }
+        if($("select[name=is_by_stages]").val() == 1){
+            if(is_open == 1){
+                util.message('团队开票的专家团不能分期支付');
+                return false;
+            }
+        }
+        if($("input[name=service_time]").val() == ''){
+            util.message('服务期限不能为空');
+            return false;
+        }
+        if($("input[name=service_time]").val() <=0 || $("input[name=service_time]").val() > 12){
+            util.message('服务期限范围1~12/月');
+            return false;
+        }
+    }
+</script>
+{/if}
+{template 'common/footer'}

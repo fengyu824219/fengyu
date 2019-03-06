@@ -1,0 +1,357 @@
+{template 'common/header'}
+<style type="text/css">
+.table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+  white-space:normal;
+}
+</style>
+<ul class="nav nav-tabs">
+	<li {if $_GPC['do'] =='' || $_GPC['do'] == 'talk_manage' && $op == 'display'}class="active"{/if}><a href="{php echo $this->createWebUrl('talk_manage', array('rid' => $rid,'version_id'=>0))}">微课管理</a></li>
+	{if  $_GPC['op'] == 'comment'}
+        <li {if  $_GPC['do'] == 'talk_manage' && $op == 'comment'}class="active"{/if}><a
+            href="{php echo $this->createWebUrl('talk_manage',array('op'=>'comment','version_id'=>0))}">评论列表</a></li>
+    {/if}
+    {if  $_GPC['op'] == 'reply'}
+        <li {if  $_GPC['do'] == 'talk_manage' && $op == 'reply'}class="active"{/if}><a
+            href="{php echo $this->createWebUrl('talk_manage',array('op'=>'reply','version_id'=>0))}">回复</a></li>
+    {/if}
+    {if  $_GPC['op'] == 'wk_details'}
+        <li {if  $_GPC['do'] == 'talk_manage' && $op == 'wk_details'}class="active"{/if}><a
+            href="{php echo $this->createWebUrl('talk_manage',array('op'=>'wk_details','version_id'=>0))}">微课详情</a></li>
+    {/if}
+</ul>
+
+<!-- 微课记录 start -->
+{if $op == 'display'}
+    <div id="action_list" class="panel panel-default">
+
+        <div class="panel-body">
+
+            <div class="col-xs-12 col-sm-11" style="width:99%;">
+			<form  method="get" class="form-horizontal" role="form">
+				<input type="hidden" name="c" value="site">
+				<input type="hidden" name="version_id" value="0">
+
+				<input type="hidden" name="a" value="entry">
+				<input type="hidden" name="do" value="talk_manage">
+				<input type="hidden" name="m" value="dg_ask">
+				<div class="input-group">
+					<span class="input-group-addon"></span>
+						<select name="is_audit" class="form-control input-medium">
+							<option value="" selected="selected">微课状态</option>
+							<option value="2"{if $_GPC['is_audit'] == 2} selected="selected"{/if}>已上架</option>
+							<option value="1"{if $_GPC['is_audit'] == 1} selected="selected"{/if}>已下架</option>
+						</select>
+					<span class="input-group-addon">关键词</span>
+						<input class="form-control ac_name" name="keyword" id="" type="text" value="{$_GPC['keyword']}" placeholder="标题 | 内容 | 发布者">
+					<span class="input-group-btn">
+
+	                <button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+
+	                </span>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<div class="panel-heading-filter">
+			共计 {$total} 条数据
+		</div>
+	</div>
+	<div class="panel-body table-responsive">
+		<table class="table table-hover" style="font-size:14px;">
+			<thead class="navbar-inner">
+				<tr>
+					<th style="width:65px;">编号</th>
+					<th style="width:65px;">发布者</th>
+					<th style="width:75px;">标题</th>
+					<th style="width:80px;">音频</th>
+					<!-- <th style="width:65px;">内容</th> -->
+					<th style="width:75px;">收听量</th>
+					<th style="width:75px;">发布时间</th>
+					<th style="width:65px;">状态</th>
+					<th style="width:180px;">操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				{loop $weike $i $row}
+				<tr id="de{$row['mi_id']}">
+					<td>{$row['mi_id']}</td>
+					<td>{if $row['real_name']}{$row['real_name']}{else}{$row['nickname']}{/if}</td>
+					<td>{$row['title']}</td>
+					<td>{if $row['answer_content_down']}<audio src='{$row["answer_content_down"]}' controls="controls"></audio>{/if}</td>
+					<!-- <?php $content=nl2br($row['content']); ?>
+					<td>{$content}</td> -->
+					<td>{$row['yuedu']}</td>
+					<td>{php echo date('Y/m/d H:i:s', $row['create_time']);}</td>
+					<td id="au{$row['mi_id']}">
+						{if $row['is_audit'] == 1}
+							<span style="color:red">已下架</span>
+						{elseif $row['is_audit'] == 2}
+							<span style="color:green">已上架</span>
+						{/if}
+					</td>
+					<td>
+						<!-- <a class="btn btn-default btn-sm manage" id="es{$row['mi_id']}" onclick="sz('essence','',{$row['mi_id']});">
+							{if $row['is_jing'] == 0}设为精选{elseif $row['is_jing'] == 1}取消精选{/if}
+						</a>
+						<a href="{php echo $this->createWebUrl('talk_manage',array('op'=>'comment','mi_id'=>$row['mi_id']))}" class="btn btn-default btn-sm manage">评论</a> -->
+						<a class="btn btn-default btn-sm manage" id="sx{$row['mi_id']}" onclick="sz('trial','',{$row['mi_id']});">
+							{if $row['is_audit'] == 1}上架{elseif $row['is_audit'] == 2}下架{/if}
+						</a>
+						<a class="btn btn-default btn-sm manage" href="{php echo $this->createWebUrl('talk_manage', array('op' => 'wk_details','version_id'=>0,'mi_id'=>$row['mi_id']))}">查看</a>
+						<a class="btn btn-default btn-sm manage" onclick="sz('del','',{$row['mi_id']});">删除</a>
+					</td>
+				</tr>
+				{/loop}
+			</tbody>
+		</table>
+	</div>
+</div>
+	{$pager}
+</div>
+
+<script>
+	function sz(op,is_audit,mi_id){
+		if(confirm('确认操作吗') == false){
+			return false;
+		};
+		$.post("{php echo $this->createWebUrl('talk_manage')}",{
+			op: op,
+			is_audit: is_audit,
+			mi_id: mi_id
+		},function(data){
+			if(data.code == 1){
+				if(op == 'essence'){
+					if(data.jing == 0){
+						$("#ji"+mi_id).text('否');
+						$("#es"+mi_id).text("设为精选");
+						util.message(data.msg, "", "success");return false;
+					}else{
+						$("#ji"+mi_id).text('是');
+						$("#es"+mi_id).text("取消精选");
+						util.message(data.msg, "", "success");return false;
+					}
+				}
+
+				if(op == 'trial'){
+					if(data.audit == 2){
+						$("#au"+mi_id).text('已上架').css({'color':'green'});
+						$("#sx"+mi_id).text('下架');
+						util.message(data.msg, "", "success");return false;
+					}else{
+						$("#au"+mi_id).text('已下架').css({'color':'red'});
+						$("#sx"+mi_id).text('上架');
+						util.message(data.msg, "", "success");return false;
+					}
+				}
+
+				if(op == 'del'){
+					$("#de"+mi_id).remove();
+					util.message(data.msg, "", "success");return false;
+				}
+
+			}
+			if(data.code == 2){
+				util.message(data.msg, "", "error");return false;
+			}
+		},'json');
+	}
+</script>
+{/if}
+<!-- 微课记录 end -->
+<!-- 微课详情 start -->
+{if $op == 'wk_details'}
+<div class="main">
+	<form action="" method="post" class="form-horizontal form"	id="user-submit"  enctype="multipart/form-data">
+		<input type="hidden" name="op" value="add_service">
+		<input type="hidden" name="id" value="{$id}">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				微课详情
+			</div>
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">发布者</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="title" class="form-control" value="{if $user['real_name']}{$user['real_name']}{else}$user['nickname']{/if}" readonly="readonly" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">标题</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="title" class="form-control" value="{$weike['title']}" readonly="readonly" />
+					</div>
+				</div>
+				{if $weike['answer_content_down']}
+					<div class="form-group">
+						<label class="col-xs-12 col-sm-3 col-md-2 control-label">音频</label>
+						<div class="col-sm-9 col-xs-12">
+							<audio src='{$weike["answer_content_down"]}' style="border:none;" class="form-control" controls="controls"></audio>
+						</div>
+					</div>
+				{/if}
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">内容</label>
+					<div class="col-sm-9 col-xs-12">
+						<textarea class="form-control" style="padding:0;" readonly="readonly">{$weike['content']}</textarea>
+					</div>
+				</div>
+
+			</div>
+		</div>
+		<!-- <div class="form-group col-sm-12">
+			<input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+			<input type="hidden" name="token" value="{$_W['token']}" />
+		</div> -->
+	</form>
+</div>
+{/if}
+<!-- 微课详情 end -->
+<!-- 评论列表 start -->
+{if $op == 'comment'}
+    <div id="action_list" class="panel panel-default">
+
+        <div class="panel-body">
+
+            <div class="col-xs-12 col-sm-11" style="width:99%;">
+			<form action="" method="get" class="form-horizontal" role="form">
+				<input type="hidden" name="c" value="site">
+				<input type="hidden" name="version_id" value="0">
+				<input type="hidden" name="a" value="entry">
+				<input type="hidden" name="do" value="talk_manage">
+				<input type="hidden" name="op" value="comment">
+				<input type="hidden" name="mi_id" value="{$_GPC['mi_id']}">
+				<input type="hidden" name="m" value="dg_ask">
+				<div class="input-group">
+					<span class="input-group-addon">状态</span>
+						<select name="is_answer" class="form-control input-medium">
+							<option value="" selected="selected">不限</option>
+							<option value="0"{if $_GPC['is_answer'] == '0'} selected="selected"{/if}>未回复</option>
+							<option value="1"{if $_GPC['is_answer'] == 1} selected="selected"{/if}>已回复</option>
+						</select>
+					<span class="input-group-addon">查询关键词</span>
+						<input class="form-control ac_name" name="keyword" id="" type="text" value="{$_GPC['keyword']}" placeholder="请输入姓名或内容关键字">
+					<span class="input-group-btn">
+
+	                <button class="btn btn-default"><i class="fa fa-search"></i>搜索</button>
+
+	                </span>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<div class="row-fluid">
+			<div class="span8 control-group">
+				共计 {$total} 条数据
+			</div>
+		</div>
+	</div>
+	<div class="panel-body table-responsive">
+		<table class="table table-hover" style="font-size:14px;">
+			<thead class="navbar-inner">
+				<tr>
+					<th style="width:65px;">编号(回复编号)</th>
+					<th style="width:75px;">留言信息</th>
+					<th style="width:65px;">头像</th>
+					<th style="width:75px;">姓名</th>
+					<th style="width:75px;">留言时间</th>
+					<th style="width:80px;">是否已回复</th>
+					<th style="width:180px;">快捷操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				{loop $comment $i $v}
+					<td>{$v['aaid']}({$v['pid']})</td>
+					<td>{$v['contents']}</td>
+					<td><img src="{$v['avatar']}" style="width:60px;height:60px;"></td>
+					<td>{$v['nickname']}</td>
+					<td>{php echo date('Y-m-d H:i:s',$v['create_time'])}</td>
+					<td>
+						{if $v['pid'] == 0}
+							{if $v['is_answer']==0}
+	                        	<span>未回复</span>
+		                    {elseif $v['is_answer']==1}
+		                        <span style="color: red">已回复</span>
+		                    {/if}
+	                    {/if}
+					</td>
+					<td>
+						{if $v['is_answer'] == 0}
+							<a class="btn btn-default btn-sm manage" href="{php echo $this->createWebUrl('talk_manage',array('op'=>'reply','aaid'=>$v['aaid'],'mi_id'=>$mi_id))}">回复</a>
+						{/if}
+						<!-- <a class="btn btn-default btn-sm manage" href="{php echo $this->createWebUrl('talk_manage',array('op'=>'set_show','aaid'=>$v['aaid'],'mi_id'=>$mi_id ,'is_show'=>$v['is_show']))}">
+							{if $v['is_show'] == 0}显示{elseif $v['is_show'] == 1}不显示{/if}
+						</a> -->
+						<a id="an{$v['aaid']}" class="btn btn-default btn-sm manage" href="#" onclick="xg('set_show',{$v['aaid']},{$v['is_show']})">
+							{if $v['is_show'] == 0}显示{elseif $v['is_show'] == 1}隐藏{/if}
+						</a>
+						<a class="btn btn-default btn-sm manage" href="#">删除</a>
+					</td>
+				</tr>
+				{/loop}
+			</tbody>
+		</table>
+	</div>
+</div>
+	{$pager}
+</div>
+<script>
+	function xg(op,aaid,is_show){
+		if (is_show == 1){
+			var is_show = 1;
+		}else{
+			var is_show = 2;
+		}
+		$.post("{php echo $this->createWebUrl('talk_manage')}",{
+			op: op,
+			aaid: aaid,
+			is_show: is_show
+		},function(data){
+			if(data.code == 1){
+				if(op == 'set_show'){
+					util.message("操作成功", "{php echo $this->createWebUrl('talk_manage',array('op'=>'comment','mi_id'=>$_GPC['mi_id']))}", "success");return false;
+				}
+			}
+		},'json');
+	}
+</script>
+{/if}
+<!-- 评论列表 start -->
+<!-- 回复 start -->
+{if $op == 'reply'}
+<form method="post" action="{php echo $this->createWebUrl('talk_manage',array('op'=>'reply'))}" class="form-horizontal bv-form" role="form" novalidate="novalidate">
+    <div class="panel panel-info">
+        <div class="panel-heading">回复</div>
+        <input type="hidden" name="do" value="talk_manage">
+        <input type="hidden" name="op" value="reply">
+        <input type="hidden" name="mi_id" value="{$mi_id}">
+        <input type="hidden" name="aaid" value="{$aaid}">
+        <input type="hidden" name="version_id" value="0">
+        <div class="panel-body">
+            <div class="form-group">
+                <label class="col-xs-12 col-sm-3 col-md-2 control-label" for="title">回复内容</label>
+                <div class="col-sm-9 col-xs-12">
+                    {php echo tpl_ueditor('info');}
+                </div>
+            </div>
+            <input type="hidden" name="id" value="{$aaid}">
+            <input type="hidden" name="type_id" value="{$type_id}">
+        </div>
+        <div class="form-group" style="margin-left: 10%;">
+            <div class="col-sm-9 col-xs-12">
+                <input type="submit" value="提交" class="btn btn-primary">
+            </div>
+        </div>
+    </div>
+</form>
+{/if}
+<!-- 回复 end -->
+{template 'common/footer'}

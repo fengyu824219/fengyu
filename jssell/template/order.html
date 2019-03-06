@@ -1,0 +1,2556 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li {if $_GPC['op'] =='' || $_GPC['op'] == 'productOrderList'}class="active"{/if}>
+        <a id="productTitle" {if !empty($countData['productOrderCount'])}title="待指派/待接单/议价：({$countData['productOrderCount']})"{/if} href="{php echo $this->createWebUrl('order',array('op'=>'productOrderList','eid'=>$_GPC['eid'],'version_id'=>0))}">
+            产品订单&nbsp;<span style="color:red;" id="productOrder">{if !empty($countData['productOrderCount'])}({$countData['productOrderCount']}){/if}</span>
+        </a>
+    </li>
+    <li {if $_GPC['op'] == 'display'}class="active"{/if}>
+        <a id="serviceTitle" {if !empty($countData['serviceOrderCount'])}title="议价：({$countData['serviceOrderCount']})"{/if} href="{php echo $this->createWebUrl('order',array('op'=>'display','eid'=>$_GPC['eid'],'version_id'=>0))}">
+            服务订单&nbsp;<span style="color:red;" id="serviceOrder">{if !empty($countData['serviceOrderCount'])}({$countData['serviceOrderCount']}){/if}</span>
+        </a>
+    </li>
+    <li {if $_GPC['op'] == 'agent_order_list'}class="active"{/if}><a
+        href="{php echo $this->createWebUrl('order',array('op'=>'agent_order_list','eid'=>$_GPC['eid'],'version_id'=>0))}">代理订单</a>
+    </li>
+    <li {if $_GPC['op'] == 'transferAccountsList'}class="active"{/if}>
+        <a id="bankTitle" {if !empty($countData['bankOrderCount'])}title="转账审核：({$countData['bankOrderCount']})"{/if} href="{php echo $this->createWebUrl('order',array('op'=>'transferAccountsList','eid'=>$_GPC['eid'],'version_id'=>0))}">
+            转账审核&nbsp;<span style="color:red;" id="bankOrder">{if !empty($countData['bankOrderCount'])}({$countData['bankOrderCount']}){/if}</span>
+        </a>
+    </li>
+    <li {if $_GPC['op'] == 'byStagesList'}class="active"{/if}>
+        <a href="{php echo $this->createWebUrl('order',array('op'=>'byStagesList','eid'=>$_GPC['eid'],'version_id'=>0))}">分期记录</a>
+    </li>
+    {if $_GPC['op'] == 'agent_order_details'}
+        <li {if $_GPC['op'] == 'agent_order_details'}class="active"{/if}><a
+            href="{php echo $this->createWebUrl('order',array('op'=>'agent_order_details','eid'=>$_GPC['eid'],'version_id'=>0))}">产品订单</a>
+        </li>
+    {/if}
+    <li {if $_GPC['op'] == 'execution_settlement'}class="active"{/if}><a href="{php echo $this->createWebUrl('order', array('rid' => $rid, 'op' => 'execution_settlement' ,'version_id'=>0))}">订单结算</a></li>
+    {if $_GPC['op'] == 'byStagesDetails'}
+        <li {if $_GPC['op'] == 'byStagesDetails'}class="active"{/if}><a href="javascript:;">分期详情</a></li>
+    {/if}
+    {if $_GPC['op'] == 'orderDetails'}
+        <li {if $_GPC['op'] == 'orderDetails'}class="active"{/if}><a href="javascript:;">订单详情</a></li>
+    {/if}
+    {if $_GPC['op'] == 'byStagesTa'}
+        <li {if $_GPC['op'] == 'byStagesTa'}class="active"{/if}><a href="javascript:;">分期转账处理</a></li>
+    {/if}
+    {if $_GPC['op'] == 'bargaining'}
+        <li {if $_GPC['op'] == 'bargaining'}class="active"{/if}><a href="javascript:;">产品议价</a></li>
+    {/if}
+    {if $_GPC['op'] == 'transferAccounts'}
+        <li {if $_GPC['op'] == 'transferAccounts'}class="active"{/if}><a href="javascript:;">转账处理</a></li>
+    {/if}
+    {if $_GPC['op'] == 'orderAppoint'}
+        <li {if $_GPC['op'] == 'orderAppoint'}class="active"{/if}><a href="javascript:;">订单指派</a></li>
+    {/if}
+</ul>
+<script>
+    requestCount();
+    function requestCount(){
+        $.post("{php echo $this->createWebUrl('order',array('op'=>'productOrderList'))}",{
+            requestCount: 1
+        },function(data){
+            //产品订单
+            if(data.data.productOrderCount != 0){
+                $("#productOrder").html("("+data.data.productOrderCount+")");
+                $("#productTitle").attr('title',"待指派/待接单/议价：("+data.data.productOrderCount+")");
+            }else{
+                $("#productOrder").html("");
+                $("#productTitle").attr('title',"");
+            }
+            //服务订单
+            if(data.data.serviceOrderCount != 0){
+                $("#serviceOrder").html("("+data.data.serviceOrderCount+")");
+                $("#serviceTitle").attr('title',"议价：("+data.data.serviceOrderCount+")");
+            }else{
+                $("#serviceOrder").html("");
+                $("#serviceTitle").attr('title',"");
+            }
+            //转账审核
+            if(data.data.bankOrderCount != 0){
+                $("#bankOrder").html("("+data.data.bankOrderCount+")");
+                $("#bankTitle").attr('title',"转账审核：("+data.data.bankOrderCount+")");
+            }else{
+                $("#bankOrder").html("");
+                $("#bankTitle").attr('title',"");
+            }
+        },'json');
+        setTimeout(function(){requestCount()}, 60000);//每隔60秒，查询一次。
+    }
+</script>
+
+<!-- 产品订单列表 start -->
+{if $operation == 'productOrderList'}
+    <div id="action_list" class="panel panel-default">
+        <div class="panel-body">
+			<form action="" method="get" class="form-horizontal" role="form" id="form1">
+				<div class="col-xs-12 col-sm-11" style="width:99%;">
+					<input type="hidden" name="op" id="op_pro" value="productOrderList">
+					<input type="hidden" name="export">
+					<input type="hidden" name="c" value="{$_GPC['c']}">
+					<input type="hidden" name="a" value="{$_GPC['a']}">
+					<input type="hidden" name="eid" value="{$_GPC['eid']}">
+					<input type="hidden" name="version_id" value="0">
+					<div class="input-group">
+						<select name="status_select" class="form-control input-medium">
+							<option value="1" <?php if($status_select == 1){echo 'selected';} ?> >不按时间</option>
+							<option value="create_time" <?php if($_GPC['status_select'] == 'create_time'){echo 'selected';} ?> >下单时间</option>
+							<option value="pay_time" <?php if($_GPC['status_select'] == 'pay_time'){echo 'selected';} ?> >支付时间</option>
+						</select>
+						<span class="input-group-addon" style="padding: 0; width: 0;border:none;"></span>
+						{php echo tpl_form_field_daterange('time',array('start'=>($_GPC['start'] ? $_GPC['start'] : $_GPC['time']['start']),'end'=>($_GPC['end'] ? $_GPC['end'] : $_GPC['time']['end'])));}
+						<script type="text/javascript">
+							$(function(){
+								$("#action_list .input-group .daterange-date").addClass("form-control");
+							})
+						</script>
+						<span class="input-group-addon"></span>
+						<select name="status" class="form-control input-medium">
+							<option value="99" <?php if($_GPC['status'] == 99){echo 'selected';} ?> >所有订单状态</option>
+							<option value="6" <?php if($_GPC['status'] == 6){echo 'selected';} ?> >议价中</option>
+							<option value="11" <?php if($_GPC['status'] == 11){echo 'selected';} ?> >待支付</option>
+							<option value="2" <?php if($_GPC['status'] == 2){echo 'selected';} ?> >待指派 / 待接单</option>
+							<option value="9" <?php if($_GPC['status'] == 9){echo 'selected';} ?> >服务中(分期付)</option>
+							<option value="10" <?php if($_GPC['status'] == 10){echo 'selected';} ?> >服务中(一次性)</option>
+							<option value="7" <?php if($_GPC['status'] == 7){echo 'selected';} ?> >待确认</option>
+							<option value="5" <?php if($_GPC['status'] == 5){echo 'selected';} ?> >已完成</option>
+							<option value="8" <?php if($_GPC['status'] == 8){echo 'selected';} ?> >已取消</option>
+							<option value="4" <?php if($_GPC['status'] == 4){echo 'selected';} ?> >已退款</option>
+						</select>
+						<span class="input-group-addon"></span>
+						<select name="pay_type" class="form-control input-medium">
+							<option value="1" <?php if($_GPC['pay_type'] == 1){echo 'selected';} ?> >全部支付方式</option>
+							<option value="wx" <?php if($_GPC['pay_type'] == 'wx'){echo 'selected';} ?> >微信支付</option>
+							<option value="ye" <?php if($_GPC['pay_type'] == 'ye'){echo 'selected';} ?> >余额支付</option>
+							<option value="yh" <?php if($_GPC['pay_type'] == 'yh'){echo 'selected';} ?> >银行支付</option>
+							<option>分期支付(开发中)</option>
+						</select>
+						<span class="input-group-addon"></span>
+						<select name="to_place_an_order" class="form-control input-medium">
+							<option value="10" <?php if($_GPC['to_place_an_order'] == 10){echo 'selected';} ?> >全部下单方式</option>
+							<option value="1" <?php if($_GPC['to_place_an_order'] == '1'){echo 'selected';} ?> >代下单</option>
+							<option value="0" <?php if($_GPC['to_place_an_order'] == '0'){echo 'selected';} ?> >用户下单</option>
+						</select>
+						<span class="input-group-addon"></span>
+						<select name="thp_order" class="form-control input-medium">
+							<option value="10" <?php if($_GPC['thp_order'] == 10){echo 'selected';} ?> >全部渠道</option>
+							<option value="midheaven" <?php if($_GPC['thp_order'] == 'midheaven'){echo 'selected';} ?> >中天</option>
+							<option value="2" <?php if($_GPC['thp_order'] == '2'){echo 'selected';} ?> >非中天</option>
+						</select>
+					</div>
+				</div>
+				<div class="col-xs-12 col-sm-11" style="width:99%;margin-top:4px;">
+					<div class="input-group">
+						<select class="form-control input-medium">
+							<option>所有产品属性(开发中)</option>
+							<option>一口价产品</option>
+							<option>议价产品</option>
+							<option>分期产品</option>
+						</select>
+						<span class="input-group-addon"></span>
+						<select name="appointStatus" class="form-control input-medium">
+							<option value="10" <?php if($_GPC['appointStatus'] == 10){echo 'selected';} ?> >不限专家跟进</option>
+							<option value="1" <?php if($_GPC['appointStatus'] == '1'){echo 'selected';} ?> >需专家(团)跟进</option>
+						</select>
+						<span class="input-group-addon">关键字</span>
+						<input type="text" name="order_sn" class="form-control ac_name" value="{$_GPC['order_sn']}" placeholder="订单编号 | 手机号码"/>
+						<span class="input-group-btn">
+							<input onclick="tj()" type="submit" class="btn" value="提交筛选" style="border:1px solid #ccc;"/>
+							<input onclick="dc()" type="button" class="btn" value="导出" style="border:1px solid #ccc;background-color: #fff;"/>
+						</span>
+					</div>
+				</div>
+			</form>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+			<div class="panel-heading-filter">
+				<span class="search_time"></span>
+				<span class="status"></span>
+				<span class="pay_type"></span>
+				<span class="to_place"></span>
+				<span class="thp_order"></span>
+				<span class="appointStatus"></span>
+				<div class="rightbutton">
+					<span>共计 <strong>{$total['num']}</strong> 条数据</span>
+					<select>
+						<option value ="">推荐排序(开发中)</option>
+						<option value ="">下单时间</option>
+						<option value ="">支付时间</option>
+					</select>
+				</div>
+			</div>
+        </div>
+        <div class="panel-body table-responsive">
+            <table class="table table-hover">
+                <thead class="navbar-inner">
+                    <tr>
+                        <!-- <th>Id</th> -->
+                        <th>订单号</th>
+                        <th>产品名称</th>
+                        <th>手机号</th>
+                        <th style="text-align: center;">状态</th>
+                        <th style="text-align: right;">订单总额</th>
+                        <th style="text-align: center;">已支付</th>
+                        <th style="text-align: center;">代下单</th>
+                        <th style="text-align: center;">中天</th>
+                        <th style="text-align: center;">下单时间</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loop $adv $i $v}
+                        <tr>
+                            <!-- <td>{$v['id']}</td> -->
+                            <td>
+								<a target="_blank" title="订单详情" href="{php echo $this->createWebUrl('order',array('op'=>'orderDetails','id'=>$v['id'],'eid'=>$_GPC['eid'],'version_id'=>0))}">
+								{$v['order_sn']}
+								</a>
+							</td>
+                            <td title="{$v['name']}">{php echo $this->str_strs($v['name'],0,6)}</td>
+                            <td>{$v['mobile']}</td>
+                            <td style="text-align: center;">
+                                {if $v['status'] == 1}
+                                    待支付
+                                {elseif $v['status'] == 2}
+                                    待接单
+                                {elseif $v['status'] == 3}
+                                    申请退款中
+                                {elseif $v['status'] == 4}
+                                    已退款
+                                {elseif $v['status'] == 5}
+                                    已完成
+                                {elseif $v['status'] == 6}
+                                    议价中
+                                {elseif $v['status'] == 7}
+                                    待确认
+                                {elseif $v['status'] == 8}
+                                    已取消
+                                {elseif $v['status'] == 9}
+                                    服务中
+                                {elseif $v['status'] == 10}
+                                    服务中
+                                {elseif $v['status'] == 11}
+                                    待支付
+                                {/if}
+                            </td>
+                            <td style="text-align: right;">{$v['price']}</td>
+                            <td title="{if $v['pay_time']}支付时间：{php echo date("Y/m/d H:i",$v['pay_time'])}{/if}" style="text-align: center;">
+                                {if $v['is_by_stages'] == 1}
+									<a title="已支付 {$v['currentNum']} 期" href="{php echo $this->createWebUrl('order',array('op'=>'byStagesList','order_sn'=>$v['order_sn'],'eid'=>$_GPC['eid'],'version_id'=>0))}" target="_blank">({$v['payNum']})</a>
+								{elseif $v['pay_type'] == 'wx'}
+                                    <i class="fa fa-wechat"></i>
+                                {elseif $v['pay_type'] == 'ye'}
+                                    余额
+                                {elseif $v['pay_type'] == 'yh'}
+                                    银行
+								{else}
+									<span title="未支付">-</span>
+                                {/if}
+                            </td>
+                            <td style="text-align: center;">
+                                {if $v['to_place_an_order'] == 1}<i title="代下单：税媒大使名字" class="fa fa-keyboard-o"></i>{/if}
+                            </td>
+                            <td style="text-align: center;">{if $v['thp_order'] == 'midheaven'}<i title="中天订单" class="fa fa-check"></i>{/if}</td>
+                            <td style="text-align: center;"><?php echo date("Y/m/d H:i",$v['create_time']) ?></td>
+                            <td>
+                                <a target="_blank" title="订单详情" href="{php echo $this->createWebUrl('order',array('op'=>'orderDetails','id'=>$v['id'],'eid'=>$_GPC['eid'],'version_id'=>0))}">
+                                    <label style="cursor:pointer;" class="btn btn-default btn-sm manage"><i class="fa fa-file-text-o"></i></label>
+                                </a>
+                                {if ($v['is_platform'] == 1 && ($v['status'] == 6 || $v['status'] == 11)) || $v['status'] == 1}
+                                    <a title="取消订单" onclick="return confirm('是否取消订单？')" href="{php echo $this->createWebUrl('order',array('op'=>'cancelOrder','id'=>$v['id']))}">
+                                        <label style="cursor:pointer;" class="btn btn-default btn-sm manage"><i class="fa fa-close"></i></label>
+                                    </a>
+                                {/if}
+                                {if $v['is_platform'] == 1 && $v['status'] == 6}
+                                    <a href="{php echo $this->createWebUrl('order',array('op'=>'bargaining','id'=>$v['id'],'eid'=>$_GPC['eid'],'page'=>$_GPC['page'],'version_id'=>0))}">
+                                        <label style="cursor:pointer;" class="btn btn-default btn-sm manage">议价</label>
+                                    </a>
+                                {/if}
+                                {if $v['is_platform'] == 1 && ($v['status'] == 2 || $v['status'] == 9 || $v['status'] == 10)}
+                                    {if ($v['zid'] == 0 && $v['invitation_code'] == 0 && $v['partner_id'] == 0) || $v['is_group'] == 0}
+                                        <a href="{php echo $this->createWebUrl('order', array('op' => 'orderAppoint','id'=>$v['id'],'page'=>$_GPC['page'],'version_id'=>0))}">
+                                            <label style="cursor:pointer;" class="btn btn-default btn-sm manage">指派</label>
+                                        </a>
+                                    {/if}
+                                {/if}
+                            </td>
+                        </tr>
+                    {/loop}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {$pager}
+    <script>
+        function tj(){
+            $('input[name=export]').val('');
+            $('#op_pro').val('productOrderList');
+            $('#form1').submit();
+        }
+
+        function dc(){
+            $('input[name=export]').val('yes');
+            $('#op_pro').val('productOrderList');
+            $('#form1').submit();
+        }
+    </script>
+{/if}
+<!-- 产品订单列表 end -->
+<!-- 服务订单列 start -->
+{if $operation == 'display'}
+    <div id="action_list" class="panel panel-default">
+        <div class="panel-body">
+            <div class="col-xs-12 col-sm-11" style="width:99%;">
+                <form action="" method="get" class="form-horizontal" role="form" id="form1">
+                    <input type="hidden" name="op" id="op_dis" value="display">
+                    <input type="hidden" name="export">
+                    <input type="hidden" name="c" value="{$_GPC['c']}">
+                    <input type="hidden" name="a" value="{$_GPC['a']}">
+                    <input type="hidden" name="eid" value="{$_GPC['eid']}">
+                    <input type="hidden" name="version_id" value="0">
+                    <div class="input-group">
+                        <select name="status_select" class="form-control input-medium">
+                            <option value="1" <?php if($status_select == 1){echo 'selected';} ?> >不按时间</option>
+                            <option value="create_time" <?php if($_GPC['status_select'] == 'create_time'){echo 'selected';} ?> >下单时间</option>
+                            <option value="pay_time" <?php if($_GPC['status_select'] == 'pay_time'){echo 'selected';} ?> >支付时间</option>
+                        </select>
+                        <span class="input-group-addon" style="padding: 0; width: 0;border:none;">
+                        </span>
+                      {php echo tpl_form_field_daterange('time',array('start'=>($_GPC['start'] ? $_GPC['start'] : $_GPC['time']['start']),'end'=>($_GPC['end'] ? $_GPC['end'] : $_GPC['time']['end'])));}
+                        <script type="text/javascript">
+                            $(function(){
+                                $("#action_list .input-group .daterange-date").addClass("form-control");
+                            })
+                        </script>
+                        <span class="input-group-addon"></span>
+                        <select name="status" class="form-control input-medium">
+                            <option value="99" <?php if($_GPC['status'] == 99){echo 'selected';} ?> >状态</option>
+                            <option value="6" <?php if($_GPC['status'] == 6){echo 'selected';} ?> >议价中</option>
+                            <option value="11" <?php if($_GPC['status'] == 11){echo 'selected';} ?> >待支付</option>
+                            <option value="2" <?php if($_GPC['status'] == 2){echo 'selected';} ?> >已支付</option>
+                            <option value="9" <?php if($_GPC['status'] == 9){echo 'selected';} ?> >服务中(分期付)</option>
+                            <option value="10" <?php if($_GPC['status'] == 10){echo 'selected';} ?> >服务中(一次性)</option>
+                            <option value="7" <?php if($_GPC['status'] == 7){echo 'selected';} ?> >待确认</option>
+                            <option value="5" <?php if($_GPC['status'] == 5){echo 'selected';} ?> >已完成</option>
+                            <option value="8" <?php if($_GPC['status'] == 8){echo 'selected';} ?> >已取消</option>
+                            <option value="4" <?php if($_GPC['status'] == 4){echo 'selected';} ?> >已退款</option>
+                        </select>
+                        <span class="input-group-addon"></span>
+                        <select name="pay_type" class="form-control input-medium">
+                            <option value="1" <?php if($_GPC['pay_type'] == 1){echo 'selected';} ?> >支付</option>
+                            <option value="wx" <?php if($_GPC['pay_type'] == 'wx'){echo 'selected';} ?> >微信</option>
+                            <option value="ye" <?php if($_GPC['pay_type'] == 'ye'){echo 'selected';} ?> >余额</option>
+                            <option value="yh" <?php if($_GPC['pay_type'] == 'yh'){echo 'selected';} ?> >银行</option>
+                        </select>
+                        <span class="input-group-addon"></span>
+                        <select name="thp_order" class="form-control input-medium">
+                            <option value="10" <?php if($_GPC['thp_order'] == 10){echo 'selected';} ?> >渠道</option>
+                            <option value="midheaven" <?php if($_GPC['thp_order'] == 'midheaven'){echo 'selected';} ?> >中天</option>
+                            <option value="2" <?php if($_GPC['thp_order'] == '2'){echo 'selected';} ?> >非中天</option>
+                        </select>
+                        <span class="input-group-addon">关键字</span>
+                        <input type="text" name="order_sn" class="form-control ac_name" value="{$_GPC['order_sn']}" placeholder="订单编号 | 手机号码"/>
+                        <span class="input-group-btn">
+                        <input onclick="tj()" type="submit" class="btn" value="提交筛选" style="border:1px solid #ccc;"/>
+                        <input onclick="dc()" type="button" class="btn" value="导出" style="border:1px solid #ccc;background-color: #fff;"/>
+                        </span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+			<div class="panel-heading-filter">
+				<span class="search_time"></span>
+				<span class="status"></span>
+				<span class="pay_type"></span>
+				<span class="thp_order"></span>
+
+				<span style="float:right;">共计 {$total['num']} 条数据</span>
+			</div>
+        </div>
+        <div class="panel-body table-responsive">
+            <table class="table table-hover">
+                <thead class="navbar-inner">
+                    <tr>
+                        <!-- <th>Id</th> -->
+                        <th>订单号</th>
+                        <th>服务名称</th>
+                        <th>手机号</th>
+                        <th style="text-align: center;">状态</th>
+                        <th style="text-align: right;">订单总额</th>
+                        <th style="text-align: center;">已支付</th>
+                        <th style="text-align: center;">代下单</th>
+                        <th style="text-align: center;">中天</th>
+                        <th style="text-align: center;">下单时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loop $adv $i $v}
+                        <tr>
+                            <!-- <td>{$v['id']}</td> -->
+                            <td>
+                                <a target="_blank" title="订单详情" href="{php echo $this->createWebUrl('order',array('op'=>'orderDetails','id'=>$v['id'],'eid'=>$_GPC['eid'],'version_id'=>0))}">
+                                {$v['order_sn']}
+                                </a>
+                            </td>
+                            <td title="{$v['name']}">{php echo $this->str_strs($v['name'],0,6)}</td>
+                            <td>{$v['mobile']}</td>
+                            <td style="text-align: center;">
+                                {if $v['status'] == 1}
+                                    待支付(议价)
+                                {elseif $v['status'] == 2}
+                                    待接单
+                                {elseif $v['status'] == 3}
+                                    申请退款中
+                                {elseif $v['status'] == 4}
+                                    已退款
+                                {elseif $v['status'] == 5}
+                                    已完成
+                                {elseif $v['status'] == 6}
+                                    议价中
+                                {elseif $v['status'] == 7}
+                                    待确认
+                                {elseif $v['status'] == 8}
+                                    已取消
+                                {elseif $v['status'] == 9}
+                                    服务中
+                                {elseif $v['status'] == 10}
+                                    服务中
+                                {elseif $v['status'] == 11}
+                                    待支付(议价)
+                                {/if}
+                            </td>
+                            <td style="text-align: right;">{$v['price']}</td>
+                            <td title="{if $v['pay_time']}支付时间：{php echo date("Y/m/d H:i",$v['pay_time'])}{/if}" style="text-align: center;">
+                                {if $v['is_by_stages'] == 1}
+                                    <a title="已支付 {$v['currentNum']} 期" href="{php echo $this->createWebUrl('order',array('op'=>'byStagesList','order_sn'=>$v['order_sn'],'eid'=>$_GPC['eid'],'version_id'=>0))}" target="_blank">({$v['payNum']})</a>
+                                {elseif $v['pay_type'] == 'wx'}
+                                    <i class="fa fa-wechat"></i>
+                                {elseif $v['pay_type'] == 'ye'}
+                                    余额
+                                {elseif $v['pay_type'] == 'yh'}
+                                    银行
+                                {else}
+                                    <span title="未支付">-</span>
+                                {/if}
+                            </td>
+                            <td style="text-align: center;">
+                                {if $v['to_place_an_order'] == 1}<i title="代下单：税媒大使名字" class="fa fa-keyboard-o"></i>{/if}
+                            </td>
+                            <td style="text-align: center;">{if $v['thp_order'] == 'midheaven'}<i title="中天订单" class="fa fa-check"></i>{/if}</td>
+                            <td style="text-align: center;"><?php echo date("Y/m/d H:i",$v['create_time']) ?></td>
+                            <td>
+                                <a target="_blank" title="订单详情" href="{php echo $this->createWebUrl('order',array('op'=>'orderDetails','id'=>$v['id'],'eid'=>$_GPC['eid'],'version_id'=>0))}">
+                                    <label style="cursor:pointer;" class="btn btn-default btn-sm manage"><i class="fa fa-file-text-o"></i></label>
+                                </a>
+                                {if ($v['is_platform'] == 1 && ($v['status'] == 6 || $v['status'] == 11)) || $v['status'] == 1}
+                                    <a title="取消订单" onclick="return confirm('是否取消订单？')" href="{php echo $this->createWebUrl('order',array('op'=>'cancelOrder','id'=>$v['id']))}">
+                                        <label style="cursor:pointer;" class="btn btn-default btn-sm manage"><i class="fa fa-close"></i></label>
+                                    </a>
+                                {/if}
+                                {if $v['is_platform'] == 1 && $v['status'] == 6}
+                                    <a href="{php echo $this->createWebUrl('order',array('op'=>'bargaining','id'=>$v['id'],'eid'=>$_GPC['eid'],'page'=>$_GPC['page'],'version_id'=>0))}">
+                                        <label style="cursor:pointer;" class="btn btn-default btn-sm manage">议价</label>
+                                    </a>
+                                {/if}
+                            </td>
+                        </tr>
+                    {/loop}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {$pager}
+    <script>
+        function tj(){
+            $('input[name=export]').val('');
+            $('#op_dis').val('display');
+            $('#form1').submit();
+        }
+
+        function dc(){
+            $('input[name=export]').val('yes');
+            $('#op_dis').val('display');
+            $('#form1').submit();
+        }
+    </script>
+{/if}
+<!-- 服务订单列表 end -->
+
+<!-- 订单转账列表 start -->
+{if $operation == 'transferAccountsList'}
+    <div id="action_list" class="panel panel-default">
+        <div class="panel-body">
+            <div class="col-xs-12 col-sm-11" style="width:99%;">
+                <form action="" method="get" class="form-horizontal" role="form" id="form1">
+                    <input type="hidden" name="op" value="transferAccountsList">
+                    <input type="hidden" name="c" value="{$_GPC['c']}">
+                    <input type="hidden" name="a" value="{$_GPC['a']}">
+                    <input type="hidden" name="eid" value="{$_GPC['eid']}">
+                    <input type="hidden" name="version_id" value="0">
+                    <div class="input-group">
+                        <select name="status_select" class="form-control input-medium">
+                            <option value="1" <?php if($status_select == 1){echo 'selected';} ?> >不按时间</option>
+                            <option value="create_time" <?php if($_GPC['status_select'] == 'create_time'){echo 'selected';} ?> >下单时间</option>
+                        </select>
+                        <span class="input-group-addon" style="padding: 0; width: 0;border:none;">
+                        </span>
+                        {php echo tpl_form_field_daterange('time',array('start'=>$_GPC['time']['start'],'end'=>$_GPC['time']['end']));}
+                        <script type="text/javascript">
+                            $(function(){
+                                $("#action_list .input-group .daterange-date").addClass("form-control");
+                            })
+                        </script>
+                        <span class="input-group-addon"></span>
+                        <select name="to_place_an_order" class="form-control input-medium">
+                            <option value="10" <?php if($_GPC['to_place_an_order'] == 10){echo 'selected';} ?> >所有下单方式</option>
+                            <option value="1" <?php if($_GPC['to_place_an_order'] == '1'){echo 'selected';} ?> >代下单</option>
+                            <option value="0" <?php if($_GPC['to_place_an_order'] == '0'){echo 'selected';} ?> >用户下单</option>
+                        </select>
+                        <span class="input-group-addon"></span>
+                        <select name="thp_order" class="form-control input-medium">
+                            <option value="10" <?php if($_GPC['thp_order'] == 10){echo 'selected';} ?> >全部渠道</option>
+                            <option value="midheaven" <?php if($_GPC['thp_order'] == 'midheaven'){echo 'selected';} ?> >中天</option>
+                            <option value="2" <?php if($_GPC['thp_order'] == '2'){echo 'selected';} ?> >非中天</option>
+                        </select>
+                        <span class="input-group-addon">关键字</span>
+                        <input type="text" name="order_sn" class="form-control ac_name" value="{$_GPC['order_sn']}" placeholder="订单编号 | 手机号"/>
+                        <span class="input-group-btn">
+                            <input type="submit" class="btn" value="提交筛选" style="border:1px solid #ccc;"/>
+                        </span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+			<div class="panel-heading-filter">
+			<span class="search_time"></span>
+			<span class="to_place"></span>
+			<span class="thp_order"></span>
+				<span style="float:right;">共计 {$total} 条数据</span>
+			</div>
+        </div>
+        <div class="panel-body table-responsive">
+            <table class="table table-hover">
+                <thead class="navbar-inner">
+                    <tr>
+                        <th>服务名称</th>
+                        <th>订单编号</th>
+                        <th>手机号</th>
+                        <th style="text-align: right;">支付金额</th>
+                        <th style="text-align: center;">分期</th>
+                        <th style="text-align: center;">代下单</th>
+                        <th style="text-align: center;">中天</th>
+                        <th>下单时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loop $order $i $v}
+                        <tr>
+                            {if $v['is_bankPay'] == 'yes' || ($v['status'] == 1 && $v['pay_type'] == 'yh')}
+                                <!-- <td>{$v['id']}</td> -->
+                                <td>{$v['name']}</td>
+                                <td>
+                                    <a target="_blank" title="订单详情" href="{php echo $this->createWebUrl('order',array('op'=>'orderDetails','id'=>$v['id'],'eid'=>$_GPC['eid'],'version_id'=>0))}">
+                                        {$v['order_sn']}
+                                    </a>
+                                </td>
+                                <td>{$v['mobile']}</td>
+                                <td style="text-align: right;">
+                                    {if $v['is_bankPay'] == 'yes'}
+                                        {$v['currentPrice']}
+                                    {else}
+                                        {$v['price']}
+                                    {/if}
+                                </td>
+                                <td title="订单总额：{$v['price']}元" style="text-align: center;">{if $v['is_bankPay'] == 'yes'}({$v['payNum']}){/if}</td>
+                                <td title="代下单" style="text-align: center;">
+                                    {if $v['to_place_an_order'] == 1}<i class="fa fa-check"></i>{/if}
+                                </td>
+                                <td title="中天订单" style="text-align: center;">{if $v['thp_order'] == 'midheaven'}<i class="fa fa-check"></i>{/if}</td>
+                                <td><?php echo date("Y/m/d H:i",$v['create_time']) ?></td>
+                                <td>
+                                    <a href="{php echo $this->createWebUrl('order',array('op'=>'orderDetails','id'=>$v['id'],'eid'=>$_GPC['eid'],'version_id'=>0))}">
+                                        <label style="cursor:pointer;" class="btn btn-default btn-sm manage"><i class="fa fa-file-text-o"></i></label>
+                                    </a>
+                                    {if $v['pay_type'] == 'yh' && $v['status'] == 1 && $v['is_by_stages'] == 0}
+                                        <a class="btn btn-default btn-sm manage" style="color:#DA1740;" href="{php echo $this->createWebUrl('order',array('op'=>'transferAccounts','version_id'=>0,'id'=>$v['id'],'eid'=>$_GPC['eid'],'page'=>$_GPC['page']))}">转账审核</a>
+                                    {elseif $v['is_bankPay'] == 'yes'}
+                                        <a target="_blank" class="btn btn-default btn-sm manage" style="color:#DA1740;" href="{php echo $this->createWebUrl('order',array('op'=>'byStagesTa','bsid'=>$v['bsid'],'eid'=>$_GPC['eid']))}">转账审核</a>
+                                    {/if}
+                                    {if ($v['is_platform'] == 1 && ($v['status'] == 6 || $v['status'] == 11)) || $v['status'] == 1}
+                                        <a title="取消订单" onclick="return confirm('你确定要操作吗？')" href="{php echo $this->createWebUrl('order',array('op'=>'cancelOrder','id'=>$v['id']))}">
+                                            <label style="cursor:pointer;" class="btn btn-default btn-sm manage"><i class="fa fa-close"></i></label>
+                                        </a>
+                                    {/if}
+                                </td>
+                            {/if}
+                        </tr>
+                    {/loop}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {$pager}
+{/if}
+<!-- 订单转账列表 end -->
+<!-- 转账处理 start -->
+{if $operation == 'transferAccounts'}
+    <div class="main">
+        <div class="form-horizontal form">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    线下转账
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">服务名称</label>
+                        <div class="col-sm-5 col-xs-6 form-control-static">
+                           <input class="form-control" value="{$order['name']}" readonly="readonly" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">金额</label>
+                        <div class="col-sm-5 col-xs-6 form-control-static">
+                           <input class="form-control" value="{$order['price']}" readonly="readonly" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">用户名称</label>
+                        <div class="col-sm-5 col-xs-6 form-control-static">
+                           <input class="form-control" value="{$user['nickname']}" readonly="readonly" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">手机号</label>
+                        <div class="col-sm-5 col-xs-6 form-control-static">
+                           <input class="form-control" value="{$user['mobile']}" readonly="readonly" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">转账凭证</label>
+                        <div class="col-sm-5 col-xs-6">
+                            {php echo tpl_form_field_image('voucher','');}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">流水号</label>
+                        <div class="col-sm-5 col-xs-6 form-control-static">
+                           <input class="form-control" name="serial_number" value="" />
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="form-group col-sm-12">
+                <input type="submit" name="submit" value="确认" class="btn btn-default btn-sm manage submit" onclick="confirmClick()"/>
+                <input type="hidden" name="token" value="{$_W['token']}" />
+            </div>
+        </div>
+    </div>
+    <script>
+        function confirmClick(){
+            if(confirm('你确定要操作吗？') == false){
+                return false;
+            }
+            var id = "{$order['id']}";
+            var openid = "{$user['openid']}";//订单号
+            var voucher = $("input[name=voucher]").val();//转账凭证
+            var serial_number = $("input[name=serial_number]").val();//流水号
+            var eid = "{$eid}";
+            var pageNumber = "{$page}";
+
+            if(voucher == ''){
+                util.message('请上传转账凭证');
+                return false;
+            }
+
+            if(serial_number == ''){
+                util.message('流水号不能为空');
+                return false;
+            }
+
+            $.post("{php echo $this->createWebUrl('order',array('op'=>'transferAccounts'))}",{
+                id: id,
+                openid: openid,
+                voucher: voucher,
+                serial_number: serial_number
+            },function(data){
+                if(data.code == 200){
+                    util.message(data.msg,setTimeout(function(){
+                        window.location.href = "{php echo $this->createWebUrl('order',array('op'=>'display'))}&eid="+eid+"&page="+pageNumber;
+                    },1000),'success');
+                    return false;
+                }else{
+                    util.message(data.msg,'','error');
+                    return false;
+                }
+            },'json');
+        }
+    </script>
+{/if}
+<!-- 转账处理 end -->
+<!-- 订单指派 start -->
+{if $operation == 'orderAppoint'}
+    <style type="text/css">
+    .table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+      white-space:normal;
+    }
+    </style>
+    <input type="hidden" name="id" value="{$order['id']}">
+    <input type="hidden" name="page" value="{$page}">
+    <div class="tab-content">
+        <div class="panel-body table-responsive clearfix">
+            <table class="table we7-table table-hover vertical-middle" style="position:relative">
+                <thead class="navbar-inner">
+                    <tr><th>用户名称</th><td>{$user['nickname']}</td><th>手机号</th><td>{$user['mobile']}</td></tr>
+                    <tr><th>服务名称</th><td>{$order['name']}</td><th>订单编号</th><td>{$order['order_sn']}</td></tr>
+                    <tr><th>支付类型</th><td>{$order['pay_type']}</td><th>支付金额</th><td>{$order['price']}</td></tr>
+                    <tr>
+                        <th>支付时间</th><td>{$order['pay_time']}</td>
+                        <th>结束时间</th><td>{if !empty($order['end_time'])}{$order['end_time']}{/if}</td>
+                    </tr>
+                    <tr><th>省份</th><td>{$order['province']}</td><th>城市</th><td>{$order['city']}</td></tr>
+                    <tr><th>县区</th><td>{$order['area']}</td><th>详细地址</th><td>{$order['address']}</td></tr>
+                    <tr>
+                        <th>指派专家</th>
+                        <td>
+                            <!-- {if $order['zid'] == 0}
+                                <div class="input-group">
+                                    <input type='text' class="form-control" name='dataContent' readonly="readonly" style="width:300px">
+                                    <input type='hidden' name='zid'>
+                                    <input type='hidden' name='group_egid'>
+                                    <a href="javascript:;" style="margin-left:25px;" onclick="appointFrame('appointExpert');">
+                                        <label style="cursor:pointer;" class="btn btn-default btn-sm manage">指派</label>
+                                    </a>
+                                </div>
+                            {else}
+                                <div class="input-group">
+                                    <input type='text' class="form-control" value="{$expert['name']}" readonly="readonly" style="width:300px">
+                                </div>
+                            {/if} -->
+                            <div class="input-group">
+                                <input type='text' class="form-control" name='dataContent' value="{$expert['name']}" readonly="readonly" style="width:300px">
+                                {if $order['is_group']  == 0}
+                                    <input type='hidden' name='zid'>
+                                    <input type='hidden' name='group_egid'>
+                                    <a href="javascript:;" style="margin-left:25px;" onclick="appointFrame('appointExpert');">
+                                        <label style="cursor:pointer;" class="btn btn-default btn-sm manage">指派</label>
+                                    </a>
+                                {/if}
+                            </div>
+                        </td>
+                        <th>指派税媒大使</th>
+                        <td>
+                            <div class="input-group">
+                                {if !empty($order['invitation_code'])}
+                                    <input type="text" class="form-control" value="{$salesman['real_name']}" readonly="readonly" style="width:300px">
+                                {else}
+                                    <input id="sal" type="text" class="form-control" value="税媒平台" readonly="readonly" style="width:300px">
+                                    <input type='hidden' name='invitation_code' value="999999">
+                                {/if}
+                            </div>
+                            <!-- <div class="input-group">
+                                <input id="sal" type="text" class="form-control" value="{$salesman['real_name']}" readonly="readonly" style="width:300px">
+                                <input type='hidden' name='invitation_code'>
+                                {if empty($order['invitation_code'])}
+                                    <a href="javascript:;" style="margin-left:25px;" onclick="appointFrame('appointSalesman');">
+                                        <label style="cursor:pointer;" class="btn btn-default btn-sm manage">指派</label>
+                                    </a>
+                                {/if}
+                            </div> -->
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>专家结算比例</th>
+                        <td>
+                            {if !empty($order['zid']) && !empty($order['invitation_code']) && !empty($order['partner_id'])}
+                                <input type="number" name="expert_scale" readonly="readonly" value="{$order['expert_scale']}" class="form-control" style="width:300px">
+                            {else}
+                                <input type="number" name="expert_scale" value="50" class="form-control" style="width:300px">
+                            {/if}
+                        </td>
+                        <th>税媒大使结算比例</th>
+                        <td>
+                            {if !empty($order['zid']) && !empty($order['invitation_code']) && !empty($order['partner_id'])}
+                                <input type="number" name="salesman_scale" readonly="readonly" value="{$order['salesman_scale']}" class="form-control" style="width:300px">
+                            {else}
+                                <input type="number" name="salesman_scale" value="20" class="form-control" style="width:300px">
+                            {/if}
+                        </td>
+                    </tr>
+                    <tr>
+                        <!-- <th>指定业务总监</th>
+                        <td>
+                            <div class="input-group">
+                                <input id="boss" type="text" class="form-control" value="{$chief['real_name']}" readonly="readonly" style="width:300px">
+                                <input type='hidden' name='boss_id'>
+                                {if empty($order['boss_id'])}
+                                    <a href="javascript:;" style="margin-left:25px;" onclick="appointSearch('appointBoss');">
+                                        <label style="cursor:pointer;" class="btn btn-default btn-sm manage">指定</label>
+                                    </a>
+                                {/if}
+                            </div>
+                        </td> -->
+                        <th>指定合伙人</th>
+                        <td colspan="3">
+                            <div class="input-group">
+                                <input id="par" type="text" class="form-control" value="{$partner['real_name']}" readonly="readonly" style="width:300px">
+                                <input type='hidden' name='partner_id'>
+                                {if empty($order['partner_id'])}
+                                    <a href="javascript:;" style="margin-left:25px;" onclick="appointSearch('appointPartner');">
+                                        <label style="cursor:pointer;" class="btn btn-default btn-sm manage">指定</label>
+                                    </a>
+                                {/if}
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <!-- <th>总监结算比例</th>
+                        <td>
+                            <input type="number" name="boss_scale" value="{$order['boss_scale']}" class="form-control" style="width:300px">
+                        </td> -->
+                        <th>合伙人结算比例</th>
+                        <td colspan="3">
+                            {if !empty($order['zid']) && !empty($order['invitation_code']) && !empty($order['partner_id'])}
+                                <input type="number" name="partner_scale" readonly="readonly" value="{$order['partner_scale']}" class="form-control" style="width:300px">
+                            {else}
+                                <input type="number" name="partner_scale" value="10" class="form-control" style="width:300px">
+                            {/if}
+                        </td>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    <div class="form-group col-sm-12" style="margin-top:50px;">
+        <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" onclick="judge()" />
+        <input type="hidden" name="token" value="{$_W['token']}" />
+    </div>
+
+    <div class="modal fade" id="appoint" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width:800px;">
+            <div class="modal-content">
+                <input type="hidden" name="m" value=""/>
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <span><h4 id="titleFrame"></h4></span>
+                </div>
+                <div class="modal-body" style="padding:50px 30px!important;">
+                        <div class="row clearfix" style="padding-top:30px!important;">
+                            <select style="float:left;" name="type" id="dropDownExpertGroup">
+                                <option value='0'>请选择</option>
+                                <option value='1' {if $order['appoint_type'] == 1}selected{/if}>个人专家</option>
+                                <option value='2' {if $order['appoint_type'] == 2}selected{/if}>专家团</option>
+                            </select>
+                            <select style="float:left;" name="level_id" id="dropDownExpert">
+                                <option value='0'>请选择</option>
+                                <option value='1' {if $order['level_id'] == 1}selected{/if}>中级专家</option>
+                                <option value='2' {if $order['level_id'] == 2}selected{/if}>高级专家</option>
+                                <option value='3' {if $order['level_id'] == 3}selected{/if}>资深级专家</option>
+                                <option value='4' {if $order['level_id'] == 4}selected{/if}>大师级专家</option>
+                            </select>
+                            <div class="input-group" style="float:left;width:50px">
+                                <input type="text" style="width:450px!important" autocomplete="off" class="form-control" name="keyword" value="" id="keyword" placeholder="请输入真实姓名/手机号/专家团名称/团长姓名">
+                                <span class="input-group-btn"><button type="button" class="btn btn-default" onclick="search_members();">搜索</button></span>
+                           </div>
+                        </div>
+                        <div id="module-menus" style="padding-top:5px;">
+                        <div style="max-height:500px;overflow:auto;min-width:750px;">
+                            <table class="table table-hover" style="min-width:750px;">
+                                <tbody id="search_list">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var appointType;//指定类型
+        function appointFrame(type){//指定专家或专家团或税媒大使弹出框
+            $("#search_list").html('');
+            appointType = type;
+            if(type == 'appointExpert'){
+                $("#dropDownExpertGroup").show();
+                $("#dropDownExpert").show();
+                $("#titleFrame").html('指定专家或专家团');
+                $("#keyword").attr('placeholder','请输入真实姓名/手机号/专家团名称/团长姓名');
+            }else{
+                $("#dropDownExpertGroup").hide();
+                $("#dropDownExpert").hide();
+                $("#titleFrame").html('指定税媒大使');
+                $("#keyword").attr('placeholder','请输入真实姓名/手机号/昵称');
+            }
+            $("#appoint").modal('show');
+        }
+
+        //回车键搜索
+        $('#keyword').bind('keyup', function(event) {
+            if (event.keyCode == "13") {
+                search_members();
+            }
+        });
+
+        function search_members(){//搜索专家或专家团
+            $("#search_list").html('');
+            var type = $("select[name=type]").val();
+            var level_id = $("select[name=level_id]").val();
+            var order_level_id = "{$order['level_id']}";
+            var order_appoint_type = "{$order['appoint_type']}";
+            var order_zid_data = "{$order['zid']}";
+            var messageContent;
+            if(order_level_id == 1){
+                messageContent = '该订单只能指定中级专家';
+            }else if(order_level_id == 2){
+                messageContent = '该订单只能指定高级专家';
+            }else if(order_level_id == 3){
+                messageContent = '该订单只能指定资深专家';
+            }else if(order_level_id == 4){
+                messageContent = '该订单只能指定大师级专家';
+            }
+            var keyword = $("input[name=keyword]").val();
+
+            if(order_appoint_type != 0){
+                if(order_appoint_type == 1 && order_appoint_type != type){
+                    util.message("该订单只能指定个人专家");
+                    return false;
+                }
+                if(order_appoint_type == 2 && order_appoint_type != type){
+                    util.message("该订单只能指定专家团");
+                    return false;
+                }
+            }
+            if(order_zid_data != 0 && type == 2){
+                util.message("该订单只能指定个人专家");
+                return false;
+            }
+            if(appointType == 'appointExpert'){//搜索专家或专家团
+                if(type == 0){
+                    util.message("请选择指定类型");
+                    return false;
+                }
+                if(type == 1){//个人专家
+                    if(level_id == 0 && keyword == ''){
+                        util.message("请选择专家等级或输入搜索内容");
+                        return false
+                    }
+                    if(order_level_id != 0){
+                        if(order_level_id != level_id){
+                            util.message(messageContent);
+                            return false
+                        }
+                    }
+                }
+                if(type == 2){//专家团
+                    if(keyword == ''){
+                        util.message("请输入搜索的内容");
+                        return false;
+                    }
+                }
+            }else{//搜索税媒大使
+                if(keyword == ''){
+                    util.message("请输入搜索的内容");
+                    return false;
+                }
+            }
+
+            $.post("{php echo $this->createWebUrl('order',array('op'=>'searchExpert'))}",{
+                appointType: appointType,
+                type: type,
+                level_id: level_id,
+                keyword: keyword
+            },function(data){
+                if(data.code == 200){
+                    var html = getRows(data.content);
+                    $("#search_list").append(html);
+                }
+            },'json');
+        }
+
+        function getRows(data){//搜索专家或专家团或税媒大使结果
+            var html='';
+            for(i=0;i<data.length;i++){
+                data[i]['kname'] = "'"+data[i]['nickname']+"'";
+                data[i]['rname'] = "'"+data[i]['real_name']+"'";
+                if(appointType == 'appointSalesman'){
+                    data[i]['uid'] = data[i]['id'];
+                    data[i]['id'] = data[i]['invitation_code'];
+                    data[i]['typeData'] = '';
+                }
+                html += '<tr>';
+                html += '<td>';
+                html += '<img src="'+data[i]['avatar']+'" style="width:30px;height:30px;padding1px;border:1px solid #ccc">'+data[i]['nickname'];
+                html += '</td>';
+                if(data[i]['real_name'] != null){
+                    html += '<td>'+data[i]['real_name']+'</td>';
+                }else{
+                    html += '<td></td>';
+                }
+                if(data[i]['mobile'] != null){
+                    html += '<td>'+data[i]['mobile']+'</td>';
+                }else{
+                    html += '<td></td>';
+                }
+                html+='<td style="width:80px;"><a href="javascript:;" onclick="select_member('+data[i]['id']+','+data[i]['uid']+','+data[i]['kname']+','+data[i]['rname']+','+data[i]['typeData']+')">选择</a></td>';
+                html+='</tr>';
+            }
+            return html;
+        }
+
+        function select_member(type_id,uid,nickname,real_name,typeData){//选择指定
+            if(appointType == 'appointExpert'){
+                if(typeData == 1){
+                    $("input[name=dataContent]").val(real_name);
+                    $("input[name=zid]").val(type_id);
+                }
+                if(typeData == 2){
+                    $("input[name=dataContent]").val(nickname);
+                    $("input[name=zid]").val(uid);
+                    $("input[name=group_egid]").val(type_id);
+                }
+            }else{
+                if(real_name == ''){
+                    $("#sal").val(nickname);
+                }else{
+                    $("#sal").val(real_name);
+                }
+                $("input[name=invitation_code]").val(type_id);
+            }
+            $("#appoint").modal('hide');
+        }
+
+        function appointSearch(type){//指定合伙人或总监
+            // alert(type);return false;
+            var province = "{$order['province']}";
+            var city = "{$order['city']}";
+            var area = "{$order[area]}";
+            if(type == 'appointBoss' || type == 'appointPartner'){
+                $.post("{php echo $this->createWebUrl('order',array('op'=>'searchAppoint'))}",{
+                    appointType: type,
+                    province: province,
+                    city: city,
+                    area: area,
+                },function(data){
+                    // console.log(data);return false;
+                    if(type == 'appointBoss'){
+                        if(data.code == 200){
+                            $("#boss").val(data.content.real_name);
+                            $("input[name=boss_id]").val(data.content.id);
+                            return false;
+                        }else{
+                            util.message(data.msg);
+                            return false;
+                        }
+                    }else{
+                        if(data.code == 200){
+                            $("#par").val(data.content.real_name);
+                            $("input[name=partner_id]").val(data.content.id);
+                            return false;
+                        }else{
+                            util.message(data.msg);
+                            return false;
+                        }
+                    }
+                },'json');
+            }
+        }
+
+
+        function judge(){
+            if(confirm('你确定要操作吗？') == false){
+                return false;
+            }
+            var id,expert_scale,salesman_scale,boss_scale,partner_scale,reg,order_zid_data;
+            id = "{$order['id']}";
+            expert_scale = parseFloat($("input[name=expert_scale]").val());
+            salesman_scale = parseFloat($("input[name=salesman_scale]").val());
+            // boss_scale = parseFloat($("input[name=boss_scale]").val());
+            partner_scale = parseFloat($("input[name=partner_scale]").val());
+            order_zid_data = "{$order['zid']}";
+            reg=/^\d+$/;
+
+            if($("input[name=zid]").val() == 0 && order_zid_data == 0){
+                util.message("请选择指定的专家或专家团");
+                return false;
+            }
+            if($("#sal").val() == ''){
+                if($("input[name=invitation_code]").val() == 0){
+                    util.message("请选择指定税媒大使");
+                    return false;
+                }
+            }
+            // if($("#boss").val() == ''){
+            //     if($("input[name=boss_id]").val() == 0){
+            //         util.message("请选择指定业务总监");
+            //         return false;
+            //     }
+            // }
+            if($("#par").val() == ''){
+                if($("input[name=partner_id]").val() == 0){
+                    util.message("请选择指定合伙人");
+                    return false;
+                }
+            }
+            if(expert_scale < 0){
+                util.message("请填写正确的专家结算比例");
+                return false;
+            }
+            if(salesman_scale < 0){
+                util.message("请填写正确的税媒大使结算比例");
+                return false;
+            }
+            if(partner_scale < 0){
+                util.message("请填写正确的合伙人结算比例");
+                return false;
+            }
+            // if(boss_scale < 0){
+            //     util.message("请填写正确的总监结算比例");
+            //     return false;
+            // }
+
+            if(!reg.test(expert_scale) || !reg.test(salesman_scale) || !reg.test(partner_scale)){
+                util.message("请填写正确的结算比例");
+                return false;
+            }
+            if(expert_scale + salesman_scale + partner_scale > 100){
+                util.message("总结算比例不能大于100");
+                return false;
+            }
+
+            $.post("{php echo $this->createWebUrl('order',array('op'=>'orderAppoint'))}",{
+                id: id,
+                zid: $("input[name=zid]").val(),
+                group_egid: $("input[name=group_egid]").val(),
+                invitation_code: $("input[name=invitation_code]").val(),
+                // boss_id: $("input[name=boss_id]").val(),
+                partner_id: $("input[name=partner_id]").val(),
+                expert_scale: expert_scale,
+                salesman_scale: salesman_scale,
+                // boss_scale: boss_scale,
+                partner_scale: partner_scale
+            },function(data){
+                if(data.code == 200){
+                    util.message(data.msg,"{php echo $this->createWebUrl('order',array('op'=>'display','version_id'=>0,'eid'=>$_GPC['eid'],'page'=>$_GPC['page']))}");
+                    return false;
+                }
+                if(data.code == 400){
+                    util.message(data.msg);
+                    return false;
+                }
+            },'json');
+        }
+    </script>
+{/if}
+<!-- 订单指定 end -->
+<!-- 订单详情 start -->
+{if $operation == 'orderDetails'}
+    <style type="text/css">
+    .table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+      white-space:normal;
+    }
+    </style>
+    <div class="tab-content">
+        <div class="picShade"></div>
+        <div class="panel-body table-responsive clearfix">
+            <center style="font-size:20px;">订单信息</center>
+            <table class="table we7-table table-hover vertical-middle" style="position:relative">
+                <thead class="navbar-inner">
+                    <tr><th>用户名称</th><td>{if $user['real_name']}{$user['real_name']}{else}{$user['nickname']}{/if}</td>
+                    <th>手机号</th><td>{$user['mobile']}</td></tr>
+
+                    <tr><th>服务名称</th><td>{$order['name']}</td><th>订单编号</th><td>{$order['order_sn']}</td></tr>
+
+                    <tr>
+                        <th>服务类型</th><td>{$order['type_explain']}</td>
+                        {if empty($order['group_egid'])}
+                            <th>专家名称</th><td>{$expert['real_name']}</td>
+                        {else}
+                            <th>专家团名称</th><td>{$expertGroup['name']}</td>
+                        {/if}
+                    </tr>
+
+                    <tr><th>支付类型</th><td>{$order['pay_type']}</td><th>支付金额</th><td>{$order['price']}</td></tr>
+
+                    <tr><th>是否分期结算</th><td>{$order['is_maid']}</td><th>专家分期剩余佣金</th><td>{$order['expert_price']}</td></tr>
+
+                    <tr><th>下单时间</th><td>{$order['create_time']}</td>
+                    <th>支付时间</th><td>{if $order['pay_time'] != 0}{$order['pay_time']}{/if}</td></tr>
+
+                    <tr><th>省份</th><td>{$order['province']}</td><th>城市</th><td>{$order['city']}</td></tr>
+
+                    <tr><th>县区</th><td>{$order['area']}</td><th>详细地址</th><td>{$order['address']}</td></tr>
+                    {if $order['pay_type'] == '银行支付' && $order['is_by_stages'] == 0}
+                        <tr><th>转账凭证</th><td>{if !empty($order['voucher'])}<img src="{php echo tomedia($order['voucher'])}" onclick="zoomPic('{php echo tomedia($order['voucher'])}')" style="width:50px;height:50px;"><span style="color:red;margin-left:10px;">点击图片预览</span>{/if}</td>
+                        <th>流水号</th><td>{$order['serial_number']}</td></tr>
+                    {/if}
+
+                    <tr><th>用户需求</th><td  colspan="3">{$order['content']}</td></tr>
+                </thead>
+            </table>
+
+            {if !empty($order['partner_id']) || !empty($order['invitation_code'])}
+                <center style="font-size:20px;"></center>
+                <table class="table we7-table table-hover vertical-middle" style="position:relative">
+                    <thead class="navbar-inner">
+                        <tr>
+                            <th>城市合伙人</th><td>{$partner['real_name']}</td>
+                           <!--  <th>运营总监</th><td>{$boss['real_name']}</td> -->
+                            <th>税媒大使</th><td>{$salesman['real_name']}</td>
+                            <th>是否代下单</th><td>{$order['to_place_an_order']}</td>
+                        </tr>
+                    </thead>
+                </table>
+            {/if}
+
+            {if !empty($orderStep)}
+                <center style="font-size:20px;">专家服务订单记录</center>
+                <table class="table we7-table table-hover vertical-middle" style="position:relative">
+                    <thead class="navbar-inner">
+                    <tr>
+                        <th>真实姓名</th>
+                        <th>服务内容</th>
+                        <th>添加时间</th>
+                        <th>开始时间</th>
+                        <th>结束时间</th>
+                        <th>服务备注</th>
+                    </tr>
+                    </thead>
+                    {loop $orderStep $i $vo}
+                        <tr>
+                            <td>{$vo['real_name']}</td>
+                            <td>{$vo['title']}</td>
+                            <td>{php echo date('Y-m-d H:i',$vo['create_time'])}</td>
+                            <td>{php echo date('Y-m-d H:i',$vo['start_time'])}</td>
+                            <td>{if !empty($vo['end_time'])}{php echo date('Y-m-d H:i',$vo['end_time'])}{/if}</td>
+                            <td>{$vo['content']}</td>
+                        </tr>
+                    {/loop}
+                </table>
+            {/if}
+
+
+            {if !empty($userPayLog)}
+                <center style="font-size:20px;">支付日志记录</center>
+                {if $order['is_by_stages'] != 1}
+                    <table class="table we7-table table-hover vertical-middle" style="position:relative">
+                        <thead class="navbar-inner">
+                            <tr>
+                                <th>支付方式</th>
+                                <td>
+                                    {if $userPayLog['pay_type'] == 'wx'}
+                                        微信支付
+                                    {elseif $userPayLog['pay_type'] == 'ye'}
+                                        余额支付
+                                    {elseif $userPayLog['pay_type'] == 'yh'}
+                                        银行支付
+                                    {/if}
+                                </td>
+                                <th>支付状态</th><td>{if $userPayLog['pay_status'] == 1}未支付{elseif $userPayLog['pay_status'] == 2}已支付{/if}</td>
+                            </tr>
+                            <tr>
+                                <th>付款类型</th>
+                                <td>
+                                    {if $userPayLog['type'] == 1}
+                                        文章或者问答
+                                    {elseif $userPayLog['type'] == 2}
+                                        专家服务
+                                    {elseif $userPayLog['type'] == 3}
+                                        赞赏
+                                    {elseif $userPayLog['type'] == 4}
+                                        悬赏
+                                    {elseif $userPayLog['type'] == 5}
+                                        产品
+                                    {elseif $userPayLog['type'] == 6}
+                                        充值
+                                    {elseif $userPayLog['type'] == 7}
+                                        悬赏退款
+                                    {/if}
+                                </td>
+                                <th>付款说明</th><td>{$userPayLog['explain']}</td>
+                            </tr>
+                            <tr>
+                                <th>创建时间</th><td>{php echo date('Y-m-d H:i',$userPayLog['create_time'])}</td>
+                                <th>支付时间</th><td>{if $userPayLog['pay_time'] != 0}{php echo date('Y-m-d H:i',$userPayLog['pay_time'])}{/if}</td>
+                            </tr>
+                            <tr>
+                                <th>支付金额</th><td>{$userPayLog['price']}</td>
+                                <th>资金类型</th>
+                                <td>
+                                    {if $userPayLog['price_type'] == 1}
+                                        消费
+                                    {elseif $userPayLog['price_type'] == 2}
+                                        退款
+                                    {elseif $userPayLog['price_type'] == 3}
+                                        提现
+                                    {/if}
+                                </td>
+                            </tr>
+                        </thead>
+                    </table>
+                {else}
+                    <table class="table we7-table table-hover vertical-middle" style="position:relative">
+                        <thead class="navbar-inner">
+                        <tr>
+                            <th>订单编号</th>
+                            <th>支付方式</th>
+                            <th>支付状态</th>
+                            <th>付款类型</th>
+                            <th>付款说明</th>
+                            <th>创建时间</th>
+                            <th>支付时间</th>
+                            <th>支付金额</th>
+                            <th>资金类型</th>
+                        </tr>
+                        </thead>
+                        {loop $userPayLog $i $vo}
+                            <tr>
+                                <td>{$vo['out_trade_no']}</td>
+                                <td>
+                                    {if $vo['pay_type'] == 'wx'}
+                                        微信支付
+                                    {elseif $vo['pay_type'] == 'ye'}
+                                        余额支付
+                                    {elseif $vo['pay_type'] == 'yh'}
+                                        银行转账
+                                    {/if}
+                                </td>
+                                <td>
+                                    {if $vo['pay_status'] == 1}
+                                        未支付
+                                    {elseif $vo['pay_status'] == 2}
+                                        已支付
+                                    {/if}
+                                </td>
+                                <td>
+                                    {if $vo['type'] == 1}
+                                        文章或者问答
+                                    {elseif $vo['type'] == 2}
+                                        专家服务
+                                    {elseif $vo['type'] == 3}
+                                        赞赏
+                                    {elseif $vo['type'] == 4}
+                                        悬赏
+                                    {elseif $vo['type'] == 5}
+                                        产品
+                                    {elseif $vo['type'] == 6}
+                                        充值
+                                    {elseif $vo['type'] == 7}
+                                        悬赏退款
+                                    {/if}
+                                </td>
+                                <td>{$vo['explain']}</td>
+                                <td>{php echo date('Y-m-d H:i',$vo['create_time'])}</td>
+                                <td>{if !empty($vo['pay_time'])}{php echo date('Y-m-d H:i',$vo['pay_time'])}{/if}</td>
+                                <td>{$vo['price']}</td>
+                                <td>
+                                    {if $vo['price_type'] == 1}
+                                        消费
+                                    {elseif $vo['price_type'] == 2}
+                                        退款
+                                    {elseif $vo['price_type'] == 3}
+                                        提现
+                                    {/if}
+                                </td>
+                            </tr>
+                        {/loop}
+                    </table>
+                {/if}
+            {/if}
+
+            {if !empty($orderByStages)}
+                <center style="font-size:20px;">订单分期付款记录</center>
+                <table class="table we7-table table-hover vertical-middle" style="position:relative">
+                    <thead class="navbar-inner">
+                    <tr>
+                        <th>期数</th>
+                        <th>总金额</th>
+                        <th>当期金额</th>
+                        <th>订单编号</th>
+                        <th>支付类型</th>
+                        <th>状态</th>
+                        <!-- <th>是否全款</th> -->
+                        <th>支付时间</th>
+                        <th>到期支付时间</th>
+                        <th>转账凭证</th>
+                        <th>转账流水号</th>
+                        <th>备注</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    {loop $orderByStages $i $vo}
+                        <tr>
+                            <td>{$vo['number']}</td>
+                            <td>{$vo['total_price']}</td>
+                            <td>{$vo['price']}</td>
+                            <td>{$vo['order_sn']}</td>
+                            <td>
+                                {if $vo['pay_type'] == 'wx'}
+                                    微信支付
+                                {elseif $vo['pay_type'] == 'ye'}
+                                    余额支付
+                                {elseif $vo['pay_type'] == 'yh'}
+                                    银行支付
+                                {/if}
+                            </td>
+                            <td>{if $vo['status'] == 1}未支付{elseif $vo['status'] == 2}已支付{elseif $vo['status'] == 3}已全款支付{/if}</td>
+                            <!-- <td>{if $vo['is_full_section'] == 1}是{elseif $vo['is_full_section'] == 0}否{/if}</td> -->
+                            <td>{if $vo['pay_time'] != 0}{php echo date('Y-m-d H:i',$vo['pay_time'])}{/if}</td>
+                            <td>{if $vo['payment_time'] != 0}{php echo date('Y-m-d H:i',$vo['payment_time'])}{/if}</td>
+                            <td>{if !empty($vo['voucher'])}<img src="{php echo tomedia($vo['voucher'])}" onclick="zoomPic('{php echo tomedia($vo['voucher'])}')" style="width:50px;height:50px;">{/if}</td>
+                            <td>{$vo['serial_number']}</td>
+                            <td title="{$vo['content']}">{$vo['contentEllipsis']}</td>
+                            <td>
+                                <!-- {if $vo['pay_type'] == 'yh' && $vo['status'] == 1}
+                                    <a href="javascript:;" onclick="frame({$vo['bsid']})" class="add_manager">
+                                        <label style="cursor:pointer;" class="btn btn-default btn-sm manage">确认</label>
+                                    </a>
+                                {/if} -->
+                                {if $vo['pay_type'] == 'yh' && $vo['status'] == 1}
+                                    <a href="{php echo $this->createWebUrl('order',array('op'=>'byStagesTa','bsid'=>$vo['bsid'],'eid'=>$_GPC['eid']))}" class="add_manager">
+                                        <label style="cursor:pointer;" class="btn btn-default btn-sm manage">转账处理</label>
+                                    </a>
+                                {/if}
+                            </td>
+                        </tr>
+                    {/loop}
+                </table>
+
+                <!-- 备注框 -->
+                <!-- <div class="modal fade" id="module-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <input type="hidden" name="m" value=""/>
+                            <input type="hidden" name="bsid">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">
+                                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                                </button>
+                                <h4>备注</h4>
+                            </div>
+                            <div class="modal-body">
+                                    <div class="row clearfix">
+                                        <div class="form-group">
+                                            流水号：<input name="serial_number" class="form-control" style="width:600px;height:35px;"/>
+                                        </div>
+                                        <p></p>
+                                        <div class="input-group">
+                                            转账凭证：{php echo tpl_form_field_image('voucher','');}
+                                        </div>
+                                        <p></p>
+                                        <div class="input-group">
+                                           <textarea name="content" class="form-control" style="width:600px;height:100px;" placeholder="请填写备注"></textarea>
+                                        </div>
+                                        <p></p>
+                                        <span class="input-group-btn">
+                                            <button type="button" class="btn btn-default" onclick="submitContent()">提交</button>
+                                        </span>
+                                    </div>
+                                    <div id="module-menus">
+                                    <div>
+                                        <table class="table table-hover">
+                                            <tbody id="search_list">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+            {/if}
+
+            {if !empty($refundsLog)}
+                <center style="font-size:20px;">结算日志</center>
+                <table class="table we7-table table-hover vertical-middle" style="position:relative">
+                    <thead class="navbar-inner">
+                    <tr>
+                        <th>总返金额</th>
+                        <th>本月返金额</th>
+                        <th>返款次数</th>
+                        <th>添加时间</th>
+                        <th>日志类型</th>
+                    </tr>
+                    </thead>
+                    {loop $refundsLog $i $vo}
+                        <tr>
+                            <td>{$vo['total_price']}</td>
+                            <td>{$vo['price']}</td>
+                            <td>{$vo['number']}</td>
+                            <td>{php echo date('Y-m-d H:i',$vo['create_time'])}</td>
+                            <td>
+                                {if $vo['type'] == 1}
+                                    专家返款日志
+                                {elseif $vo['type'] == 2}
+                                    税媒大使返款日志
+                                {elseif $vo['type'] == 3}
+                                    专家团服务返款日志
+                                {/if}
+                            </td>
+                        </tr>
+                    {/loop}
+                </table>
+            {/if}
+
+        </div>
+    </div>
+    <script>
+        function zoomPic(imgFile){//预览图片
+            console.log(imgFile)
+            var imgFile=imgFile;  //图片路径
+            var $imgWidth=$(document.body).outerWidth(true)/2;
+            var $img = '<img src="'+imgFile+'">';
+            $('.picShade').show();
+            $('.picShade').append($img);
+            $('.picShade img').css({'width':$imgWidth+'px','position':'fixed','top':'50%','left':'50%','transform': 'translate(-50%,-50%)','z-index':'1001','transition': 'all .3s'})
+            //点击遮罩层回复
+            $('.picShade').click(function(){
+                $('.picShade img').remove();
+                $('.picShade').hide();
+            })
+        }
+    </script>
+{/if}
+<!-- 订单详情 end -->
+<!-- 分期转账处理 start -->
+{if $operation == 'byStagesTa'}
+    <div class="main">
+        <div class="form-horizontal form">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    分期转账转账
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">服务名称</label>
+                        <div class="col-sm-5 col-xs-6 form-control-static">
+                           <input class="form-control" value="{$order['name']}" readonly="readonly" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">分期订单号</label>
+                        <div class="col-sm-5 col-xs-6 form-control-static">
+                           <input class="form-control" value="{$orderByStages['order_sn']}" readonly="readonly" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">总金额</label>
+                        <div class="col-sm-5 col-xs-6 form-control-static">
+                           <input class="form-control" value="{$orderByStages['total_price']}" readonly="readonly" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">总期数</label>
+                        <div class="col-sm-5 col-xs-6 form-control-static">
+                           <input class="form-control" value="{$orderByStages['total_number']}" readonly="readonly" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">当前期数</label>
+                        <div class="col-sm-5 col-xs-6 form-control-static">
+                           <input class="form-control" value="{$orderByStages['number']}" readonly="readonly" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">当前金额</label>
+                        <div class="col-sm-5 col-xs-6 form-control-static">
+                           <input class="form-control" value="{$orderByStages['price']}" readonly="readonly" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">转账凭证</label>
+                        <div class="col-sm-5 col-xs-6">
+                            {php echo tpl_form_field_image('voucher','');}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">流水号</label>
+                        <div class="col-sm-5 col-xs-6 form-control-static">
+                           <input class="form-control" name="serial_number"/>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">备注</label>
+                        <div class="col-sm-5 col-xs-6 form-control-static">
+                           <textarea class="form-control" name="content" style="height:100px;"></textarea>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="form-group col-sm-12">
+                <input type="submit" name="submit" value="确认" class="btn btn-default btn-sm manage submit" onclick="confirmClick()"/>
+                <input type="hidden" name="token" value="{$_W['token']}" />
+            </div>
+        </div>
+    </div>
+    <script>
+        function confirmClick(){
+            var oid,bsid,content,serial_number,voucher,eid;
+            eid = "{$_GPC['eid']}";
+            bsid = "{$orderByStages['bsid']}";
+            oid = "{$orderByStages['oid']}";
+            serial_number = $("input[name=serial_number]").val();//流水号
+            voucher = $("input[name=voucher]").val();//转账凭证
+            content = $("textarea[name=content]").val();//备注
+
+            if(serial_number == ''){
+                util.message('流水号不能为空');
+                return false;
+            }
+
+            if(voucher == ''){
+                util.message('转账凭证不能为空');
+                return false;
+            }
+
+            $.post("{php echo $this->createWebUrl('order',array('op'=>'orderDetails'))}",{
+                bsid: bsid,
+                serial_number: serial_number,
+                voucher: voucher,
+                content: content
+            },function(data){
+                if(data.code == 200){
+                    util.message(data.msg,setTimeout(function(){
+                        window.location.href = "{php echo $this->createWebUrl('order',array('op'=>'orderDetails'))}&id="+oid+"&eid="+eid;
+                    },1000),'success');
+                    return false;
+                }
+                if(data.code == 400){
+                    util.message(data.msg,'','error');
+                    return false;
+                }
+            },'json');
+        }
+    </script>
+{/if}
+<!-- 分期转账处理 end -->
+<!-- 产品议价 start -->
+{if $operation == 'bargaining'}
+<div class="main">
+    <!-- <div class="picShade"></div> -->
+    <div class="form-horizontal form">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                产品议价
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">服务名称</label>
+                    <div class="col-sm-5 col-xs-6 form-control-static">
+                       <input class="form-control" value="{$order['name']}" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">订单编号</label>
+                    <div class="col-sm-5 col-xs-6 form-control-static">
+                       <input class="form-control" value="{$order['order_sn']}" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">用户名称</label>
+                    <div class="col-sm-5 col-xs-6 form-control-static">
+                       <input class="form-control" value="{$user['real_name']}" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">联系电话</label>
+                    <div class="col-sm-5 col-xs-6 form-control-static">
+                       <input class="form-control" value="{$user['mobile']}" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">下单时间</label>
+                    <div class="col-sm-5 col-xs-6 form-control-static">
+                       <input class="form-control" value="{php echo date('Y-m-d H:i',$order['create_time'])}" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">预算价格</label>
+                    <div class="col-sm-5 col-xs-6 form-control-static">
+                       <input class="form-control" type="number" value="{$order['budget']}" readonly="readonly" />
+                       <p style="color:red;">单位：元</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">价格</label>
+                    <div class="col-sm-5 col-xs-6 form-control-static">
+                       <input class="form-control" type="number" name="price" value="0"/>
+                       <p style="color:red;">单位：元</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group col-sm-12">
+            <input type="submit" name="submit" value="确认" class="btn btn-default btn-sm manage submit" onclick="confirmClick()"/>
+            <input type="hidden" name="token" value="{$_W['token']}" />
+        </div>
+    </div>
+</div>
+<script>
+    function confirmClick(){
+        var id = "{$order['id']}";
+        var price = $("input[name=price]").val();
+        var openid = "{$user['openid']}";
+
+        if(price == ''){
+            util.message('价格不能为空');
+            return false;
+        }
+        if(price <= 0){
+            util.message('请填写正确的价格');
+            return false;
+        }
+        $.post("{php echo $this->createWebUrl('order',array('op'=>'bargaining'))}",{
+            id: id,
+            price: price,
+            openid: openid
+        },function(data){
+            if(data.code == 200){
+                util.message(data.msg,setTimeout(function(){location.href="{php echo $this->createWebUrl('order',array('op'=>'display','version_id'=>0,'eid'=>$eid,'page'=>$pageNum))}"},1000),'success');
+                return false;
+            }else{
+                util.message(data.msg,'','error');
+                return false;
+            }
+        },'json');
+    }
+</script>
+{/if}
+<!-- 产品议价 end -->
+<!-- 分期列表 start -->
+{if $operation == 'byStagesList'}
+<div id="action_list" class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-xs-12 col-sm-11" style="width:99%;">
+            <form action="" method="get" class="form-horizontal" role="form" id="form1">
+                <input type="hidden" name="op" value="byStagesList">
+                <input type="hidden" name="c" value="{$_GPC['c']}">
+                <input type="hidden" name="a" value="{$_GPC['a']}">
+                <input type="hidden" name="eid" value="{$_GPC['eid']}">
+                <input type="hidden" name="version_id" value="0">
+                <div class="input-group">
+                    <select name="status_select" class="form-control input-medium">
+                        <option value="1" <?php if($status_select == 1){echo 'selected';} ?> >不按时间</option>
+                        <option value="pay_time" <?php if($_GPC['status_select'] == 'pay_time'){echo 'selected';} ?> >支付时间</option>
+                        <option value="payment_time" <?php if($_GPC['status_select'] == 'payment_time'){echo 'selected';} ?> >到期支付时间</option>
+                    </select>
+                    <span class="input-group-addon" style="padding: 0; width: 0;border:none;">
+                    </span>
+                    {php echo tpl_form_field_daterange('time',array('start'=>($_GPC['start'] ? $_GPC['start'] : $_GPC['time']['start']),'end'=>($_GPC['end'] ? $_GPC['end'] : $_GPC['time']['end'])));}
+                    <script type="text/javascript">
+                        $(function(){
+                            $("#action_list .input-group .daterange-date").addClass("form-control");
+                        })
+                    </script>
+                    <span class="input-group-addon"></span>
+                    <select name="status" class="form-control input-medium">
+                        <option value="99" <?php if($_GPC['status'] == 99){echo 'selected';} ?> >支付状态</option>
+                        <option value="1" <?php if($_GPC['status'] == 1){echo 'selected';} ?> >未支付</option>
+                        <option value="2" <?php if($_GPC['status'] == 2){echo 'selected';} ?> >已支付</option>
+                        <option value="3" <?php if($_GPC['status'] == 3){echo 'selected';} ?> >已全款支付</option>
+                    </select>
+                    <span class="input-group-addon"></span>
+                    <select name="pay_type" class="form-control input-medium">
+                        <option value="1" <?php if($_GPC['pay_type'] == 1){echo 'selected';} ?> >支付类型</option>
+                        <option value="wx" <?php if($_GPC['pay_type'] == 'wx'){echo 'selected';} ?> >微信支付</option>
+                        <option value="ye" <?php if($_GPC['pay_type'] == 'ye'){echo 'selected';} ?> >余额支付</option>
+                        <option value="yh" <?php if($_GPC['pay_type'] == 'yh'){echo 'selected';} ?> >银行卡转账</option>
+                    </select>
+                    <span class="input-group-addon">关键字</span>
+                    <input type="text" name="order_sn" class="form-control ac_name" value="{$_GPC['order_sn']}" placeholder="订单编号"/>
+                    <span class="input-group-btn">
+                        <input type="submit" class="btn" value="提交筛选" style="border:1px solid #ccc;"/>
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+		<div class="panel-heading-filter">
+			<span class="search_time"></span>
+			<span class="status"></span>
+			<span class="pay_type"></span>
+			<span style="float:right;">共计 {$total} 条数据</span>
+		</div>
+    </div>
+    <div class="panel-body table-responsive">
+        <table class="table table-hover">
+            <thead class="navbar-inner">
+                <tr>
+                    <th>订单号</th>
+                    <th>当前期数</th>
+                    <th style="text-align: right;">总金额</th>
+                    <th style="text-align: right;">当期金额</th>
+                    <th>分期编号</th>
+                    <th style="text-align: center;">支付</th>
+                    <th style="text-align: center;">状态</th>
+                    <!-- <th style="text-align: center;">是否全款</th> -->
+                    <th style="text-align: center;">支付时间</th>
+                    <th style="text-align: center;">到期支付时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {loop $orderByStages $i $vo}
+                    <tr>
+                        <td onclick="jumpClick('{$vo['type_explain']}','{$vo['o_sn']}')">{$vo['o_sn']}</td>
+                        <td style="text-align: center;">{$vo['number']}</td>
+                        <td style="text-align: right;">{$vo['total_price']}</td>
+                        <td style="text-align: right;">{$vo['price']}</td>
+                        <td>{$vo['order_sn']}</td>
+                        <td style="text-align: center;">
+                            {if $vo['pay_type'] == 'wx'}
+                                <i class="fa fa-wechat"></i>
+                            {elseif $vo['pay_type'] == 'ye'}
+                                余额
+                            {elseif $vo['pay_type'] == 'yh'}
+                                银行
+                            {/if}
+                        </td>
+                        <td style="text-align: center;">{if $vo['status'] == 1}未付款{elseif $vo['status'] == 2}<span style="color: #3EA71E;">已支付</span>{elseif $vo['status'] == 3}已全款支付{/if}</td>
+                        <!-- <td style="text-align: center;">{if $vo['is_full_section'] == 1}<i class="fa fa-check"></i>{/if}</td> -->
+                        <td title="{php echo date('Y-m-d H:i',$vo['pay_time'])}" style="text-align: center;">{if $vo['pay_time'] != 0}{php echo date('Y-m-d',$vo['pay_time'])}{/if}</td>
+                        <td title="{php echo date('Y-m-d H:i',$vo['payment_time'])}" style="text-align: center;">{if $vo['payment_time'] != 0}{php echo date('Y-m-d',$vo['payment_time'])}{/if}</td>
+                        <td>
+                            <a href="{php echo $this->createWebUrl('order',array('op'=>'byStagesDetails','version_id'=>0,'eid'=>$_GPC['eid'],'page'=>$_GPC['page'],'bsid'=>$vo['bsid']))}" class="add_manager">
+                                <label style="cursor:pointer;" class="btn btn-default btn-sm manage"><i class="fa fa-file-text-o"></i></label>
+                            </a>
+                        </td>
+                    </tr>
+                {/loop}
+            </tbody>
+        </table>
+    </div>
+</div>
+{$pager}
+<script>
+    function jumpClick(type,order_sn){
+        var eid = "{$_GPC['eid']}";
+        if(type == 'proct' || type == 'proct_server'){//产品订单
+            var orderUrl = "{php echo $this->createWebUrl('order',array('op'=>'productOrderList'))}&version_id=0&order_sn="+order_sn+"&eid="+eid;
+        }else{
+            var orderUrl = "{php echo $this->createWebUrl('order',array('op'=>'display'))}&version_id=0&order_sn="+order_sn+"&eid="+eid;
+        }
+        window.open(orderUrl);
+    }
+</script>
+{/if}
+<!-- 分期列表 end -->
+<!-- 分期详情 start -->
+{if $operation == 'byStagesDetails'}
+<div class="main">
+    <div class="form-horizontal">
+        <input type="hidden" name="bsid" value="{$orderByStages['bsid']}">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                分期详情
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">用户名称</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <input type="text" class="form-control" {if $user['real_name'] != ''}value="{$user['real_name']}"{else}value="{$user['nickname']}"{/if} readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">手机号</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <input type="text" class="form-control" value="{$user['mobile']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">总期数</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <input type="text" class="form-control" value="{$orderByStages['total_number']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">当前期数</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <input type="text" class="form-control" value="{$orderByStages['number']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">总金额</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <input type="text" class="form-control" value="{$orderByStages['total_price']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">当期金额</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <input type="text" class="form-control" value="{$orderByStages['price']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">分期订单号</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <input type="text" class="form-control" value="{$orderByStages['order_sn']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">是否全款</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <input type="text" class="form-control" value="{$orderByStages['is_full_section']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">支付状态</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <input type="text" class="form-control" value="{$orderByStages['status']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">支付类型</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <input type="text" class="form-control" value="{$orderByStages['pay_type']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">支付时间</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <input type="text" class="form-control" value="{$orderByStages['pay_time']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">到期支付时间</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <input type="text" class="form-control" value="{$orderByStages['payment_time']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                {if !empty($adminUser)}
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">后台操作人</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <input type="text" class="form-control" value="{$adminUser['username']}" readonly="readonly"/>
+                        </div>
+                    </div>
+                {/if}
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">备注</label>
+                    <div class="col-sm-5 col-xs-6">
+                        <textarea class="form-control" style="height:100px;" name='content' {if $orderByStages['pay_type'] != '银行支付' || $orderByStages['status'] != '未支付'}readonly="readonly"{/if}>{$orderByStages['content']}</textarea>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+        {if $orderByStages['pay_type'] == '银行支付' && $orderByStages['status'] == '未支付'}
+            <div class="form-group col-sm-12">
+                <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" onclick="submitContent()" />
+            </div>
+        {/if}
+    </div>
+</div>
+<script>
+    function submitContent(){
+        var bsid,content;
+        bsid = $("input[name=bsid]").val();
+        content = $("textarea[name=content]").val();
+
+        $.post("{php echo $this->createWebUrl('order',array('op'=>'orderDetails'))}",{
+            bsid: bsid,
+            content: content
+        },function(data){
+            if(data.code == 200){
+                util.message(data.msg,setTimeout(function(){location.href="{php echo $this->createWebUrl('order',array('op'=>'byStagesList','version_id'=>0,'eid'=>$_GPC['eid'],'page'=>$_GPC['page']))}"},1000));
+                return false;
+            }
+            if(data.code == 400){
+                util.message(data.msg);
+                return false;
+            }
+        },'json');
+    }
+</script>
+{/if}
+<!-- 分期详情 end -->
+<!-- 代理产品订单表 start -->
+{if $operation == 'agent_order_list'}
+<div id="action_list" class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-xs-12 col-sm-11" style="width:99%;">
+            <form action="" method="get" class="form-horizontal" role="form" id="form1">
+                <input type="hidden" name="op" value="agent_order_list">
+                <input type="hidden" name="c" value="{$_GPC['c']}">
+                <input type="hidden" name="a" value="{$_GPC['a']}">
+                <input type="hidden" name="eid" value="{$_GPC['eid']}">
+                <input type="hidden" name="version_id" value="0">
+                <div class="input-group">
+                    <select name="status_select" class="form-control input-medium">
+                        <option value="1" <?php if($status_select == 1){echo 'selected';} ?> >不按时间</option>
+                        <option value="create_time" <?php if($_GPC['status_select'] == 'create_time'){echo 'selected';} ?> >创建时间</option>
+                    </select>
+                    <span class="input-group-addon" style="padding: 0; width: 0;border:none;">
+                    </span>
+                  {php echo tpl_form_field_daterange('time',array('start'=>($_GPC['start'] ? $_GPC['start'] : $_GPC['time']['start']),'end'=>($_GPC['end'] ? $_GPC['end'] : $_GPC['time']['end'])));}
+                    <script type="text/javascript">
+                        $(function(){
+                            $("#action_list .input-group .daterange-date").addClass("form-control");
+                        })
+                    </script>
+                    <span class="input-group-addon"></span>
+                    <select name="order_status" class="form-control input-medium">
+                        <option value="10" <?php if($_GPC['order_status'] == 10){echo 'selected';} ?> >产品订单状态</option>
+                        <option value="1" <?php if($_GPC['order_status'] == 1){echo 'selected';} ?> >已下单</option>
+                        <option value="2" <?php if($_GPC['order_status'] == 2){echo 'selected';} ?> >已支付</option>
+                        <option value="3" <?php if($_GPC['order_status'] == 3){echo 'selected';} ?> >已上传</option>
+                    </select>
+                    <span class="input-group-addon">关键字</span>
+                    <input type="text" name="content" class="form-control ac_name" value="{$_GPC['content']}" placeholder="姓名 | 手机号 | 产品名称 | 订单号"/>
+                    <span class="input-group-btn">
+                    <input type="submit" class="btn" value="提交筛选" style="border:1px solid #ccc;"/>
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+		<div class="panel-heading-filter">
+			<span class="search_time"></span>
+			<span class="order_status"></span>
+			<span style="float:right;">共计 {$total['num']} 条数据</span>
+		</div>
+    </div>
+    <div class="panel-body table-responsive">
+        <table class="table table-hover">
+            <thead class="navbar-inner">
+                <tr>
+                    <th>姓名</th>
+                    <th>手机号</th>
+                    <th>订单号</th>
+                    <th>产品名称</th>
+                    <th style="text-align: right;">购买数量</th>
+                    <th style="text-align: right;">总价格</th>
+                    <th style="text-align: center;">创建时间</th>
+                    <th style="text-align: center;">是否代理</th>
+                    <th style="text-align: center;">状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {loop $agent_order $i $v}
+                    <tr>
+                        <td>{$v['name']}</td>
+                        <td>{$v['mobile']}</td>
+                        <td>{$v['order_sn']}</td>
+                        <td>{$v['goods_name']}</td>
+                        <td style="text-align: right;">{$v['number']}</td>
+                        <td style="text-align: right;">{$v['total']}</td>
+                        <td style="text-align: center;">{php echo date('Y-m-d H:i',$v['create_time'])}</td>
+                        <td style="text-align: center;">{if $v['is_ontrial'] == 1}<i class="fa fa-check"></i>{/if}</td>
+                        <td style="text-align: center;">
+                            {if $v['status'] == 1}已下单{elseif $v['status'] == 2}已支付{elseif $v['status'] == 3}已上传{/if}
+                        </td>
+                        <td>
+                            <a class="btn btn-default" href="{php echo $this->createWebUrl('order',array('op'=>'agent_order_details','aoid'=>$v['aoid'],'version_id'=>0,'eid'=>$_GPC['eid']))}">查看</a>
+                            {if $v['status'] == 2 && $v['type'] == 1}
+                                <a class="btn btn-default" onclick="sc({$v['aoid']});">上传</a>
+                            {/if}
+                        </td>
+                    </tr>
+                {/loop}
+            </tbody>
+        </table>
+    </div>
+</div>
+{$pager}
+<script>
+// 上传按钮操作
+function sc(aoid){
+    if(confirm('你确定要操作吗？') == false){
+        return false;
+    }
+    $.post("{php echo $this->createWebUrl('order',array('op'=>'upload_status'))}",{
+        aoid: aoid
+    },function(data){
+        if(data.code == 200){
+            util.message(data.msg,setTimeout(function(){location.reload()},1000), "success");
+            return false;
+        }
+        if(data.code == 400){
+            util.message(data.msg, "", "error");
+            return false;
+        }
+    },'json');
+}
+</script>
+{/if}
+<!-- 代理产品订单表 end -->
+<!-- 代理产品订单详情 start -->
+{if $operation == 'agent_order_details'}
+<div class="main">
+    <div class="form-horizontal form">
+        <div class="panel panel-default">
+            <div class="panel-heading">产品订单详情</div>
+            <div class="panel-body">
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">姓名</label>
+                    <div class="col-sm-5 col-xs-12 form-control-static">
+                        <input type="text" class="form-control" value="{$ao_details['name']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">手机号</label>
+                    <div class="col-sm-5 col-xs-12 form-control-static">
+                        <input type="text" class="form-control" value="{$ao_details['mobile']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">公司名称</label>
+                    <div class="col-sm-5 col-xs-12 form-control-static">
+                        <input type="text" class="form-control" value="{$ao_details['corporate']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">订单号</label>
+                    <div class="col-sm-5 col-xs-12 form-control-static">
+                        <input type="text" class="form-control" value="{$ao_details['order_sn']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">产品名称</label>
+                    <div class="col-sm-5 col-xs-12 form-control-static">
+                        <input type="text" class="form-control" value="{$ao_details['goods_name']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">购买数量</label>
+                    <div class="col-sm-5 col-xs-12 form-control-static">
+                        <input type="text" class="form-control" value="{$ao_details['number']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">单价</label>
+                    <div class="col-sm-5 col-xs-12 form-control-static">
+                        <input type="text" class="form-control" value="{$ao_details['price']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">总价</label>
+                    <div class="col-sm-5 col-xs-12 form-control-static">
+                        <input type="text" class="form-control" value="{$ao_details['total']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">是否代理购买</label>
+                    <div class="col-sm-5 col-xs-12 form-control-static">
+                        <input type="text" class="form-control" value="{if $ao_details['is_ontrial'] == 0}否{elseif $ao_details['is_ontrial'] == 1}是{/if}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">状态</label>
+                    <div class="col-sm-5 col-xs-12 form-control-static">
+                        <input type="text" class="form-control" value="{if $ao_details['status'] == 1}已下单{elseif $ao_details['status'] == 2}已支付{elseif $ao_details['status'] == 3}已上传{/if}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">创建时间</label>
+                    <div class="col-sm-5 col-xs-12 form-control-static">
+                        <input type="text" class="form-control" value="{php echo date('Y-m-d H:i',$ao_details['create_time'])}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">支付时间</label>
+                    <div class="col-sm-5 col-xs-12 form-control-static">
+                        <input type="text" class="form-control" value="{php echo date('Y-m-d H:i',$ao_details['pay_time'])}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">代理人</label>
+                    <div class="col-sm-5 col-xs-12 form-control-static">
+                        <input type="text" class="form-control" value="{$agent_user['name']}" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">备注</label>
+                    <div class="col-sm-5 col-xs-12 form-control-static">
+                        <textarea style="height:150px;" id='user_desc' class="form-control" cols="60" readonly="readonly">{$ao_details['remarks']}</textarea>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{/if}
+<!-- 代理产品订单详情 end -->
+{if $operation == 'execution_settlement'}
+<div class="main">
+    <form action="" method="post" class="form-horizontal form"  enctype="multipart/form-data" id="order_post">
+        <input type="hidden" name="order" class="form-control" value="1" />
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                执行结算的订单
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">订单号</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <input type="text" name="order_sn" class="form-control" value="" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group col-sm-12">
+            <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+            <input type="hidden" name="token" value="{$_W['token']}" />
+        </div>
+    </form>
+</div>
+<script>
+    $("#order_post").submit(function(){
+
+        if($('input[name="order_sn"]').val()==""){
+            util.message('订单号不能为空');
+            return false;
+        }
+    });
+</script>
+<!-- 更改代理提现状态 end -->
+{/if}
+
+
+<script>
+
+    var str='';
+    var screen_time_name='';
+    var time_value=$('select[name="status_select"]').val() ? $('select[name="status_select"]').val() : '';
+
+    var status = $('select[name="status"]').val() ? $('select[name="status"]').val() : '';
+    var pay_type = $('select[name="pay_type"]').val() ? $('select[name="pay_type"]').val() : '';
+    var to_place_an_order=$('select[name="to_place_an_order"]').val() ? $('select[name="to_place_an_order"]').val() : ''
+    var thp_order=$('select[name="thp_order"]').val() ? $('select[name="thp_order"]').val() : '';
+    var appointStatus=$('select[name="appointStatus"]').val() ? $('select[name="appointStatus"]').val() : '';
+    var to_examine=$('select[name="to_examine"]').val() ? $('select[name="to_examine"]').val() : '';
+
+    var time_start='';
+    var time_end='';
+    var order_url='';
+
+    var order_str = '';
+    $(function () {
+        //时间筛选
+        if(time_value=='create_time' || time_value=='pay_time' ||time_value=='payment_time'){
+            time_start = sessionStorage.getItem('time_start');
+            $("#daterangepicker_start").val(time_start);
+            time_end = sessionStorage.getItem('time_end');
+            $("#daterangepicker_end").val(time_end);
+            var time_str = sessionStorage.getItem('time_str');
+            if(typeof(time_str)!=''){
+                $('.search_time').html(time_str);
+            }
+        }
+
+        //支付状态
+        if(status!='99' && typeof(status)!='undefined'){
+            order_str = sessionStorage.getItem('status_str');
+            $('.status').html(order_str);
+        }
+
+        //支付方式
+        if(pay_type!='1' && typeof(pay_type)!='undefined' && pay_type!=10) {
+            order_str = sessionStorage.getItem('pay_type_str');
+            $('.pay_type').html(order_str);
+        }
+
+        //下单方式
+        if(to_place_an_order!='10' && typeof(to_place_an_order)!='undefined'){
+            order_str = sessionStorage.getItem('to_place_str');
+            $('.to_place').html(order_str);
+        }
+
+         //下单渠道
+        if(thp_order!='10' && typeof(thp_order)!='undefined'){
+            order_str = sessionStorage.getItem('thp_order_str');
+            $('.thp_order').html(order_str);
+        }
+
+
+        //是否指定
+        if(appointStatus!='10' && typeof(appointStatus)!='undefined'){
+            order_str = sessionStorage.getItem('appointStatus_str');
+            $('.appointStatus').html(order_str);
+        }
+
+        //是否指定
+        if(to_examine!='10' && typeof(to_examine)!='undefined'){
+            order_str = sessionStorage.getItem('to_examine_str');
+            $('.to_examine').html(order_str);
+        }
+
+    });
+
+    //时间
+    function order_applyBtn()
+    {
+        time_value = $('select[name="status_select"]').val();;
+        time_sart = sessionStorage.getItem('time_start');
+        if(time_value=='pay_time'){
+            screen_time_name = '支付时间';
+        }else if(time_value=='payment_time'){
+            screen_time_name = '到期支付时间';
+        }else if(time_value=='create_time'){
+            screen_time_name = '下单时间';
+        }
+
+        if(time_value=='pay_time' || time_value=='create_time' || time_value=='payment_time' || (time_start!='null' && time_start!='undefined' && time_start!='')){
+                time_start = $('input[name="daterangepicker_start"]').val();
+                time_end = $('input[name="daterangepicker_end"]').val();
+            if(typeof(time_start)=='undefined' || time_start=='null' || typeof(time_end)=='undefined' || time_end=='null'){
+                time_end = sessionStorage.getItem('time_end');
+            }
+            str = '按'+screen_time_name+'：<font style="color:red;">'+time_start+ '&nbsp;至&nbsp;' +time_end+'&nbsp;</font><span onClick="clean('+"'"+'search'+"'"+')"><i class="fa fa-times" aria-hidden="true" style="cursor:pointer" title="清除" id="arid"></i></span>';
+            $(".search_time").html(str);
+            sessionStorage.setItem('time_start', time_start);
+            sessionStorage.setItem('time_end', time_end);
+            sessionStorage.setItem('time_str',str);
+            ask_user_url = "&status_select="+time_value+"&status="+status+"&start="+time_start+"&end="+time_end+"&pay_type="+pay_type+"&to_place_an_order="+to_place_an_order+"&thp_order="+thp_order+"&appointStatus="+appointStatus;
+            location.href = href_url+ask_user_url;
+        }
+    }
+
+    var status_name='';
+    var pay_name = '';
+    var to_place_name='';
+
+    function order_medium(select_name,select_value)
+    {
+
+        order_url = "&status_select="+time_value+"&status="+status+"&start="+time_start+"&end="+time_end+"&pay_type="+pay_type+"&to_place_an_order="+to_place_an_order+"&thp_order="+thp_order+"&appointStatus="+appointStatus;
+        switch (select_name) {
+            case 'status_select':
+                if(select_value!='1'){
+                    $(".search_time").html("");
+                    //$(".opensright").css({'display': 'block', 'top': '177px', 'left': '383.031px','right': 'auto'});
+                    sessionStorage.setItem('time_str',"");
+                    return;
+                }else{
+                    if($('.search_time').html() !=''){
+                        order_url = order_url+"&status_select="+select_value;
+                        sessionStorage.setItem(clean+'_str','');
+                        location.href = href_url+order_url
+                        return false;
+                    }else{
+                        return false;
+                    }
+                }
+
+            case 'status'://全部状态
+
+                switch(select_value){
+                    case '1':
+                        status_name = '未支付';
+                        break;
+                    case '2':
+                        status_name = '已支付';
+                        break;
+                    case '3':
+                        status_name = '已全款支付';
+                        break;
+                    case '4':
+                        status_name = '已退款';
+                        break;
+                    case '5':
+                        status_name = '已完成';
+                        break;
+                    case '6':
+                        status_name = '议价中';
+                        break;
+                    case '7':
+                        status_name = '待确认';
+                        break;
+                    case '8':
+                        status_name = '已取消';
+                        break;
+                    case '9':
+                        status_name = '服务中(分期付)';
+                        break;
+                    case '10':
+                        status_name = '服务中(一次性)';
+                        break;
+                    case '11':
+                        status_name = '待支付(议价)';
+                        break;
+                    case '99':
+                        status_name = '全部';
+                        break;
+                }
+                str = '状态：<font style="color:red;">'+status_name+'&nbsp;</font><span onClick="order_clean('+"'"+'status'+"'"+')"><i class="fa fa-times" aria-hidden="true" style="cursor:pointer" title="清除"></i></span>';
+                order_url = order_url+"&status="+select_value;
+            break;
+
+            case 'pay_type'://支付方式
+                 if(select_value=='ye'){
+                       pay_name = "余额支付";
+                 }else if(select_value=='wx'){
+                       pay_name = "微信支付";
+                 }else if(select_value=='yh'){
+                       pay_name = "银行支付";
+                 }else{
+                       pay_name = "全部";
+                 }
+                str = '支付方式：<font style="color:red;">'+pay_name+'&nbsp;</font><span onClick="order_clean('+"'"+'pay_type'+"'"+')"><i class="fa fa-times" aria-hidden="true" style="cursor:pointer" title="清除"></i></span>';
+                order_url = order_url+"&pay_type="+select_value;
+            break;
+
+            case 'to_place_an_order'://下单方式
+                 if(select_value=='1'){
+                       to_place_name = "代下单";
+                 }else if(select_value=='0'){
+                       to_place_name = "用户下单";
+                 }
+                str = '下单方式：<font style="color:red;">'+to_place_name+'&nbsp;</font><span onClick="order_clean('+"'"+'to_place_an_order'+"'"+')"><i class="fa fa-times" aria-hidden="true" style="cursor:pointer" title="清除"></i></span>';
+                order_url = order_url+"&to_place_an_order="+select_value;
+                select_name = 'to_place';
+            break;
+
+            case 'thp_order'://全部渠道
+                 if(select_value=='midheaven'){
+                       order_name = "中天";
+                 }else if(select_value=='2'){
+                       order_name = "非中天";
+                 }else if(select_value=='10'){
+                       order_name = "全部渠道"
+                 }
+                str = '下单渠道：<font style="color:red;">'+order_name+'&nbsp;</font><span onClick="order_clean('+"'"+'thp_order'+"'"+')"><i class="fa fa-times" aria-hidden="true" style="cursor:pointer" title="清除"></i></span>';
+                order_url = order_url+"&thp_order="+select_value;
+            break;
+
+            case 'appointStatus'://是否指定
+                 if(select_value=='1'){
+                       order_name = "是";
+                 }else{
+                       order_name = "否";
+                 }
+                str = '是否需要跟进：<font style="color:red;">'+order_name+'&nbsp;</font><span onClick="order_clean('+"'"+'appointStatus'+"'"+')"><i class="fa fa-times" aria-hidden="true" style="cursor:pointer" title="清除"></i></span>';
+                order_url = order_url+"&appointStatus="+select_value;
+            break;
+
+            case 'to_examine'://审核
+                 if(select_value=='10'){
+                    order_name = "全部";
+                 }else if(select_value=='1'){
+                    order_name = "未处理";
+                 }else if(select_value=='2'){
+                    order_name = "已通过";
+                 }else if(select_value=='3'){
+                    order_name = "已拒绝";
+                 }
+                str = '是否需指定：<font style="color:red;">'+order_name+'&nbsp;</font><span onClick="order_clean('+"'"+'appointStatus'+"'"+')"><i class="fa fa-times" aria-hidden="true" style="cursor:pointer" title="清除"></i></span>';
+                order_url = order_url+"&to_examine="+select_value;
+            break;
+
+            case 'to_examine'://审核
+                 if(select_value=='10'){
+                    order_name = "全部";
+                 }else if(select_value=='1'){
+                    order_name = "未处理";
+                 }else if(select_value=='2'){
+                    order_name = "已通过";
+                 }else if(select_value=='3'){
+                    order_name = "已拒绝";
+                 }
+                str = '是否需指定：<font style="color:red;">'+order_name+'&nbsp;</font><span onClick="order_clean('+"'"+'appointStatus'+"'"+')"><i class="fa fa-times" aria-hidden="true" style="cursor:pointer" title="清除"></i></span>';
+                order_url = order_url+"&to_examine="+select_value;
+            break;
+
+        }
+        //以name 为前缀
+        sessionStorage.setItem(select_name, select_name);
+        sessionStorage.setItem(select_name+'_str',str);
+
+        if(str!=''){
+            select_html(select_name,str);
+        }
+
+        location.href = href_url+order_url;
+    }
+
+
+var parameter;
+    function order_clean(clean)
+    {
+        order_url = "&status_select="+time_value+"&status="+status+"&start="+time_start+"&end="+time_end+"&pay_type="+pay_type+"&to_place_an_order="+to_place_an_order+"&thp_order="+thp_order+"&appointStatus="+appointStatus;
+        if(clean=='status'){
+            parameter = "&status=99"
+        }
+        if(clean=='pay_type'){
+            parameter = "&pay_type=1"
+        }
+        if(clean=='to_place_an_order'){
+            parameter = "&to_place_an_order=10"
+        }
+        if(clean=='thp_order'){
+            parameter = "&thp_order=10"
+        }
+        if(clean=='appointStatus'){
+            parameter = "&appointStatus=10"
+        }
+        if(clean=='to_examine'){
+            parameter = "&appoto_examineintStatus=10"
+        }
+        sessionStorage.setItem(clean+'_str','');
+        location.href = href_url+order_url+parameter;
+    }
+
+</script>
+{template 'common/footer'}

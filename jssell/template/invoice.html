@@ -1,0 +1,595 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li {if $_GPC['op'] == '' || $_GPC['op'] == 'display'}class="active"{/if}>
+        <a href="{php echo $this->createWebUrl('invoice',array('op'=>'display','eid'=>$_GPC['eid'],'version_id'=>0))}">开具发票</a>
+    </li>
+    <!-- <li {if $_GPC['op'] == 'invoiceConfig'}class="active"{/if}>
+        <a href="{php echo $this->createWebUrl('invoice',array('op'=>'invoiceConfig','eid'=>$_GPC['eid'],'version_id'=>0))}">电子发票配置</a>
+    </li> -->
+    {if $_GPC['op'] == 'invoiceDetails'}
+        <li {if $_GPC['op'] == 'invoiceDetails'}class="active"{/if}>
+            <a href="javascript:;">发票详情</a>
+        </li>
+    {/if}
+    {if $_GPC['op'] == 'setStatus'}
+        <li {if $_GPC['op'] == 'setStatus'}class="active"{/if}>
+            <a href="javascript:;">发票状态</a>
+        </li>
+    {/if}
+</ul>
+<!-- 开具发票 start -->
+{if $operation == 'display'}
+    <div id="action_list" class="panel panel-default">
+        <div class="panel-body">
+            <div class="col-xs-12 col-sm-11" style="width:99%;">
+                <form action="" method="get" class="form-horizontal" role="form" id="form1">
+                    <input type="hidden" name="op" value="display">
+                    <input type="hidden" name="c" value="{$_GPC['c']}">
+                    <input type="hidden" name="a" value="{$_GPC['a']}">
+                    <input type="hidden" name="eid" value="{$_GPC['eid']}">
+                    <input type="hidden" name="version_id" value="0">
+                    <div class="input-group">
+                        <select name="status_select" class="form-control input-medium">
+                            <option value="1" <?php if($status_select == 1){echo 'selected';} ?> >不按时间</option>
+                            <option value="create_time" <?php if($_GPC['status_select'] == 'create_time'){echo 'selected';} ?> >创建时间</option>
+                        </select>
+                        <span class="input-group-addon" style="padding: 0; width: 0;border:none;">
+                        </span>
+                        {php echo tpl_form_field_daterange('time',array('start'=>$_GPC['time']['start'],'end'=>$_GPC['time']['end']));}
+                        <script type="text/javascript">
+                            $(function(){
+                                $("#action_list .input-group .daterange-date").addClass("form-control");
+                            })
+                        </script>
+                        <span class="input-group-addon"></span>
+                        <select name="status" class="form-control input-medium">
+                            <option value="10" <?php if($_GPC['status'] == 10){echo 'selected';} ?> >开票状态</option>
+                            <option value="1" <?php if($_GPC['status'] == 1){echo 'selected';} ?> >申请中</option>
+                            <option value="2" <?php if($_GPC['status'] == 2){echo 'selected';} ?> >成功</option>
+                            <option value="3" <?php if($_GPC['status'] == 3){echo 'selected';} ?> >失败</option>
+                            <option value="4" <?php if($_GPC['status'] == 4){echo 'selected';} ?> >未开票</option>
+                            <option value="4" <?php if($_GPC['status'] == 5){echo 'selected';} ?> >开票中</option>
+                        </select>
+                        <span class="input-group-addon"></span>
+                        <select name="kptype" class="form-control input-medium">
+                            <option value="10" <?php if($_GPC['kptype'] == 10){echo 'selected';} ?> >全部类型</option>
+                            <option value="1" <?php if($_GPC['kptype'] == 1){echo 'selected';} ?> >电子发票</option>
+                            <option value="2" <?php if($_GPC['kptype'] == 2){echo 'selected';} ?> >纸质发票</option>
+                        </select>
+                        <span class="input-group-addon">关键字</span>
+                        <input type="text" name="content" class="form-control ac_name" value="{$_GPC['content']}" placeholder="输入名称 | 税号"/>
+                        <span class="input-group-btn">
+                        <input type="submit" class="btn" value="提交筛选" style="border:1px solid #ccc;"/>
+                        </span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="row-fluid">
+                <div class="span8 control-group">
+                    共计 {$total} 条数据
+                </div>
+            </div>
+        </div>
+        <div class="panel-body table-responsive">
+            <table class="table table-hover">
+                <thead class="navbar-inner">
+                    <tr>
+                        <th>发票类型</th>
+                        <th>名称</th>
+                        <th>税号</th>
+                        <th>金额/元</th>
+                        <th>发票状态</th>
+                        <th>快递状态</th>
+                        <th>流水号</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loop $invoiceLog $i $vo}
+                        <tr>
+                            <td>{if $vo['kptype'] == 1}电子发票{elseif $vo['kptype'] == 2}纸质发票{/if}</td>
+                            <td>{$vo['ghfmc']}</td>
+                            <td>{$vo['ghfnsrsbh']}</td>
+                            <td>{$vo['hjje']}</td>
+                            <td>
+                                {if $vo['status'] == 1}
+                                    <span>申请中</span>
+                                {elseif $vo['status'] == 2}
+                                    <span style="color:green;">成功</span>
+                                {elseif $vo['status'] == 3}
+                                    <span style="color:red;">失败</span>
+                                {elseif $vo['status'] == 4}
+                                    <span>未开票</span>
+                                {elseif $vo['status'] == 5}
+                                    <span>开票中</span>
+                                {/if}
+                            </td>
+                            <td>
+                                {if $vo['kptype'] == 2}
+                                    {if $vo['express_status'] == 1}未发{elseif $vo['express_status'] == 2}已发{/if}
+                                {/if}
+                            </td>
+                            <td>{$vo['fpqqlsh']}</td>
+                            <td>{php echo date('Y-m-d H:i',$vo['create_time'])}</td>
+                            <td>
+                                {if $vo['kptype'] == 1 && !empty($vo['fpqqlsh']) && $vo['status'] != 2}
+                                    <a href="javascript:;" onclick="lookInvoice({$vo['inid']})" class="btn btn-default btn-sm manage">
+                                        查询
+                                    </a>
+                                {/if}
+                                {if $vo['kptype'] == 1 && !empty($vo['invoiceFileUrl'])}
+                                    <a href="{$vo['invoiceFileUrl']}" class="btn btn-default btn-sm manage">
+                                        查看电子票
+                                    </a>
+                                {/if}
+                                {if $vo['kptype'] == 1 && empty($vo['fpqqlsh'])}
+                                    <a onclick="generateInvoice({$vo['inid']})" class="btn btn-default btn-sm manage">
+                                        开具电子票
+                                    </a>
+                                {/if}
+                                {if $vo['kptype'] == 1 && $vo['status'] == 1}
+                                    <a onclick="refuse({$vo['inid']})" class="btn btn-default btn-sm manage">
+                                        拒绝开票
+                                    </a>
+                                {/if}
+                                <a href="{php echo $this->createWebUrl('invoice',array('op'=>'invoiceDetails','inid'=>$vo['inid']))}" class="btn btn-default btn-sm manage">
+                                    详情
+                                </a>
+                                {if $vo['kptype'] == 2 && ($vo['status'] == 1 || $vo['status'] == 2) && $vo['express_status'] == 1}
+                                    <a href="{php echo $this->createWebUrl('invoice',array('op'=>'setStatus','inid'=>$vo['inid'],'page'=>$_GPC['page'],'eid'=>$_GPC['eid']))}" class="btn btn-default btn-sm manage">
+                                        发票状态
+                                    </a>
+                                {/if}
+                            </td>
+                        </tr>
+                    {/loop}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {$pager}
+    <script>
+        var database_app_key = "{$eleInvoiceConfig['app_key']}";
+        var database_app_secret = "{$eleInvoiceConfig['app_secret']}";
+        var database_time = "{$eleInvoiceConfig['create_time']}";
+        var access_token = "{$eleInvoiceConfig['access_token']}";
+        // console.log(access_token);
+        function generateInvoice(inid){
+            if(confirm('你确定要操作吗？') == false){
+                return false;
+            }
+            if(database_app_key == '' || database_app_secret == ''){
+                util.message('请设置电子发票配置');
+                return false;
+            }
+            var time = Math.round(new Date() / 1000);//获取当前时间戳
+            if((time - database_time) >= 86400){//accessTokess有效期为24小时,30天内的调用上限为50次 
+                jumpTokenFunction(inid);//获取accessTokess
+            }else{
+                electronicsInvoice(inid,access_token,1);
+            }
+        }
+
+        /**
+         * 获取授权码
+         * */
+        function jumpTokenFunction(inid) {
+            
+            var code = "";//获取auth_code（authorize.html）返回的code; 
+            var taxNum = "";//获取auth_code（authorize.html）返回的taxnum; 
+            // var _url = "https://opentest.jss.com.cn/accessToken"; //获取token地址
+            
+            var _url = "https://open.jss.com.cn/accessToken"; //获取token地址
+            var client_id = database_app_key;  //创建应用后，分配给应用的appKey
+            var client_secret = database_app_secret; //创建应用后，分配给应用的appSecret
+            // var grant_type = "authorization_code";   //授权类型，在本步骤中，此值为“authorization_code”
+            
+            var grant_type = "client_credentials";
+            var redirect_uri = "http://open.jss.com.cn/";   //回调地址，必传且不能为空
+
+            var param = 'code=' + code + "&taxNum=" + taxNum + "&client_id=" + client_id + "&client_secret=" + client_secret + "&grant_type=" + grant_type + "&redirect_uri=" + redirect_uri;
+            // console.log(param);
+            //创建异步对象
+            var xhr = new XMLHttpRequest();
+            //设置请求的类型及url
+            // console.log(xhr);
+            xhr.open('post', _url,true);
+            // 需要设置请求报文
+            xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+            //发送请求
+            xhr.send(param);
+            xhr.onreadystatechange = function () {
+                // 这步为判断服务器是否正确响应
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    // console.info(xhr.responseText);
+                    var responseText = $.parseJSON(xhr.responseText); 
+                    // console.log(responseText);
+                    electronicsInvoice(inid,responseText,2);
+                } else {
+                    // console.info(xhr.responseText);
+                    util.message('操作失败');
+                    return false;
+                }
+            };
+        };
+
+        function electronicsInvoice(inid,responseText,obtain){
+            // console.log(inid);
+            // console.log(responseText);
+            // console.log(obtain);return false;
+            $.post("{php echo $this->createWebUrl('invoice',array('op'=>'electronicsInvoice'))}",{
+                inid: inid,
+                responseText: responseText,
+                obtain: obtain
+            },function(data){
+                if(data.code == 200){
+                    util.message(data.msg,setTimeout(function(){
+                        window.location.reload();
+                    },1000),'success');
+                    return false;
+                }
+                if(data.code == 100){
+                    util.message(data.msg,'','error');
+                    return false;
+                }
+            },'json');
+        }
+
+        function lookInvoice(inid){
+            $.post("{php echo $this->createWebUrl('invoice',array('op'=>'queryInvoiceSerialNum'))}",{
+                inid: inid
+            },function(data){
+                if(data.code == 200){
+                    util.message(data.msg,setTimeout(function(){
+                        window.location.reload();
+                    },1000),'success');
+                    return false;
+                }
+                if(data.code == 100){
+                    util.message(data.msg,'','error');
+                    return false;
+                }
+            },'json');
+        }
+
+        function refuse(inid){
+            if(confirm('你确定要操作吗？') == false){
+                return false;
+            }
+            $.post("{php echo $this->createWebUrl('invoice',array('op'=>'refuseInvoice'))}",{
+                inid: inid
+            },function(data){
+                if(data.code == 200){
+                    util.message(data.msg,setTimeout(function(){
+                        window.location.reload();
+                    },1000),'success');
+                    return false;
+                }
+                if(data.code == 100){
+                    util.message(data.msg,'','error');
+                    return false;
+                }
+            },'json');
+        }
+    </script>
+{/if}
+<!-- 开具发票 end -->
+<!-- 发票详情 start -->
+{if $operation == 'invoiceDetails'}
+    <style type="text/css">
+        .table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+          white-space:normal;
+        }
+    </style>
+    <div class="tab-content">
+        <div class="panel-body table-responsive clearfix">
+            <center style="font-size:20px;">发票详情</center>
+            <table class="table we7-table table-hover vertical-middle" style="position:relative">
+                <thead class="navbar-inner">
+                    <tr><th>单位地址</th><td>{$invoiceLog['ghfdz']}</td><th>单位电话</th><td>{$invoiceLog['ghfdh']}</td></tr>
+                    <tr><th>开户行</th><td>{$invoiceLog['ghfbank']}</td><th>银行账号</th><td>{$invoiceLog['ghfbankid']}</td></tr>
+                    {if $invoiceLog['kptype'] == 2}
+                        <tr><th>接收名称</th><td>{$invoiceLog['receive_name']}</td><th>接收电话</th><td>{$invoiceLog['receive_mobile']}</td></tr>
+                        <tr><th>接收地址</th><td colspan=3>{$invoiceLog['receive_address']}</td></tr>
+                    {elseif $invoiceLog['kptype'] == 1}
+                        <th>接收邮箱</th><td colspan=3>{$invoiceLog['receive_mail']}</td></tr>
+                    {/if}
+                </thead>
+            </table>
+
+            <center style="font-size:20px;">订单记录</center>
+            <table class="table we7-table table-hover vertical-middle" style="position:relative">
+                <thead class="navbar-inner">
+                <tr>
+                    <th>用户名称</th>
+                    <th>付款说明</th>
+                    <th>支付方式</th>
+                    <th>支付金额</th>
+                    <th>订单号</th>
+                    <th>支付时间</th>
+                </tr>
+                </thead>
+                {loop $userPayLog $i $vo}
+                    <tr>
+                        <td>{$vo['userData']['real_name']}</td>
+                        <td>{$vo['explain']}</td>
+                        <td>
+                            {if $vo['pay_type'] == 'wx'}
+                                微信支付
+                            {elseif $vo['pay_type'] == 'yh'}
+                                银行支付
+                            {elseif $vo['pay_type'] == 'ye'}
+                                余额支付
+                            {/if}
+                        </td>
+                        <td>{$vo['price']}元</td>
+                        <td>{$vo['out_trade_no']}</td>
+                        <td>{if !empty($vo['pay_time'])}{php echo date('Y-m-d H:i',$vo['pay_time'])}{/if}</td>
+                    </tr>
+                {/loop}
+            </table>
+        </div>
+    </div>
+{/if}
+<!-- 发票详情 end -->
+<!-- 编辑发票状态 start -->
+{if $operation == 'setStatus'}
+    <div class="main">
+        <div class="form-horizontal">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    更改发票状态
+                </div>
+
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">发票状态</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <select class="form-control" name="status">
+                                <option value="2">成功</option>
+                                <option value="3">失败</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">是否已发快递</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <select class="form-control" name="express_status" onchange="expressStatus()">
+                                <option value="1">否</option>
+                                <option value="2">是</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-body" id='expName' style="display:none;">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">快递公司名称</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <input type='text' class="form-control" name='express_name'/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-body" id='expNum' style="display:none;">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">快递单号</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <input type='text' class="form-control" name='express_num'/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group col-sm-12">
+                <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" onclick="confirmClick()"/>
+            </div>
+        </div>
+    </div>
+    <script>
+        var express_status = 1;//默认未发快递
+        
+        function expressStatus(){
+            express_status = $("select[name=express_status]").val();//快递状态
+            if(express_status == 1){
+                $("#expName").hide();
+                $("#expNum").hide();
+            }else{
+                $("#expName").show();
+                $("#expNum").show();
+            }
+        }
+
+        function confirmClick(){
+            var status = $("select[name=status]").val();
+            var express_name = $("input[name=express_name]").val();
+            var express_num = $("input[name=express_num]").val();
+            var inid = "{$inid}";
+            var pageNum = "{$pageNum}";
+
+            if(express_status == 2){
+                if(express_name == ''){
+                    util.message('快递公司名称不能为空');
+                    return false;
+                }
+                if(express_num == ''){
+                    util.message('快递单号不能为空');
+                    return false;
+                }
+                if(status != 2){
+                    util.message('发票状态必须为成功');
+                    return false;
+                }
+            }
+
+            $.post("{php echo $this->createWebUrl('invoice',array('op'=>'setStatus'))}",{
+                inid: inid,
+                express_status: express_status,
+                express_name: express_name,
+                express_num: express_num,
+                status: status
+            },function(data){
+                if(data.code == 200){
+                    util.message(data.msg,setTimeout(function(){location.href="{php echo $this->createWebUrl('invoice',array('op' => 'display','version_id' =>0,'page'=>$pageNum,'eid'=>$eid))}"},1000),'success');
+                    return false;
+                }
+                if(data.code == 100){
+                    util.message(data.msg,'','error');
+                    return false;
+                }
+            },'json');
+        }
+    </script>
+{/if}
+<!-- 编辑发票状态 end -->
+<!-- 电子发票配置 start -->
+{if $operation == 'invoiceConfig'}
+    <div class="main">
+        <div class="form-horizontal">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    电子发票配置信息
+                </div>
+
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">app_key</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <input type="text" name="app_key" class="form-control" value="{$eleInvoiceConfig['app_key']}"/>
+                            <span style="color:red;">沙箱环境：SDCSQejOsz</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">app_secret</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <input type="text" name="app_secret" class="form-control" value="{$eleInvoiceConfig['app_secret']}"/>
+                            <span style="color:red;">沙箱环境：SD3CDC7F61474950</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">access_token</label>
+                        <div class="col-sm-5 col-xs-6">
+                            <input type="text" class="form-control" value="{$eleInvoiceConfig['access_token']}" readonly="readonly" />
+                            <a onclick="eliminate()" href="javascript:;" style="margin-left:650px;float:left;margin-top:-32px;" class="btn btn-default btn-sm manage">
+                                清除
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="form-group col-sm-12">
+                <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" onclick="generateData()"/>
+            </div>
+        </div>
+    </div>
+    <script>
+        function generateData(){
+            var database_app_key = "{$eleInvoiceConfig['app_key']}";
+            var database_app_secret = "{$eleInvoiceConfig['app_secret']}";
+            var database_time = "{$eleInvoiceConfig['create_time']}";
+            var time = Math.round(new Date() / 1000);//获取当前时间戳
+
+            var app_key = $("input[name=app_key]").val();
+            var app_secret = $("input[name=app_secret]").val();
+
+            if(app_key == ''){
+                util.message('app_key不能为空');
+                return false;
+            }
+            if(app_secret == ''){
+                util.message('app_secret不能为空');
+                return false;
+            }
+            // generateAccessToken(app_key,app_secret);
+            if(database_app_key == app_key && database_app_secret == app_secret){
+                if(time - database_time >= 86400){
+                    generateAccessToken(app_key,app_secret);
+                }else{
+                    util.message('授权码未过期');
+                    return false;
+                }
+            }else if(database_app_key != app_key || database_app_secret != app_secret){
+                generateAccessToken(app_key,app_secret);
+            }
+        }
+
+        function generateAccessToken(app_key,app_secret){
+            var code = "";//获取auth_code（authorize.html）返回的code; 
+            var taxNum = "";//获取auth_code（authorize.html）返回的taxnum; 
+            
+            var _url = "https://open.jss.com.cn/accessToken"; //获取token地址
+            var client_id = app_key;  //创建应用后，分配给应用的appKey
+            var client_secret = app_secret; //创建应用后，分配给应用的appSecret
+            var grant_type = "client_credentials";
+            var redirect_uri = "http://open.jss.com.cn/";   //回调地址，必传且不能为空
+
+            var param = 'code=' + code + "&taxNum=" + taxNum + "&client_id=" + client_id + "&client_secret=" + client_secret + "&grant_type=" + grant_type + "&redirect_uri=" + redirect_uri;
+            // console.log(param);
+            //创建异步对象
+            var xhr = new XMLHttpRequest();
+            //设置请求的类型及url
+            // console.log(xhr);
+            xhr.open('post', _url,true);
+            // 需要设置请求报文
+            xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+            //发送请求
+            xhr.send(param);
+            xhr.onreadystatechange = function () {
+                // 这步为判断服务器是否正确响应
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    // console.info(xhr.responseText);
+                    var responseText = $.parseJSON(xhr.responseText);
+                    $.post("{php echo $this->createWebUrl('invoice',array('op'=>'invoiceConfig'))}",{
+                        requestType: 'obtain',
+                        app_key: app_key,
+                        app_secret: app_secret,
+                        responseText: responseText
+                    },function(data){
+                        if(data.code == 200){
+                            util.message(data.msg,setTimeout(function(){location.href="{php echo $this->createWebUrl('invoice',array('op' => 'display','version_id' =>0,'eid'=>$eid))}"},1000),'success');
+                            return false;
+                        }else{
+                            util.message(data.msg,'','error');
+                            return false;
+                        }
+                    },'json');
+                } else {
+                    util.message('操作失败');
+                    return false;
+                }
+            };
+        }
+
+        function eliminate(){
+            var database_id = "{$eleInvoiceConfig['id']}";
+            $.post("{php echo $this->createWebUrl('invoice',array('op'=>'invoiceConfig'))}",{
+                requestType: 'eliminate',
+                id: database_id
+            },function(data){
+                util.message(data.msg);
+                setTimeout(function(){
+                    window.location.reload();
+                },1000);
+                return false;
+            },'json');
+        }
+    </script>
+{/if}
+<!-- 电子发票配置 end -->
+{template 'common/footer'}

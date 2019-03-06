@@ -1,0 +1,763 @@
+{template 'common/header'}
+
+<ul class="nav nav-tabs">
+	<li {if $_GPC['op'] == 'display' || $_GPC['op'] == ''}class="active"{/if}><a href="{php echo $this->createWebUrl('product',array('version_id'=>0))}">产品管理</a></li>
+	<li {if $_GPC['op'] == 'add_product'}class="active"{/if}><a href="{php echo $this->createWebUrl('product',array('op'=>'add_product','version_id'=>0))}">添加产品</a></li>
+	{if $_GPC['op'] =='edit_product'}
+    <li class="active"><a href="{php echo $this->createWebUrl('product', array('op' => 'edit_product','prid'=>$_GPC['prid'],'version_id'=>0))}">编辑产品</a></li>
+	{/if}
+	<li {if $_GPC['op'] == 'product_type'}class="active"{/if}><a href="{php echo $this->createWebUrl('product',array('op'=>'product_type','version_id'=>0))}">产品分类</a></li>
+	<li {if $_GPC['op'] == 'add_product_type'}class="active"{/if}><a href="{php echo $this->createWebUrl('product', array('op' => 'add_product_type','version_id'=>0))}">添加产品分类</a></li>
+	{if $_GPC['op'] =='edit_product_type'}
+    <li class="active"><a href="{php echo $this->createWebUrl('product', array('op' => 'edit_product_type','ptid'=>$_GPC['ptid'],'version_id'=>0))}">编辑产品分类</a></li>
+	{/if}
+</ul>
+
+<!--产品列表-->
+{if $op == 'display'}
+<div id="action_list" class="panel panel-default">
+	<div class="panel-body">
+		<div class="col-xs-12 col-sm-11" style="width:99%;">
+			<form action="" method="get" class="form-horizontal" role="form" id="form1">
+				<input type="hidden" name="c" value="{$_GPC['c']}">
+				<input type="hidden" name="a" value="{$_GPC['a']}">
+				<input type="hidden" name="eid" value="{$_GPC['eid']}">
+				<input type="hidden" name="do" value="product">
+				<input type="hidden" name="op" value="display">
+				<input type="hidden" name="version_id" value="0">
+				<div class="input-group">
+					<span class="input-group-addon"></span>
+					<select name="ptid" class="form-control input-medium">
+						<option value="7" selected = "selected" <?php if($_GPC['ptid'] == 7){echo 'selected';} ?> >分类</option>
+						{loop $protype $i $p}
+						<option value="{$p['ptid']}" <?php if($_GPC['ptid'] == $p['ptid']){echo 'selected';} ?> >{$p['type_name']}</option>
+						{/loop}
+					</select>
+					<script type="text/javascript">
+                        $(function(){
+                            $("#action_list .input-group .daterange-date").addClass("form-control");
+                        })
+					</script>
+					<span class="input-group-addon"></span>
+					<select name="status" class="form-control input-medium">
+						<option selected = "selected" value="7" <?php if($_GPC['status'] == 7){echo 'selected';} ?> >产品状态</option>
+						<option value="1" <?php if($_GPC['status'] == 1){echo 'selected';} ?> >上架</option>
+						<option value="0" <?php if($_GPC['status'] == "0"){echo 'selected';} ?> >下架</option>
+					</select>
+					<span class="input-group-addon">关键字</span>
+					<input type="text" name="key" class="form-control ac_name" placeholder="产品编号 | 标题" value="{$_GPC['key']}"/>
+					<span class="input-group-btn">
+                    <input type="submit" class="btn" value="提交筛选" style="border:1px solid #ccc;"/>
+                    </span>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<div class="panel-heading-filter">
+			<span style="float: right;">共计 {$total} 条数据</span>
+		</div>
+	</div>
+	<div class="panel-body table-responsive">
+		<table class="table table-hover">
+			<thead class="navbar-inner">
+				<tr>
+					<th style="text-align: center;">ID</th>
+					<th>图片</th>
+					<th>标题</th>
+					<th>类型</th>
+					<th style="text-align: center;">分期支付</th>
+					<!-- <th>服务跟进</th> -->
+					<th style="text-align: center;">服务类型</th>
+					<th style="text-align: center;">状态</th>
+					<th style="text-align: center;">创建时间</th>
+					<th style="text-align: center;">排序</th>
+					<th>快捷操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				{loop $product $pro}
+					<tr>
+						<td style="text-align: center;">{$pro['prid']}</td>
+						<td><img src="{media $pro['images']}" style="width:30px;"></td>
+						<td>{$pro['title']}</td>
+						<td>{$pro['type_name']}</td>
+						<td style="text-align: center;">{if $pro['is_by_stages'] == 1}<i class="fa fa-check"></i>{/if}</td>
+						<!-- <td>{if $pro['is_appoint'] == 0}否{else}是{/if}</td> -->
+						<td style="text-align: center;">{if $pro['is_price'] == 1}一口价{else}报价{/if}</td>
+						<td style="text-align: center;">
+							{if $pro['status']==1}
+								<span style="color:green;">已上架</span>
+							{elseif $pro['status']==0}
+								<span style="color:red;">已下架</span>
+							{/if}
+						</td>
+						<td style="text-align: center;">{php echo date('Y/m/d H:i:s', $pro['create_time']);}</td>
+						<td style="text-align: center;">{$pro['sort']}</td>
+						<td>
+							<input type="hidden" name="version_id" value="0">
+							{if $pro['status'] == 1}
+								<a href="{php echo $this->createWebUrl('product', array('op' => 'set_status','prid'=>$pro['prid'],'version_id'=>0,'status'=>0))}">
+									<label style="cursor:pointer;" data="{$pro['id']}"  class="btn btn-default btn-sm manage">下架</label>
+								</a>
+							{elseif $pro['status'] == 0}
+								<a href="{php echo $this->createWebUrl('product', array('op' => 'set_status','prid'=>$pro['prid'],'version_id'=>0,'status'=>1))}">
+									<label style="cursor:pointer;" data="{$pro['id']}"  class="btn btn-default btn-sm manage">上架</label>
+								</a>
+							{/if}
+							<a href="{php echo $this->createWebUrl('product', array('op' => 'edit_product','prid'=>$pro['prid'],'version_id'=>0,'page'=>$_GPC['page']))}"><label style="cursor:pointer;" data="{$pro['id']}"  class="btn btn-default btn-sm manage"><i class="fa fa-edit"></i></label></a>
+							<a onclick="return confirm('你确定要删除吗？');" href="{php echo $this->createWebUrl('product', array('op' => 'delete_product','prid'=>$pro['prid'],'version_id'=>0))}"><label style="cursor:pointer;" data="{$pro['id']}"  class="btn btn-default btn-sm manage"><i class="fa fa-trash-o"></i></label></a>
+						</td>
+					</tr>
+				{/loop}
+			</tbody>
+		</table>
+	</div>
+</div>
+{$pager}
+{elseif $op == 'edit_product'}
+<div class="main">
+	<form action="" method="post" class="form-horizontal form"	enctype="multipart/form-data">
+		<div class="panel panel-default">
+			<input type="hidden" name="pageNum" value="{$pageNum}"/>
+			<div class="panel-heading">
+				编辑产品
+			</div>
+			{loop $product $v}
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品图片</label>
+					<div class="col-sm-9 col-xs-12">
+						{php echo tpl_form_field_image('images', $v['images']);}
+						<span style="color:red;">提示：建议上传326 * 186px的图片</span>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品标题</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="title" class="form-control" value="{$v['title']}" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品简介</label>
+					<div class="col-sm-9 col-xs-12">
+						<textarea type="text" name="desc" class="form-control">{$v['desc']}</textarea>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品类型</label>
+					<div class="col-sm-9 col-xs-12">
+						<select name="ptid" class="form-control input-medium">
+						    {loop $product_type $i $t}
+								<option value="{$t['ptid']}" {if $v['ptid']==$t['ptid']} selected="selected" {/if} >{$t['type_name']}</option>
+						    {/loop}
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品价格</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="price" class="form-control" value="{$v['price']}" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品原价</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="original_price" class="form-control" value="{$v['original_price']}" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">是否推荐</label>
+					<div class="col-sm-9 col-xs-12">
+						<select name="recommend" class="form-control input-medium">
+							<option value="1" <?php if($v['recommend'] == 1){echo 'selected';} ?> >是</option>
+							<option value="0" <?php if($v['recommend'] == 0){echo 'selected';} ?> >否</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">跳转地址</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="url" placeholder="需包含 http://" class="form-control" value="{$v['url']}" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">状态</label>
+					<div class="col-sm-9 col-xs-12">
+						<select name="status" class="form-control input-medium">
+							<option value="1" <?php if($v['status'] == 1){echo 'selected';} ?> >上架</option>
+							<option value="0" <?php if($v['status'] == 0){echo 'selected';} ?> >下架</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品分类</label>
+					<div class="col-sm-9 col-xs-12">
+						<select name="classification" class="form-control input-medium">
+							<option value="1" <?php if($v['classification'] == 1){echo 'selected';} ?> >平台定制产品</option>
+							<option value="4" <?php if($v['classification'] == 4){echo 'selected';} ?> >平台年度产品</option>
+							<option value="2" <?php if($v['classification'] == 2){echo 'selected';} ?> >第三方产品</option>
+							<option value="3" <?php if($v['classification'] == 3){echo 'selected';} ?> >跳转链接</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">服务类型</label>
+					<div class="col-sm-9 col-xs-12">
+						<select name="is_price" class="form-control input-medium">
+							<option value="1" <?php if($v['is_price'] == 1){echo 'selected';} ?> >一口价</option>
+							<option value="2" <?php if($v['is_price'] == 2){echo 'selected';} ?> >报价</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">排序</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="sort" class="form-control" value="{$v['sort']}" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">是否启用代理</label>
+					<div class="col-sm-9 col-xs-12">
+						<select name="is_agent" class="form-control input-medium">
+							<option value="1" <?php if($v['is_agent'] == 1){echo 'selected';} ?> >启用</option>
+							<option value="0" <?php if($v['is_agent'] == 0){echo 'selected';} ?> >关闭</option>
+						</select>
+					</div>
+				</div>
+				<!--
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">是否需要专家跟进服务</label>
+					<div class="col-sm-9 col-xs-12">
+						<select name="is_appoint" class="form-control input-medium">
+							<option value="0" <?php if($v['is_appoint'] == 0){echo 'selected';} ?> >否</option>
+							<option value="1" <?php if($v['is_appoint'] == 1){echo 'selected';} ?> >是</option>
+						</select>
+					</div>
+				</div> -->
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">指派类型</label>
+					<div class="col-sm-9 col-xs-12">
+						<select name="appoint_type" class="form-control input-medium">
+							<option value="0" <?php if($v['appoint_type'] == 0){echo 'selected';} ?> >全部</option>
+							<option value="1" <?php if($v['appoint_type'] == 1){echo 'selected';} ?> >个人专家</option>
+							<option value="2" <?php if($v['appoint_type'] == 2){echo 'selected';} ?> >专家团</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">指派专家等级</label>
+					<div class="col-sm-9 col-xs-12">
+						<select name="appoint_level" class="form-control input-medium">
+							<option value="0" <?php if($v['appoint_level'] == 0){echo 'selected';} ?> >全部</option>
+							<option value="1" <?php if($v['appoint_level'] == 1){echo 'selected';} ?> >中级专家</option>
+							<option value="2" <?php if($v['appoint_level'] == 2){echo 'selected';} ?> >高级专家</option>
+							<option value="3" <?php if($v['appoint_level'] == 3){echo 'selected';} ?> >资深专家</option>
+							<option value="4" <?php if($v['appoint_level'] == 4){echo 'selected';} ?> >大师级专家</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">服务期限</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="number" name="service_time" class="form-control" value="{$v['service_time']}" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">是否可以支付分期</label>
+					<div class="col-sm-9 col-xs-12">
+						<select name="is_by_stages" class="form-control input-medium">
+							<option value="0" <?php if($v['is_by_stages'] == 0){echo 'selected';} ?> >否</option>
+							<option value="1" <?php if($v['is_by_stages'] == 1){echo 'selected';} ?> >是</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">代理收益</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="agent_profit" class="form-control" value="{$v['agent_profit']}"/>
+					</div>
+					<div class="col-sm-9 col-xs-12" style="margin-left: 17%">
+						<span style="color:gray">说明: 代理收益比例 0~1 之间(例如0.5表示代理商收取百分之50利润)</span>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品说明图</label>
+					<div class="col-sm-9 col-xs-12">
+						{php echo tpl_form_field_image('img', $v['img'])}
+					</div>
+					<div class="col-sm-9 col-xs-12" style="margin-left: 17%">
+						<span style="color:red;">提示：建议上传326 * 186px的图片</span>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品说明</label>
+					<div class="col-sm-9 col-xs-12">
+						{php echo tpl_ueditor('content',$v['content']);}
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">协议标题</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="agreement_title" class="form-control" value="{$v['agreement_title']}" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">协议内容</label>
+					<div class="col-sm-9 col-xs-12">
+						<textarea name="agreement_content" class="form-control">{$v['agreement_content']}</textarea>
+					</div>
+				</div>
+			</div>
+		</div>
+		{/loop}
+		<div class="form-group col-sm-12">
+			<input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" onclick="return confirmClick()"/>
+			<input type="hidden" name="token" value="{$_W['token']}" />
+		</div>
+	</form>
+</div>
+<script>
+	function confirmClick(){
+		var price = $("input[name=price]").val();
+		var service_time = $("input[name=service_time]").val();
+		var is_by_stages = $("select[name=is_by_stages]").val();
+		var appoint_type = $("select[name=appoint_type]").val();
+		var appoint_level = $("select[name=appoint_level]").val();
+
+		if(appoint_type == 2 && appoint_level != 0){
+			util.message('指派类型和指派专家等级不相符');
+			return false;
+		}
+		if(service_time < 0){
+			util.message('服务期限不能小于0');
+			return false;
+		}
+		if(price < 10000 || service_time < 2){
+			if(is_by_stages == 1){
+				util.message('未满足分期条件');
+				return false;
+			}
+		}
+	}
+</script>
+<!--添加产品-->
+{elseif $op == 'add_product'}
+<div class="main">
+	<form action="" method="post" class="form-horizontal form"	enctype="multipart/form-data">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				产品基本信息
+			</div>
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品名称</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" placeholder="建议不等于6个中文字符" name="title" class="form-control" value="" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品分类</label>
+					<div class="col-sm-9 col-xs-12">
+						<select name="ptid" class="form-control input-medium">
+						    {loop $product_type $v}
+								<option value="{$v['ptid']}" >{$v['type_name']}</option>
+						    {/loop}
+						</select>
+					</div>
+				</div>
+				<script>$(function(){showProductClassInputs(0)})</script>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品类型</label>
+					<div class="col-sm-9 col-xs-12">
+						<select name="classification" class="form-control input-medium" onchange="showProductClassInputs(this.value)">
+							<option value="0">请选择产品类型</option>
+							<option value="1">平台定制产品</option>
+							<option value="4">平台年度产品</option>
+							<option value="2">第三方产品</option>
+							<option value="3">跳转链接</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group productClassInputs" data-typeid="3">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">跳转地址</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="url" placeholder="需包含 http://" class="form-control" value="{$product['url']}" />
+					</div>
+				</div>
+				<div class="form-group productClassInputs" data-typeid="1">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">价格类型</label>
+					<div class="col-sm-9 col-xs-12">
+						<select name="is_price" class="form-control input-medium">
+							<option value="1">一口价</option>
+							<option value="2">平台报价</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group productClassInputs" data-typeid="1,2,4">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品价格</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="number" name="price" class="form-control" value="" />
+					</div>
+				</div>
+				<div class="form-group productClassInputs" data-typeid="1">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">支持分期</label>
+					<div class="col-sm-9 col-xs-12">
+						<div class="mui-input-row mui-checkbox mui-left">
+						  <input name="is_by_stages" type="checkbox" > <span style="padding-left:14px;color:#999;">分期配置请进入 [ 参数设置 ] 栏目的 <a target="_blank" href="{php echo $this->createWebUrl('setting', array('c'=>'module','a'=>'manage-account','op' => 'installment', 'version_id'=>0))}">[ 分期配置 ]</a></span>
+						</div>
+						<!-- 
+						<select name="is_by_stages" class="form-control input-medium">
+							<option value="0">否</option>
+							<option value="1">是</option>
+						</select>
+						-->
+					</div>
+				</div>
+				<div class="form-group productClassInputs" data-typeid="1,4">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">专家等级</label>
+					<div class="col-sm-9 col-xs-12">
+						<select name="appoint_level" class="form-control input-medium">
+							<option value="0">不限专家等级</option>
+							<option value="1">只能指派给中级专家</option>
+							<option value="2">只能指派给高级专家</option>
+							<option value="3">只能指派给资深专家</option>
+							<option value="4">只能指派给大师级专家</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group productClassInputs" data-typeid="1,4">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">指派类型</label>
+					<div class="col-sm-9 col-xs-12">
+						<select name="appoint_type" class="form-control input-medium">
+							<option value="0">不限指派对象</option>
+							<option value="1">只能指派给个人专家</option>
+							<option value="2">只能指派给专家团</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group productClassInputs" data-typeid="1,4">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">服务期限</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="number" name="service_time" class="form-control" value="{$product['service_time']}" />
+					</div>
+				</div>
+				<div class="form-group productClassInputs" data-typeid="1,2,4">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品说明</label>
+					<div class="col-sm-9 col-xs-12">
+					    {php echo tpl_ueditor('content');}
+					</div>
+				</div>
+             	<div class="form-group productClassInputs" data-typeid="1,2,4">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品栏目封面图</label>
+					<div class="col-sm-9 col-xs-12">
+						{php echo tpl_form_field_image('images', $product['images'])}
+						<div style="color:red;padding-top:5px;">提示：建议上传500 * 286px的图片</div>
+					</div>
+				</div>
+				<div class="form-group productClassInputs" data-typeid="1,2,4">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">详情页Banner图</label>
+					<div class="col-sm-9 col-xs-12">
+						{php echo tpl_form_field_image('img')}
+					</div>
+					<div class="col-sm-9 col-xs-12" style="margin-left: 17%">
+						<div style="color:red;padding-top:5px;">提示：建议上传750 * 286px的图片</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">状态</label>
+					<div class="col-sm-9 col-xs-12">
+						<select name="status" class="form-control input-medium">
+							<option value="1">上架</option>
+							<option value="0">下架</option>
+						</select>
+					</div>
+				</div>
+				<!--
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">是否需要专家跟进服务</label>
+					<div class="col-sm-9 col-xs-12">
+						<select name="is_appoint" class="form-control input-medium">
+							<option value="1">是</option>
+							<option value="0">否</option>
+						</select>
+					</div>
+				</div>
+				-->
+			</div>
+		</div>
+		<div class="panel panel-default product-more-setting">
+			<div class="panel-heading">
+				更多设置
+			</div>
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">渠道推荐</label>
+					<div class="col-sm-9 col-xs-12">
+						<div class="mui-input-row mui-checkbox mui-left">
+						  <input name="recommend" type="checkbox" > <span style="color:#999;">选中后会展示在第三方合作平台，例如：中天H5对接页面</span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">排序</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="number" name="sort" class="form-control" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品原价</label>
+					<div class="col-sm-9 col-xs-12">
+						<input placeholder="仅用于展示" type="text" name="original_price" class="form-control" value="" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品概述</label>
+					<div class="col-sm-9 col-xs-12">
+						<textarea disabled="disabled" placeholder="目前暂无使用此功能" type="text" name="desc" class="form-control"></textarea>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">代理收益</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="number" name="agent_profit" class="form-control" />
+					</div>
+					<div class="col-sm-9 col-xs-12" style="margin-left: 17%">
+						<span style="color:gray">说明: 代理收益比例 0~1 之间(例如0.5表示代理商收取百分之50利润)</span>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">协议标题</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" placeholder="无则不填" name="agreement_title" class="form-control" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">协议内容</label>
+					<div class="col-sm-9 col-xs-12">
+						<textarea placeholder="无则不填" name="agreement_content" class="form-control"></textarea>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="form-group col-sm-12">
+			<input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1"  onclick="return confirmClick()"/>
+			<input type="hidden" name="token" value="{$_W['token']}" />
+		</div>
+	</form>
+</div>
+<script>
+	function confirmClick(){
+		var price = $("input[name=price]").val();
+		var service_time = $("input[name=service_time]").val();
+		var is_by_stages = $("select[name=is_by_stages]").val();
+		var appoint_type = $("select[name=appoint_type]").val();
+		var appoint_level = $("select[name=appoint_level]").val();
+		if(appoint_type == 2 && appoint_level != 0){
+			util.message('指定类型和指定专家等级不相符');
+			return false;
+		}
+		if(service_time < 0){
+			util.message('服务期限不能小于0');
+			return false;
+		}
+		if(price < 10000 || service_time < 2){
+			if(is_by_stages == 1){
+				util.message('未满足分期条件');
+				return false;
+			}
+		}
+	}
+</script>
+<!--产品分类列表-->
+{else if $_GPC['op'] == 'product_type'}
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<div class="row-fluid">
+				<div class="span8 control-group">
+					共计 {$total['num']} 条数据
+				</div>
+			</div>
+		</div>
+		<div class="panel-body table-responsive">
+			<table class="table table-hover">
+				<thead class="navbar-inner">
+				<tr>
+					<th style="text-align: center;">ID</th>
+					<th>分类名称</th>
+					<th style="text-align: center;">分类图片</th>
+					<th style="text-align: center;">排序</th>
+					<th style="text-align: center;">状态</th>
+					<th>快捷操作</th>
+				</tr>
+				</thead>
+				<tbody>
+				{loop $type $v}
+				<tr>
+					<td style="text-align: center;">{$v['ptid']}</td>
+					<td>{$v['type_name']}</td>
+					<td style="text-align: center;"><img alt="" src="{media $v['image']}" width='auto' style="max-width:30px; max-height:30px;" height='auto'></td>
+					<td style="text-align: center;">{$v['sort']}</td>
+					<td style="text-align: center;">
+						{if $v['status'] == 0}
+							<span style="color:red;">已下架</span>
+						{elseif $v['status'] == 1}
+							<span style="color:green;">已上架</span>
+						{/if}
+						</td>
+					<td>
+						{if $v['status'] == 0}
+							<a href="{php echo $this->createWebUrl('product', array('op' => 'set_status_product_type','ptid'=>$v['ptid'],'version_id'=>0,'status'=>1))}">
+								<label style="cursor:pointer;" data="{$v['id']}"  class="btn btn-default btn-sm manage">
+									<i class="fa fa-del"></i>上架
+								</label>
+							</a>
+						{elseif $v['status'] == 1}
+							<a href="{php echo $this->createWebUrl('product', array('op' => 'set_status_product_type','ptid'=>$v['ptid'],'version_id'=>0,'status'=>0))}">
+								<label style="cursor:pointer;" data="{$v['id']}"  class="btn btn-default btn-sm manage">
+									<i class="fa fa-del"></i>下架
+								</label>
+							</a>
+						{/if}
+						<a href="{php echo $this->createWebUrl('product', array('op' => 'edit_product_type','ptid'=>$v['ptid'],'version_id'=>0))}"><label style="cursor:pointer;" data="{$v['id']}"  class="btn btn-default btn-sm manage"><i class="fa fa-edit"></i></label></a>
+						<a onclick="return confirm('你确定要删除吗？')" href="{php echo $this->createWebUrl('product', array('op' => 'delete_product_type','ptid'=>$v['ptid'],'version_id'=>0))}"><label style="cursor:pointer;" data="{$v['ptid']}" class="btn btn-default btn-sm manage"><i class="fa fa-trash-o"></i></label></a>
+					</td>
+				</tr>
+				{/loop}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	{$pager}
+</div>
+
+<!--编辑产品类型-->
+{else if $_GPC['op'] == 'edit_product_type'}
+<div class="main">
+	<form action="" method="post" class="form-horizontal form"	id="user-submit"  enctype="multipart/form-data">
+		<input type="hidden" name="op" value="edit_product_type">
+		<input type="hidden" name="id" value="{$ptype['ptid']}">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				编辑产品类型
+			</div>
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品类型名称</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="title" class="form-control" value="{$ptype['type_name']}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品类型图片</label>
+					<div class="col-sm-9 col-xs-12">
+						{php echo tpl_form_field_image('image', $ptype['image'])}
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">排序</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="sort" class="form-control" value="{$ptype['sort']}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">状态</label>
+					<div class="col-sm-9 col-xs-12">
+						<select name='status' class="form-control">
+							<option {if $ptype['status'] == 1}selected{/if} value="1">上架</option>
+							<option {if $ptype['status'] == 0}selected{/if} value="0">下架</option>
+						</select>
+					</div>
+				</div>
+
+			</div>
+		</div>
+		<div class="form-group col-sm-12">
+			<input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+			<input type="hidden" name="token" value="{$_W['token']}" />
+		</div>
+	</form>
+</div>
+<!--添加产品类型-->
+{else if $_GPC['op'] == 'add_product_type'}
+<div class="main">
+	<form action="" method="post" class="form-horizontal form"	id="user-submit"  enctype="multipart/form-data">
+		<input type="hidden" name="op" value="add_product_type">
+		<input type="hidden" name="id" value="{$id}">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+			    添加产品类型
+			</div>
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品类型名称</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="type_name" class="form-control"/>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">产品类型图片</label>
+					<div class="col-sm-9 col-xs-12">
+						{php echo tpl_form_field_image('image')}
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">排序</label>
+					<div class="col-sm-9 col-xs-12">
+						<input type="text" name="sort" class="form-control"/>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">状态</label>
+					<div class="col-sm-9 col-xs-12">
+						<select name='status' class="form-control">
+							<option value="1">上架</option>
+							<option value="0">下架</option>
+						</select>
+					</div>
+				</div>
+
+			</div>
+		</div>
+		<div class="form-group col-sm-12">
+			<input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+			<input type="hidden" name="token" value="{$_W['token']}" />
+		</div>
+	</form>
+</div>
+{/if}
+<style type="text/css">
+	.productClassInputs{display: none;}
+	.product-more-setting .panel-heading{cursor: pointer;}
+	.product-more-setting .panel-body{display: none;}
+</style>
+<script>
+	$(".product-more-setting").each(function(){
+		var el = $(this).find(".panel-heading");
+		var ebody = $(this).find(".panel-body");
+		el.click(function(){
+			var vsta = ebody[0].style.display;
+			vsta == "block" ? (ebody.hide()) : (ebody.show());
+		})
+	});
+	//showProductClassInputs(3);
+	function showProductClassInputs(typeid){
+		$(".productClassInputs").hide();
+		$(".productClassInputs").each(function(){
+			var ids = $(this).attr("data-typeid");
+			var arr = ids.split(",");
+			for(var v in arr){
+				(arr[v]==typeid) && ($(this).show())
+			}
+		});
+	}
+</script>
+{template 'common/footer'}

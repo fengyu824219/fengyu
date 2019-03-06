@@ -1,0 +1,279 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+	<li {if $_GPC['do'] =='' ||$_GPC['do'] == 'ask_users'}class="active"{/if}><a href="{php echo $this->createWebUrl('ask_users',array('version_id'=>0))}">用户管理</a></li>
+	<li {if $op == 'edit_users'}class="active"{/if}><a href="{php echo $this->createWebUrl('ask_users', array('op' => 'recharge_manage','id'=>$sid,'version_id'=>0))}">充值记录</a></li>
+	<li {if $op == 'edit_users'}class="active"{/if}><a href="{php echo $this->createWebUrl('ask_users', array('op' => 'zs_manage','id'=>$sid,'version_id'=>0))}">赞赏记录</a></li>
+	<li {if $op == 'ciphertext'}class="active"{/if}><a href="{php echo $this->createWebUrl('ask_users', array('op' => 'ciphertext','id'=>$sid,'version_id'=>0))}">密文管理</a></li>
+</ul>
+{if $op == 'display'}
+<div class="main">
+<div class="panel panel-info">
+		<div class="panel-heading">筛选</div>
+		<div class="panel-body">
+			<form  method="get" class="form-horizontal" role="form">				
+				<div class="form-group">
+					<input type="hidden" name="c" value="site">
+					<input type="hidden" name="a" value="entry">
+					<input type="hidden" name="do" value="ask_users">
+					<input type="hidden" name="m" value="dg_ask">
+					<input type="hidden" name="version_id" value="0">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">查询关键词</label>
+					<div class="col-sm-6 col-lg-8">
+						<input class="form-control" name="keyword" id="" type="text" value="{$_GPC['keyword']}" placeholder="请输入用户昵称或者姓名或者用户头衔">
+					</div>
+					<div class="pull-right col-xs-12 col-sm-3 col-lg-2">
+						<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="panel panel-default">
+	<div class="panel-heading">	
+			<div class="row-fluid">
+				<div class="span8 control-group">
+					共计 {$total} 条数据
+				</div>
+			</div>
+		</div>
+		<div class="panel-body table-responsive">
+		<table class="table table-hover">
+			<thead class="navbar-inner">
+				<tr>
+					<th style="width:65px;" align="center">头像</th>
+					<th>昵称</th>
+					<th>姓名</th>
+					<th>手机号</th>
+					<th>微信号</th>
+					<th>头衔</th>
+					<th>余额</th>
+					<th align="center">加入时间</th>
+					<th style="width:150px;">快捷操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				{loop $records $row}
+				<tr>
+					<td><img alt="" src="{$row['avatar']}" width='auto' style="max-width:50px; max-height:50px;" height='auto'></td>
+					<td>{$row['nickname']}</td>
+					<td>{$row['real_name']}</td>
+					<td>{$row['user_phone']}</td>
+					<td>{$row['user_wxcode']}</td>
+					<td>{$row['user_title']}</td>
+					<td>{$row['balance']}</td>
+					<td>{php echo date('Y/m/d H:i:s', $row['create_time']);}</td>
+					<td>
+						<!--<label style="cursor:pointer;" data="{$row['id']}" class="label label-default" onclick="setUserStatus(this,'shut','{$row['is_openask']}')">开启</label>-->
+						<!-- <a href="{php echo $this->createWebUrl('ask_users', array('op' => 'balance','id'=>$row['id'],'version_id'=>0))}"><label style="cursor:pointer;" data="{$row['id']}" class="label label-default">设置余额</label></a> -->
+						<a href="{php echo $this->createWebUrl('ask_users', array('op' => 'edit_users','id'=>$row['id'],'version_id'=>0))}"><label style="cursor:pointer;" data="{$row['id']}" class="label label-default" >编辑</label></a>
+
+					</td>
+				</tr>
+				{/loop}
+			</tbody>
+		</table>
+	</div>
+	</div>
+	{$pager}
+</div>
+{else if $op == 'recharge_manage'}
+<style type="text/css">
+.table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+  white-space:normal;
+}
+</style>
+<div class="main">
+	<div class="panel panel-info">
+		<div class="panel-heading">筛选</div>
+		<div class="panel-body">
+			<form  method="get" class="form-horizontal" role="form">	
+				<input type="hidden" name="c" value="site">
+				<input type="hidden" name="version_id" value="0">
+				<input type="hidden" name="a" value="entry">
+				<input type="hidden" name="do" value="recharge_manage">
+				<input type="hidden" name="m" value="dg_ask">	  	
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">查询关键词</label>
+					<div class="col-sm-6 col-lg-8">
+						<input class="form-control" name="keyword" id="" type="text" value="{$_GPC['keyword']}" placeholder="请输入用户昵称关键字">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">时间范围</label>
+					<div class="col-sm-6 col-lg-8">
+						{php echo tpl_form_field_daterange('time', array('start'=>date('Y-m-d', $starttime),'end'=>date('Y-m-d', $endtime)));}
+					</div>
+					<div class="pull-right col-xs-12 col-sm-3 col-lg-2">
+						<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div class="panel panel-default">
+		<div class="panel-heading">	
+				<div class="row-fluid">
+					<div class="span8 control-group">
+						共计 {$total} 条数据
+					</div>
+				</div>
+			</div>
+			<div class="panel-body table-responsive">
+			<table class="table table-hover" style="font-size:14px;">
+				<thead class="navbar-inner">
+					<tr>
+						<th style="width:65px;" align="center">头像</th>
+						<th style="width:75px;">昵称</th>
+						<th style="width:75px;">真实姓名</th>
+						<th style="width:75px;">充值金额</th>
+						<th style="width:75px;">状态</th>
+						<th style="width:65px;">时间</th>
+					</tr>
+				</thead>
+				<tbody>
+					{loop $records $row}
+					
+					<tr id="row_{$row['id']}">
+						<td><img alt="" src="{$row['avatar']}" width='auto' style="max-width:50px; max-height:50px;" height='auto'></td>
+						<td>{$row['nickname']}</td>
+						<td>{$row['real_name']}</td>
+						<td>{$row['money']}</td>
+						<td>{$row['pay_status']}</td>
+						<td>{php echo date('Y/m/d H:i:s', $row['time']);}</td>
+					</tr>
+					{/loop}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	{$pager}
+</div>
+{else if $op == 'zs_manage'}
+<style type="text/css">
+.table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+  white-space:normal;
+}
+</style>
+<div class="main">
+	<div class="panel panel-info">
+		<div class="panel-heading">筛选</div>
+		<div class="panel-body">
+			<form  method="get" class="form-horizontal" role="form">
+				<input type="hidden" name="version_id" value="0">
+				<input type="hidden" name="c" value="site">
+				<input type="hidden" name="a" value="entry">
+				<input type="hidden" name="do" value="zs_manage">
+				<input type="hidden" name="m" value="dg_ask">		
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">时间范围</label>
+					<div class="col-sm-6 col-lg-8">
+						{php echo tpl_form_field_daterange('time', array('start'=>date('Y-m-d', $starttime),'end'=>date('Y-m-d', $endtime)));}
+					</div>
+					<div class="pull-right col-xs-12 col-sm-3 col-lg-2">
+						<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div class="panel panel-default">
+		<div class="panel-heading">	
+				<div class="row-fluid">
+					<div class="span8 control-group">
+						共计 {$total} 条数据
+					</div>
+				</div>
+			</div>
+			<div class="panel-body table-responsive">
+			<table class="table table-hover" style="font-size:14px;">
+				<thead class="navbar-inner">
+					<tr>
+						<th style="width:65px;" align="center">赞赏人头像</th>
+						<th style="width:75px;">赞赏人昵称</th>
+						<th style="width:65px;" align="center">被赞赏人头像</th>
+						<th style="width:75px;">被赞赏人昵称</th>
+						<th style="width:120px;">问题</th>
+						<th style="width:75px;">金额</th>
+						<th style="width:65px;">时间</th>
+					</tr>
+				</thead>
+				<tbody>
+					{loop $records $row}
+					
+					<tr id="row_{$row['id']}">
+						<td><img alt="" src="{$row['avatar']}" width='auto' style="max-width:50px; max-height:50px;" height='auto'></td>
+						<td>{$row['nickname']}</td>
+						<td><img alt="" src="{$row['b_avatar']}" width='auto' style="max-width:50px; max-height:50px;" height='auto'></td>
+						<td>{$row['b_nickname']}</td>
+						<td>{$row['ask_content']}</td>
+						<td>{$row['money']}</td>
+						<td>{php echo date('Y/m/d H:i:s', $row['create_time']);}</td>
+					</tr>
+					{/loop}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	{$pager}
+</div>
+{else if $op == 'ciphertext'}
+<div class="main">
+<div class="panel panel-info">
+		<div class="panel-heading">筛选</div>
+		<div class="panel-body">
+			<form  method="get" class="form-horizontal" role="form">				
+				<div class="form-group">
+					<input type="hidden" name="c" value="site">
+					<input type="hidden" name="a" value="entry">
+					<input type="hidden" name="op" value="ciphertext">
+					<input type="hidden" name="m" value="dg_ask">
+					<input type="hidden" name="version_id" value="0">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">查询关键词</label>
+					<div class="col-sm-6 col-lg-8">
+						<input class="form-control" name="keyword" id="" type="text" value="{$_GPC['keyword']}" placeholder="请输入公司或者姓名或者手机号码">
+					</div>
+					<div class="pull-right col-xs-12 col-sm-3 col-lg-2">
+						<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="panel panel-default">
+	<div class="panel-heading">	
+			<div class="row-fluid">
+				<div class="span8 control-group">
+					共计 {$total} 条数据
+				</div>
+			</div>
+		</div>
+		<div class="panel-body table-responsive">
+		<table class="table table-hover">
+			<thead class="navbar-inner">
+				<tr>
+					<th style="width:65px;" align="center">公司</th>
+					<th>姓名</th>
+					<th>手机号码</th>
+					<th>推荐人ID</th>
+					<!-- <th style="width:150px;">快捷操作</th> -->
+				</tr>
+			</thead>
+			<tbody>
+				{loop $records $row}
+				<tr>
+					<td>{$row['company']}</td>
+					<td>{$row['name']}</td>
+					<td>{$row['mobile']}</td>
+					<td>{$row['pid']}</td>
+				</tr>
+				{/loop}
+			</tbody>
+		</table>
+	</div>
+	</div>
+	{$pager}
+</div>
+{/if}
+{template 'common/footer'}

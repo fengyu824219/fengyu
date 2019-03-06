@@ -1,0 +1,227 @@
+{template 'common/header'}
+<style type="text/css">
+.table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+  white-space:normal;
+}
+</style>
+
+<ul class="nav nav-tabs">
+	<li {if $_GPC['do'] =='' ||$_GPC['do'] == 'question_manage'}class="active"{/if}><a href="{php echo $this->createWebUrl('question_manage',array('version_id'=>0,'type'=>1))}">普通问题管理</a></li>
+	<li {if $_GPC['do'] =='question_manage' && $_GPC['op'] == 'peep'}class="active"{/if}><a href="{php echo $this->createWebUrl('question_manage',array('op'=>'peep','version_id'=>0,'type'=>1))}">偷瞄问答管理</a></li>
+	<li {if $_GPC['do'] == 'reward_manage'}class="active"{/if}><a href="{php echo $this->createWebUrl('reward_manage',array('version_id'=>0,'type'=>2))}">悬赏问题管理</a></li>
+
+</ul>
+{if $_GPC['do'] == 'reward_manage'}
+<div class="main">
+    <div id="action_list" class="panel panel-default">
+        <div class="panel-body">
+            <div class="col-xs-12 col-sm-11" style="width:99%;">
+				<form  method="get" class="form-horizontal" role="form">
+					<div class="input-group">
+						<input type="hidden" name="c" value="site">
+						<input type="hidden" name="version_id" value="0">
+						<input type="hidden" name="a" value="entry">
+						<input type="hidden" name="do" value="reward_manage">
+						<input type="hidden" name="m" value="dg_ask">
+						<select name="status_select" class="form-control input-medium">
+	                        <option value="1" <?php if($status_select == 1){echo 'selected';} ?> >不按时间</option>
+	                        <option value="create_time" <?php if($_GPC['status_select'] == 'create_time'){echo 'selected';} ?> >创建时间</option>
+	                    </select>
+	                    <span class="input-group-addon" style="padding: 0; width: 0;border:none;">
+	                    </span>
+	                    {php echo tpl_form_field_daterange('time',array('start'=>$_GPC['time']['start'],'end'=>$_GPC['time']['end']));}
+	                    <script type="text/javascript">
+	                        $(function(){
+	                            $("#action_list .input-group .daterange-date").addClass("form-control");
+	                        })
+	                    </script>
+						<span class="input-group-addon">问题状态</span>
+						<select name="is_answer" class="form-control input-medium">
+							<option value="7"{if '7' == $is_answer} selected="selected"{/if}>不限</option>
+							<option value="0"{if '0' == $is_answer} selected="selected"{/if}>悬赏中</option>
+							<option value="1"{if '1' == $is_answer} selected="selected"{/if}>已采纳</option>
+							<option value="2"{if '2' == $is_answer} selected="selected"{/if}>已结束</option>
+						</select>
+						<span class="input-group-addon">查询关键词</span>
+							<input class="form-control ac_name" name="keyword" id="" type="text" value="{$_GPC['keyword']}" placeholder="请输入用户昵称或姓名或问题">
+
+						<span class="input-group-btn">
+			            	<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+			            </span>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="panel panel-default">
+		<div class="panel-heading">
+			<div class="panel-heading-filter">
+				共计 {$total} 条数据
+			</div>
+		</div>
+		<div class="panel-body table-responsive">
+		<table class="table table-hover">
+			<thead class="navbar-inner">
+				<tr>
+					<th style="width:150px;">问题</th>
+					<th style="width:75px;">提问者</th>
+					<th style="width:70px;">悬赏金额</th>
+					<th style="width:70px;">是否公开</th>
+					<th style="width:70px;">支付类型</th>
+					<th style="width:80px;">提问时间</th>
+					<th style="width:80px;">悬赏期限</th>
+					<th style="width:70px;">回答数</th>
+					<th style="width:65px;">状态</th>
+					<th style="width:180px;">快捷操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				{loop $records $row}
+					<tr id="row_{$row['id']}">
+						<?php $content=nl2br($row['ask_content']); ?>
+						<td class="sl" title="{$content}">{$content}</td>
+						<td>{$row['pay_nickname']}</td>
+						<td>{$row['pay_money']}</td>
+						<td>{if $row['open'] == 1}私密{elseif $row['open'] == 2}公开{/if}</td>
+						<td>{if $row['pay_status'] == 0}微信支付{elseif $row['pay_status'] == 1}余额支付{/if}</td>
+						<td>{if $row['create_time'] != 0}{php echo date('Y/m/d H:i:s', $row['create_time']);}{/if}</td>
+						<td>{if $row['reward_expirytime'] != 0}{php echo date('Y/m/d H:i:s', $row['reward_expirytime']);}{/if}</td>
+						<td>{$row['answer_num']}</td>
+						<td>
+							{if $row['reward_status']==0}
+                             悬赏中
+                            {elseif $row['reward_status']==1}
+                             已采纳
+                            {elseif $row['reward_status']==2}
+                            已结束{if $row['refund_time'] != 0}
+                            <span style="color:red">(已退款)</span>
+                            {/if}
+                            {/if}
+						<td>
+						{if $row['refund_time']==0}
+						{if $row['is_answer']!=0}
+							<label style="cursor:pointer;" data="{$row['id']}" class="btn btn-default btn-sm manage" onclick="view_answer({$row['id']})">查看回答</label>
+						{/if}
+							<!-- 私密不能设为精选
+
+								<label style="cursor:pointer;" data="{$row['id']}" class="btn btn-default btn-sm manage" onclick="setQuestion(this,'is_chosen')">
+									<span id="ser_{$row['id']}">
+										{if $row['is_chosen'] == 0}设为精选{elseif $row['is_chosen'] == 1}取消精选{/if}
+									</span>
+								</label> -->
+                        {if $row['open']==2 && $row['reward_status']==1}
+							<a href="{php echo $this->createWebUrl('question_edit',['op'=>'reward_edit','version_id'=>0,'row_id'=>$row['id']])}">
+								<label style="cursor:pointer;" data="{$row['id']}" class="btn btn-default btn-sm manage" >{if $row['is_chosen']==0}设为{else}编辑{/if}精选</label>
+							</a>
+                        {/if}
+                        	<!-- 先保留 -->
+							<!-- <label style="cursor:pointer;" data="{$row['id']}" class="btn btn-default btn-sm manage" onclick="setQuestion(this,'del')">删除</label>
+ -->
+							<!-- 先保留 -->
+							<!-- {if $is_answer==2 && $row['pay_money']>0}
+								<label style="cursor:pointer;" data="{$row['id']}" class="label label-default label-info" onclick="refund(this)">退款</label>
+							{/if} -->
+                        {/if}
+						</td>
+					</tr>
+				{/loop}
+			</tbody>
+		</table>
+	</div>
+</div>
+{$pager}
+<script type="text/javascript">
+// var refund_url="{php echo $this->createWebUrl('refund_ajax')}";// 先保留
+$(function(){
+	$(".sl").each(function(){
+		var maxSize = 15;
+		if($(this).text().length > maxSize){
+	        $(this).text($(this).text().substring(0,maxSize)); $(this).html($(this).html()+'…');
+	    }
+	});
+	$(".sl").show();
+})
+
+function setQuestion(obj,op){
+	if(!confirm("确认操作吗?")){return false;}
+	var row_id=$(obj).attr('data');
+	$.post(location.href,{id:row_id,op:op},function(result){
+		if(result.success==1){
+			if(op=="del"){
+				$("#row_"+result.id).remove();
+                util.message("操作成功", "", "success");return false;
+			}else if(op=='is_chosen'){
+				if(result.is_cho == 1){
+					//$(obj).removeClass('label-info');
+                    $("#ser_"+row_id).text('取消精选');
+				}else{
+					//$(obj).addClass('label-info');
+                    $("#ser_"+row_id).text('设为精选');
+				}
+			}else if(op=='caina'){
+
+			}
+			else{location.reload();}
+		}
+		if(result.success==2){
+			util.message(result.data, "", "error");return false;
+		}
+	});
+}
+
+//先保留
+// function refund(obj){
+// 	if(!confirm("确认退款吗?")){return false;}
+// 	var row_id=$(obj).attr('data');
+// 	$.post(refund_url,{id:row_id},function(result){
+// 		if(result.success==1){
+// 			$("#row_"+result.id).children().eq(6).text("已退款");
+// 			$(obj).remove();
+// 		}
+// 	});
+// 	return false;
+// }
+
+
+
+
+$(function(){
+	//推送给素有专家
+	$(".check_all").click(function(){
+       var checked = $(this).get(0).checked;
+		$(':checkbox').each(function(){this.checked = checked});
+    });
+	$(".send_all").click(function(){
+		var check = $("input:checked");
+		if(check.length<1){
+			alert('请选择要推送的问题!');
+			return false;
+		}
+        if( confirm("确认推送吗？推送后所有专家将收到模板消息提醒")){
+			var id = new Array();
+			check.each(function(i){
+				if($(this).val()!=0){
+					id[i] = $(this).val();
+				}
+			});
+			$.post(location.href, {ids:id,op:'sendall'},function(data){
+				if (data.success ==1){
+					alert("推送成功,共推送给了"+data.count+"个专家");
+				}
+			},'json');
+		}
+	});
+});
+function view_answer(askid){
+	var page_num = "{$_GPC['page']}";
+	var url="{php echo $this->createWebUrl('view_answer')}";
+//	location.href=url+"&askid="+askid+"&type=2";
+    location.href=url+"&askid="+askid+"&type=2&version_id=0&page_num="+page_num;
+
+
+}
+</script>
+{/if}
+{template 'common/footer'}

@@ -1,0 +1,293 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li {if $_GPC['op'] =='' || $_GPC['op'] == 'display'}class="active"{/if}><a
+        href="{php echo $this->createWebUrl('comment',array('op'=>'display','eid'=>$_GPC['eid'],'version_id'=>0))}">评论管理</a></li>
+</ul>
+<script src="{TEMPLATE_PATH}/js/emoji.js"></script>
+<!-- 评论管理 start -->
+{if $operation == 'display'}
+<style>
+     .checkbox-custom {
+        position: relative;
+        padding: 0 0 0 25px;
+        margin-bottom: 7px;
+        margin-top: 0;
+    }
+    /*
+    将初始的checkbox的样式改变
+    */
+    .checkbox-custom input[type="checkbox"] {
+        opacity: 0;/*将初始的checkbox隐藏起来*/
+        position: absolute;
+        cursor: pointer;
+        z-index: 2;
+        margin: -6px 0 0 0;
+        top: 50%;
+        left: 3px;
+    }
+    /*
+    设计新的checkbox，位置
+    */
+    .checkbox-custom label:before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        margin-top: -9px;
+        width: 19px;
+        height: 18px;
+        display: inline-block;
+        border-radius: 2px;
+        border: 1px solid #bbb;
+        background: #fff;
+    }
+    /*
+    点击初始的checkbox，将新的checkbox关联起来
+    */
+    .checkbox-custom input[type="checkbox"]:checked +label:after {
+        position: absolute;
+        display: inline-block;
+        font-family: 'FontAwesome';
+        content: '\F00C';
+        top: 50%;
+        left: 4px;
+        margin-top: -5px;
+        font-size: 11px;
+        line-height: 1;
+        width: 16px;
+        height: 16px;
+        color: #333;
+    }
+    .checkbox-custom label {
+        cursor: pointer;
+        line-height: 1.2;
+        font-weight: normal;/*改变了rememberme的字体*/
+        margin-bottom: 0;
+        text-align: left;
+    }
+</style>
+<div id="action_list" class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-xs-12 col-sm-11" style="width:99%;"> 
+            <form action="" method="get" class="form-horizontal" role="form" id="form1">
+                <input type="hidden" name="op" id="op_dis" value="display">
+                <input type="hidden" name="c" value="{$_GPC['c']}">
+                <input type="hidden" name="a" value="{$_GPC['a']}">
+                <input type="hidden" name="eid" value="{$_GPC['eid']}">
+                <input type="hidden" name="version_id" value="0">
+                <div class="input-group">
+                    <select name="status_select" class="form-control input-medium">
+                        <option value="1" <?php if($status_select == 1){echo 'selected';} ?> >不按时间</option>
+                        <option value="create_time" <?php if($_GPC['status_select'] == 'create_time'){echo 'selected';} ?> >回复时间</option>
+                    </select>
+                    <span class="input-group-addon" style="padding: 0; width: 0;border:none;">
+                    </span>
+                    {php echo tpl_form_field_daterange('time',array('start'=>$_GPC['time']['start'],'end'=>$_GPC['time']['end']));}
+                    <script type="text/javascript">
+                        $(function(){
+                            $("#action_list .input-group .daterange-date").addClass("form-control");
+                        })
+                    </script>
+                    <span class="input-group-addon">类型</span>
+                    <select name="type" class="form-control input-medium">
+                        <option value="10" <?php if($_GPC['type'] == 10){echo 'selected';} ?> >全部</option>
+                        <option value="article" <?php if($_GPC['type'] == 'article'){echo 'selected';} ?> >文章</option>
+                        <option value="ask" <?php if($_GPC['type'] == 'ask'){echo 'selected';} ?> >问答</option>
+                    </select>
+                    <span class="input-group-addon">状态</span>
+                    <select name="is_show" class="form-control input-medium">
+                        <option value="10" <?php if($_GPC['is_show'] == 10){echo 'selected';} ?> >全部</option>
+                        <option value="0" <?php if($_GPC['is_show'] == '0'){echo 'selected';} ?> >审核中</option>
+                        <option value="1" <?php if($_GPC['is_show'] == '1'){echo 'selected';} ?> >通过</option>
+                    </select>
+                    <span class="input-group-addon">关键字</span>
+                    <input type="text" name="nickname" class="form-control ac_name" value="{$_GPC['nickname']}" placeholder="用户名称"/>
+                    <span class="input-group-btn">
+                    <input type="submit" class="btn" value="提交筛选" style="border:1px solid #ccc;"/>
+                    <!-- <input onclick="dc()" type="button" class="btn" value="导出" style="border:1px solid #ccc;background-color: #fff;"/> -->
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading"> 
+		<div class="panel-heading-filter">
+			<span style="float: right;">共计 {$total['num']} 条数据</span>
+		</div>
+    </div>
+    <div class="panel-body table-responsive">
+        <table class="table table-hover">
+            <thead class="navbar-inner">
+                <tr>
+                    <th>
+                        <div class="checkbox-custom checkbox-default" >
+                            <input class="RememberMe" type="checkbox" id="allAndNotAll">
+                            <label for="RememberMe" style=" pointer-events: none;cursor: default;opacity: 0.6;"></label>
+                        </div>
+                    </th>
+                    <th>类型</th>
+                    <th>头像</th>
+                    <th>用户</th>
+                    <th>标题</th>
+                    <th>类型</th>
+                    <th>评论内容</th>
+                    <th style="text-align: center;">审核状态</th>
+                    <th>评论时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {loop $comment $i $v}
+                    <tr>
+                        <td>
+                            {if $v['pid'] == 0 && $v['is_show'] == 0}
+                                <div class="checkbox-custom checkbox-default">
+                                    <input class="RememberMe" type="checkbox" name="aaid[]" value="{$v['aaid']}">
+                                    <label for="RememberMe" style=" pointer-events: none;cursor: default;opacity: 0.6;"></label>
+                                </div>
+                            {/if}
+                        </td>
+                        <td>{if $v['pid'] == 0}评论{else}回复{/if}</td>
+                        <td><img alt="" src="{php echo tomedia($v['avatar'])}" style="width:30px;"></td>
+                        <td>{$v['nickname']}</td>
+                        <td style="width: 30%;">
+                            {if $v['type'] == 'article'}
+                                {$v['art_title']['title']}
+                            {elseif $v['type'] == 'ask'}
+                                {$v['ask_title']['ask_content']}
+                            {elseif $v['type'] == 'weike'}
+                                {$v['weike_title']['title']}
+                            {/if}
+                        </td>
+                        <td>{if $v['type'] == 'article'}文章{elseif $v['type'] == 'ask'}问答{elseif $v['type'] == 'weike'}微课{/if}</td>
+                        <td class="emoji">{$v['content']}</td>
+                        <td style="text-align: center;">
+                            {if $v['is_show'] == 1}
+                                <span style="color:green">通过</span>
+                            {elseif $v['is_show'] == 0}
+                                <span>审核中</span>
+                            {/if}
+                        </td>
+                        <td>{php echo date('Y-m-d H:i',$v['create_time'])}</td>
+                        <td>
+                            {if $v['is_show'] == 0}
+                                <a class="btn btn-default btn-sm manage" onclick="sh('set_show',{$v['aaid']},{$v['uid']})">通过</a>
+                                <a class="btn btn-default btn-sm manage" onclick="sh('del',{$v['aaid']})">拒绝</a>
+                            {/if}
+                            {if $v['is_answer'] == 0 && $v['pid'] == 0 && $v['is_show'] == 1}
+                                <a target="_blank" href="{php echo $this->createWebUrl('comment',array('op'=>'reply','version_id'=>0,'eid'=>$_GPC['eid'],'aaid'=>$v['aaid']))}" class="btn btn-default btn-sm manage">回复</a>
+                            {/if}
+                            {if $v['is_answer'] == 0 && $v['pid'] != 0 && $v['is_show'] == 1 && $v['uid'] == $_W['user']['uid']}
+                                <a class="btn btn-default btn-sm manage" onclick="sh('del',{$v['aaid']})"><i class="fa fa-trash-o"></i></a>
+                            {/if}
+                        </td>
+                    </tr>
+                {/loop}
+            </tbody>
+        </table>
+    </div>
+	<div class="panel-footer">
+		<a class="btn btn-default btn-sm manage" onclick="pl(1)">批量通过</a>
+		<a class="btn btn-default btn-sm manage" onclick="pl(2)">批量拒绝</a>
+	</div>
+</div>
+{$pager}
+<script>
+    $('.emoji').emoji();
+    //实现全选与反选
+    $("#allAndNotAll").click(function() {
+        if (this.checked){
+            $("input[name='aaid[]']:checkbox").each(function(){
+                $(this).prop("checked", true);
+            });
+        } else {
+            $("input[name='aaid[]']:checkbox").each(function() {
+                $(this).prop("checked", false);
+            });
+        }
+    });
+
+    function pl(is_show){//批量操作
+        var aaid = $("input[name='aaid[]']:checked").val();
+        if(aaid != undefined){
+            if(confirm('你确定要操作吗？') == false){
+                return false;
+            }
+            var aaids = '';
+            $("input[name='aaid[]']:checked").each(function(){
+                aaids += $(this).val();
+                aaids += ',';
+            });
+        }else{
+            util.message('请勾选数据');
+            return false;
+        }
+        aaids = aaids.substr(0,aaids.lastIndexOf(','));
+        $.post("{php echo $this->createWebUrl('comment',array('op'=>'batch'))}",{
+            aaids: aaids,
+            is_show: is_show
+        },function(data){
+            if(data.code == 200){
+                util.message(data.msg,setTimeout(function(){location.reload()},1000),'success');
+                return false;
+            }
+            if(data.code == 400){
+                util.message(data.msg,'','error');
+                return false;
+            }
+        },'json');
+    }
+
+    function sh(op,aaid,uid = 0){
+        if(confirm('你确定要操作吗？') == false){
+            return false;
+        }
+        $.post("{php echo $this->createWebUrl('comment')}",{
+            aaid: aaid,
+            uid: uid,
+            op: op
+        },function(data){
+            if(data.code == 200){
+                util.message(data.msg,setTimeout(function(){location.reload()},1000), "success");
+                return false;
+            }else if(data.code == 400){
+                util.message(data.msg,setTimeout(function(){location.reload()},1000), "error");
+                return false;
+            }
+        },'json');
+    }
+</script>
+{/if}
+<!-- 评论管理 end -->
+<!-- 回复评论 start -->
+{if $operation == 'reply'}
+<div class="main">
+    <input type="hidden" name="op" value="reply">
+    <input type="hidden" name="c" value="{$_GPC['c']}">
+    <input type="hidden" name="a" value="{$_GPC['a']}">
+    <input type="hidden" name="eid" value="{$_GPC['eid']}">
+    <input type="hidden" name="version_id" value="0">
+    <input type="hidden" name="aaid" value="{$aaid}">
+    <form action="" method="post" class="form-horizontal form"  enctype="multipart/form-data">
+        <div class="panel panel-default">
+            <div class="panel-heading">回复评论</div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">回复</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <textarea style="height:150px;" name="content"  class="form-control richtext"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group col-sm-12">
+            <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+            <input type="hidden" name="token" value="{$_W['token']}" />
+        </div>
+    </form>
+</div>
+{/if}
+<!-- 回复评论 end -->
+{template 'common/footer'}

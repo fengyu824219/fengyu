@@ -1,0 +1,1069 @@
+{template 'common/header'}
+<link rel="stylesheet" href="{TEMPLATE_PATH}/css/kilian.css?v={$share_data['version_number']}" />
+<ul class="nav nav-tabs">
+	<li {if $_GPC['op'] =='' || $_GPC['op'] == 'display'}class="active"{/if}><a href="{php echo $this->createWebUrl('chat_audit', array('op' => display,'version_id'=>0))}">专家认证</a></li>
+	<li {if $_GPC['op'] == 'user_partner' && $_GPC['difference'] == '2'}class="active"{/if}><a href="{php echo $this->createWebUrl('chat_audit', array('op' => user_partner,'version_id'=>0,'difference'=>2))}">税媒大使</a></li>
+	<li {if $_GPC['op'] == 'user_partner' && $_GPC['difference']==1}class="active"{/if}><a href="{php echo $this->createWebUrl('chat_audit', array('op' => user_partner,'version_id'=>0,'difference'=>1))}">城市合伙人</a></li>
+	{if $op == 'chat_user_lst'}
+		<li {if $_GPC['op'] == 'chat_user_lst'}class="active"{/if}><a href="#">认证资料详情</a></li>
+	{/if}
+	<li {if $_GPC['op'] == 'chat_qyrz'}class="active"{/if}><a href="{php echo $this->createWebUrl('chat_audit', array('op' => chat_qyrz,'version_id'=>0))}">企业认证</a></li>
+	<li {if $_GPC['op'] == 'agentList'}class="active"{/if}><a href="{php echo $this->createWebUrl('chat_audit', array('op' => agentList,'version_id'=>0,'eid'=>$_GPC['eid']))}">代理审核</a></li>
+	{if $_GPC['op'] == 'set_agent_status'}
+        <li {if $_GPC['op'] == 'set_agent_status'}class="active"{/if}><a
+            href="javascript:;">编辑代理</a>
+        </li>
+    {/if}
+	{if $op == 'qyrz_xq'}
+		<li {if $_GPC['op'] == 'qyrz_xq'}class="active"{/if}><a href="#">企业认证资料详情</a></li>
+	{/if}
+</ul>
+{if $op == "chat_user_lst"}
+<div class="main">
+	<input type="hidden" name="uid" value="{$uid}">
+	<div class="picShade"></div>
+
+	<div class="form-horizontal form">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				认证资料详情
+			</div>
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">手机号</label>
+					<div class="col-sm-5 col-xs-6">
+						<div class="input-group">
+							<input type="text" class="form-control" value="{$user['mobile']}" readonly="readonly" />
+							<span class="input-group-addon">+5分</span>
+						</div>
+					</div>
+					{if $photo == ''}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="jf('手机号',5,{$uid})">加分</a>
+					{else}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="qx('手机号',{$uid})">取消加分</a>
+					{/if}
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">邮箱</label>
+					<div class="col-sm-5 col-xs-6">
+						<div class="input-group">
+							<input type="text" class="form-control" value="{$user['mailbox']}"readonly="readonly" />
+							<span class="input-group-addon">+5分</span>
+						</div>
+					</div>
+					{if $mail == ''}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="jf('邮箱',5,{$uid})">加分</a>
+					{else}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="qx('邮箱',{$uid})">取消加分</a>
+					{/if}
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">真实姓名</label>
+					<div class="col-sm-5 col-xs-6">
+						<div class="input-group">
+							<input type="text" class="form-control" value="{$user['real_name']}"readonly="readonly" />
+							<span class="input-group-addon">+5分</span>
+						</div>
+					</div>
+					{if $real_name == ''}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="jf('真实姓名',5,{$uid})">加分</a>
+					{else}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="qx('真实姓名',{$uid})">取消加分</a>
+					{/if}
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 col-md-2  control-label"><span style='color:red'>*</span>身份证</label>
+					<div class="col-sm-5 form-control-static">
+						{loop $id_card_img $i $v}
+							<img src="{php echo tomedia($v)}" onclick="zoomPic('{php echo tomedia($v)}')" style="height:150px;width:150px;">
+						{/loop}
+						<p style="color:red">点击图片预览</p>
+					</div>
+					{if $id_card == ''}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="jf('身份证',10,{$uid})">+10分</a>
+					{else}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="qx('身份证',{$uid})">取消加分</a>
+					{/if}
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 col-md-2  control-label"><span style='color:red'>*</span>真实头像</label>
+					<div class="col-sm-5 form-control-static">
+						{loop $user_img $i $v}
+							<img src="{php echo tomedia($v)}" onclick="zoomPic('{php echo tomedia($v)}')" style="height:150px;width:150px;">
+						{/loop}
+						<p style="color:red">点击图片预览</p>
+					</div>
+					{if $head_portrait == ''}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="jf('真实头像',5,{$uid})">+5分</a>
+					{else}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="qx('真实头像',{$uid})">取消加分</a>
+					{/if}
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">工作单位</label>
+					<div class="col-sm-5 col-xs-6">
+						<div class="input-group">
+							<input type="text" class="form-control" value="{$user['user_unit']}" readonly="readonly" />
+							<span class="input-group-addon"></span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">职务</label>
+					<div class="col-sm-5 col-xs-6">
+						<div class="input-group">
+							<input type="text" class="form-control" name="duties" value="{$user['duties']}" readonly="readonly"/>
+							<span class="input-group-addon"></span>
+						</div>
+					</div>
+					{if $work_proof == ''}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="jf('工作证明',5,{$uid})">+5分</a>
+					{else}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="qx('工作证明',{$uid})">取消加分</a>
+					{/if}
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">所在城市</label>
+					<div class="col-sm-5 col-xs-6">
+						<div class="input-group">
+							<input type="text" class="form-control" name="unit_address" value="{$user['province']}{$user['city']}{$user['area']}" readonly="readonly"/>
+							<span class="input-group-addon"></span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 col-md-2  control-label"><span style='color:red'></span>工作证明图片</label>
+					<div class="col-sm-5 form-control-static">
+						{loop $wpi $i $v}
+							<img src="{php echo tomedia($v)}" onclick="zoomPic('{php echo tomedia($v)}')" width='150px' height="150px">
+						{/loop}
+						<p style="color:red">点击图片预览</p>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 col-md-2  control-label"><span style='color:red'>*</span>学历证书</label>
+					<div class="col-sm-5 form-control-static">
+						{loop $edu $i $v}
+							<img src="{php echo tomedia($v)}" onclick="zoomPic('{php echo tomedia($v)}')" width='150px' height="150px">
+						{/loop}
+						<p style="color:red">点击图片预览</p>
+					</div>
+					{if $education == ''}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="jf('学历证书',8,{$uid})">+8分</a>
+						<a class="btn btn-default" style="cursor:pointer;" onclick="jf('学历证书',9,{$uid})">+9分</a>
+						<a class="btn btn-default" style="cursor:pointer;" onclick="jf('学历证书',10,{$uid})">+10分</a>
+					{else}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="qx('学历证书',{$uid})">取消加分</a>
+					{/if}
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 col-md-2  control-label"><span style='color:red'>*</span>资格证</label>
+					<div class="col-sm-5 form-control-static">
+						{loop $cer $i $v}
+							<img src="{php echo tomedia($v)}" onclick="zoomPic('{php echo tomedia($v)}')" width='150px' height="150px">
+						{/loop}
+						<p style="color:red">点击图片预览</p>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">专业资质</label>
+					<div class="col-sm-5 col-xs-6">
+						{loop $cert_data $i $v}
+							<input type="checkbox" name="certs" value="{$v['cid']}" {if in_array($v['cid'],$certs)}checked{/if} style="margin-left:30px;">{$v['cert_name']}
+						{/loop}
+					</div>
+					{if $certificate == ''}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="jf('资格证/职业证书',15,{$uid})">+15分</a>
+						<a class="btn btn-default" style="cursor:pointer;" onclick="jf('资格证/职业证书',20,{$uid})">+20分</a>
+					{else}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="qx('资格证/职业证书',{$uid})">取消加分</a>
+					{/if}
+				</div>
+
+				<!-- <div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">证书名称</label>
+					<div class="col-sm-5 col-xs-6">
+						<input type="text" class="form-control" name="certificate_name" value="{$user['certificate_name']}"/>
+					</div>
+				</div> -->
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">工作年限</label>
+					<div class="col-sm-5 col-xs-6">
+						<div class="input-group">
+							<input type="number" class="form-control" value="{$user['working_life']}" readonly="readonly" />
+							<span class="input-group-addon">+{$wo_life}分</span>
+						</div>
+					</div>
+					{if $working_life == ''}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="jf('工作年限',{$wo_life},{$uid})">加分</a>
+					{else}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="qx('工作年限',{$uid})">取消加分</a>
+					{/if}
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">专业职称</label>
+					<div class="col-sm-5 col-xs-6">
+						<div class="input-group">
+							<input type="text" class="form-control" value="{$user['professional_title']}" readonly="readonly" />
+							<span class="input-group-addon"></span>
+						</div>
+						<p style="color:red">提示：中级10分、高级15分、教授20分</p>
+					</div>
+					{if $career_name == ''}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="jf('专业职称',10,{$uid})">+10分</a>
+						<a class="btn btn-default" style="cursor:pointer;" onclick="jf('专业职称',15,{$uid})">+15分</a>
+						<a class="btn btn-default" style="cursor:pointer;" onclick="jf('专业职称',20,{$uid})">+20分</a>
+					{else}
+						<a class="btn btn-default" style="cursor:pointer;" onclick="qx('专业职称',{$uid})">取消加分</a>
+					{/if}
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 col-md-2 control-label">自我介绍</label>
+					<div class="col-sm-5 col-xs-6 form-control-static">
+						<div class="input-group">
+							<textarea style="height:60px;" id='user_desc' class="form-control" cols="60" readonly="readonly">{$user['user_desc']}</textarea>
+							<span class="input-group-addon">+5分</span>
+						</div>
+					</div>
+					{if $introduce == ''}
+						<a class="btn btn-default" style="cursor:pointer;margin-top:20px" onclick="jf('自我介绍',5,{$uid})">+5分</a>
+					{else}
+						<a class="btn btn-default" style="cursor:pointer;margin-top:20px" onclick="qx('自我介绍',{$uid})">取消加分</a>
+					{/if}
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">平台专家</label>
+					<div class="col-sm-5 col-xs-12 form-control-static">
+						<select class="form-control" name="is_platform">
+							<option value='0'>否</option>
+							<option value='1'>是</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">擅长领域</label>
+					<div class="col-sm-5 col-xs-12 form-control-static">
+						{loop $ask_tags $i $v}
+							| {$v['tag_name']}
+						{/loop}
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">专家等级</label>
+					<div class="col-sm-5 col-xs-6 form-control-static">
+						<select class="form-control" name="level_id">
+							<option value="1">中级专家</option>
+							<option value="2">高级专家</option>
+							<option value="3">资深专家</option>
+							<option value="4">大师级专家</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">备注</label>
+					<div class="col-sm-5 col-xs-6 form-control-static">
+						<textarea style="height:150px;" name="remarks" id='user_desc' class="form-control" cols="60">{$user['remarks']}</textarea>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">总分</label>
+					<div class="col-sm-5 col-xs-6">
+						<div class="input-group">
+							<input type="number" max="10" class="form-control" value="{if $frac['num'] == ''}0{else}{$frac['num']}{/if}" readonly="readonly" />
+							<span class="input-group-addon"></span>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+		<div class="form-group col-sm-12">
+			<input onclick="an('通过')" type="submit" name="submit" value="审核通过" class="btn btn-default btn-sm manage submit" />
+			<input onclick="an('拒绝')" type="submit" name="submit" value="拒绝" class="btn btn-default btn-sm manage" style="left: 10%" />
+			<input type="hidden" name="token" value="{$_W['token']}" />
+		</div>
+	</div>
+</div>
+<script>
+	function zoomPic(imgFile){//预览图片
+		console.log(imgFile)
+		var imgFile=imgFile;  //图片路径
+		var $imgWidth=$(document.body).outerWidth(true)/2;
+		var $img = '<img src="'+imgFile+'">';
+		$('.picShade').show();
+		$('.picShade').append($img);
+		$('.picShade img').css({'width':$imgWidth+'px','position':'fixed','top':'50%','left':'50%','transform': 'translate(-50%,-50%)','z-index':'1001','transition': 'all .3s'})
+		//点击遮罩层回复
+	 	$('.picShade').click(function(){
+			$('.picShade img').remove();
+	 		$('.picShade').hide();
+		})
+	}
+
+	var click_num = 0;
+	//加分
+	function jf(content,num,uid){
+		if(click_num === 0){
+			click_num = 1;
+			$.post("{php echo $this->createWebUrl('chat_audit',array('op' => 'chat_user_lst'))}",{
+				type: 'fraction',
+				content: content,
+				num: num,
+				uid: uid
+			},function(data){
+				if(data.code == 1){
+					location.reload();
+					// util.message(data.msg,setTimeout(function(){location.reload()},1000), "success");
+		            return false;
+				}else if(data.code == 2){
+					util.message(data.msg, "", "error");
+		            return false;
+				}
+			},'json');
+		}
+	}
+
+	//取消加分
+	function qx(content,uid){
+		$.post("{php echo $this->createWebUrl('chat_audit',array('op' => 'chat_user_lst'))}",{
+			type: 'cancel_fraction',
+			content: content,
+			uid: uid
+		},function(data){
+			if(data.code == 1){
+				location.reload();
+				// util.message(data.msg,setTimeout(function(){location.reload()},1000), "success");
+	            return false;
+			}else if(data.code == 2){
+				util.message(data.msg, "", "error");
+	            return false;
+			}
+		},'json');
+	}
+
+	//提交
+	function an(type){
+		//判断是否为空
+		var certs =[];
+		$('input[name="certs"]:checked').each(function(){
+		   certs.push($(this).val());
+		});
+		var uid = "{$uid}";
+		var remarks = $("textarea[name='remarks']").val();
+		var is_platform = $("select[name=is_platform]").val();
+		var level_id = $("select[name=level_id]").val();
+		var level;
+		if(level_id == 1){
+			level = '中级专家';
+		}else if(level_id == 2){
+			level = '高级专家';
+		}else if(level_id == 3){
+			level = '资深专家';
+		}else if(level_id == 4){
+			level = '大师级专家';
+		}
+
+		if(type == '拒绝'){
+			if(remarks == ''){
+	     		util.message("备注不能为空", "", "error");
+	            return false;
+	     	}
+		}
+
+		$.post("{php echo $this->createWebUrl('chat_audit',array('op' => 'chat_user_lst'))}",{
+			type: 'is_adopt',
+			submit: type,
+			uid: uid,
+			level_id: level_id,
+			level: level,
+			certs: certs,
+			is_platform: is_platform,
+			remarks: remarks
+		},function(data){
+			if(data.code == 1){
+				util.message(data.msg,setTimeout(function(){location.href="{php echo $this->createWebUrl('chat_audit',array('op' => 'display','version_id' => 0))}"},1000), "success");
+	            return false;
+			}else if(data.code == 2){
+				util.message(data.msg, "", "error");
+	            return false;
+			}
+		},'json');
+	}
+
+</script>
+
+
+{elseif $op == "" || $op == "display"}
+<div id="action_list" class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-xs-12 col-sm-11" style="width:99%;">
+			<form  method="get" class="form-horizontal" role="form">
+			    <div class="input-group">
+					<input type="hidden" name="version_id" value="0">
+					<input type="hidden" name="c" value="site">
+					<input type="hidden" name="a" value="entry">
+					<input type="hidden" name="do" value="chat_audit">
+					<input type="hidden" name="m" value="dg_ask">
+					<span class="input-group-addon"> 用户关键词</span>
+					<input style="border:1px solid #e4e4e4" name="keyword" id="" type="text" value="{$_GPC['keyword']}" placeholder="用户昵称 | 电话 | 真实姓名" class="form-control ac_name">
+					<span class="input-group-addon"> 举荐人关键词</span>
+					<input style="border:1px solid #e4e4e4" name="jjr" id="" type="text" value="{$_GPC['jjr']}" placeholder="举荐人昵称 | 电话 | 真实姓名" class="form-control ac_name">
+					<span class="input-group-btn">
+	                	<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+	                </span>
+	            </div>
+			</form>
+		</div>
+	</div>
+</div>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<div class="row-fluid">
+			<div class="span8 control-group">
+				共计 {$totalnum} 条数据
+			</div>
+		</div>
+	</div>
+	<div class="panel-body table-responsive">
+		<table class="table table-hover">
+			<thead class="navbar-inner">
+				<tr>
+					<th>真实姓名</th>
+					<th>性别</th>
+					<th>手机号</th>
+					<th style="text-align: center;">认证照片</th>
+					<th>举荐人</th>
+					<th align="center">申请时间</th>
+					<th style="width:200px;">快捷操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				{loop $audit $row}
+				<tr>
+					<td>{$row['real_name']}</td>
+					<td>{if $row['sex'] == 1}男{elseif $row['sex'] == 2}女{/if}</td>
+					<td>{$row['mobile']}</td>
+					<td style="text-align: center;"><img alt="" src="{php echo tomedia($row['avatar'])}" width='auto' style="max-height:30px;" height='auto'></td>
+					<td>{$row['jjr_name']}</td>
+					<td>{php echo date('Y/m/d H:i:s', $row['apply_time']);}</td>
+					<td>
+						<a target="_blank" class="btn btn-default"  href="{php echo $this->createWebUrl('chat_audit', array('op' => 'chat_user_lst','uid' => $row['id'],'version_id'=>0))}">资料详情</a>
+					</td>
+				</tr>
+				{/loop}
+			</tbody>
+		</table>
+	</div>
+</div>
+{$pager}
+{/if}
+
+{if $op == "chat_qyrz"}
+<div id="action_list" class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-xs-12 col-sm-11" style="width:99%;">
+			<form  method="get" class="form-horizontal" role="form">
+			    <div class="input-group">
+					<input type="hidden" name="version_id" value="0">
+					<input type="hidden" name="c" value="site">
+					<input type="hidden" name="a" value="entry">
+					<input type="hidden" name="do" value="chat_audit">
+					<input type="hidden" name="op" value="chat_qyrz">
+					<input type="hidden" name="m" value="dg_ask">
+					<span class="input-group-addon"> 查询关键词</span>
+					<input style="border:1px solid #e4e4e4" name="keyword" id="" type="text" value="{$_GPC['keyword']}" placeholder="企业全称 | 电话 | 统一社会信用代码" class="form-control ac_name">
+					<span class="input-group-addon"></span>
+					<select name="status" class="form-control input-medium">
+						<option value="99" <?php if($_GPC['status'] == 99){echo 'selected';} ?> >审核状态</option>
+						<option value="1" <?php if($_GPC['status'] == 1){echo 'selected';} ?> >审核中</option>
+						<option value="2" <?php if($_GPC['status'] == 2){echo 'selected';} ?> >已通过</option>
+						<option value="3" <?php if($_GPC['status'] == 3){echo 'selected';} ?> >不通过</option>
+					</select>
+					<span class="input-group-btn">
+	                	<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+	                </span>
+	            </div>
+			</form>
+		</div>
+	</div>
+</div>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<div class="row-fluid">
+			<div class="span8 control-group">
+				共计 {$totalnum} 条数据
+			</div>
+		</div>
+	</div>
+	<div class="panel-body table-responsive">
+		<table class="table table-hover">
+			<thead class="navbar-inner">
+				<tr>
+					<th>申请用户</th>
+					<th>企业全称</th>
+					<th>联系电话</th>
+					<th>统一社会信用代码</th>
+					<!-- <th>执照照片</th> -->
+					<th>申请时间</th>
+					<th>审核状态</th>
+					<th style="width:200px;">快捷操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				{loop $audit $row}
+				<tr>
+					<td>{$row['nickname']}</td>
+					<td>{$row['qy_name']}</td>
+					<td>{$row['mobile']}</td>
+					<td>{$row['zzzch']}</td>
+					<!-- <td><img alt="" src="{php echo tomedia($row['zh_photo'])}" width='auto' style="max-height:80px;" height='auto'></td> -->
+					<td>{php echo date('Y/m/d H:i:s', $row['create_time']);}</td>
+					<td {if $row['status'] == '不通过'}style="color:red;"{/if}{if $row['status'] == '已通过'}style="color:green;"{/if}>
+						{$row['status']}
+					</td>
+					<td>
+						<a class="btn btn-default"  href="{php echo $this->createWebUrl('chat_audit', array('op' => 'qyrz_xq','qy_id' => $row['qy_id'],'version_id'=>0))}">资料详情</a>
+					</td>
+				</tr>
+				{/loop}
+			</tbody>
+		</table>
+	</div>
+</div>
+{$pager}
+{/if}
+{if $op == "user_partner"}
+<div id="action_list" class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-xs-12 col-sm-11" style="width:99%;">
+			<form  method="get" class="form-horizontal" role="form">
+			    <div class="input-group">
+					<input type="hidden" name="version_id" value="0">
+					<input type="hidden" name="c" value="site">
+					<input type="hidden" name="a" value="entry">
+					<input type="hidden" name="do" value="chat_audit">
+					<input type="hidden" name="op" value="user_partner">
+					<input type="hidden" name="difference" value="{$_GPC['difference']}">
+
+					<input type="hidden" name="m" value="dg_ask">
+					<span class="input-group-addon"> 查询关键词</span>
+					<input style="border:1px solid #e4e4e4" name="keyword" id="" type="text" value="{$_GPC['keyword']}" placeholder="真实姓名" class="form-control ac_name">
+					<span class="input-group-addon"></span>
+					<select name="status" class="form-control input-medium">
+						<option value="99" <?php if($_GPC['status'] == 99){echo 'selected';} ?> >审核状态</option>
+						<option value="3" <?php if($_GPC['status'] == 3){echo 'selected';} ?> >审核中</option>
+						<option value="1" <?php if($_GPC['status'] == 1){echo 'selected';} ?> >已通过</option>
+						<option value="2" <?php if($_GPC['status'] == 2){echo 'selected';} ?> >不通过</option>
+					</select>
+					<span class="input-group-btn">
+	                	<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+	                </span>
+	            </div>
+			</form>
+		</div>
+	</div>
+</div>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<div class="row-fluid">
+			<div class="span8 control-group">
+				共计 {$totalnum} 条数据
+			</div>
+		</div>
+	</div>
+	<div class="panel-body table-responsive">
+		<table class="table table-hover">
+			<thead class="navbar-inner">
+				<tr>
+					<th>申请用户</th>
+					<th style="text-align: center;">用户头像</th>
+					<th style="text-align: center;">联系电话</th>
+	                <!-- <th>申请区域</th> -->
+	                <!-- <th>申请级别</th> -->
+					<th style="text-align: center;">申请时间</th>
+					<th style="text-align: center;">审核状态</th>
+					<th style="width:200px;">快捷操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				{loop $audit $row}
+				<tr>
+					<td>{$row['nickname']}</td>
+					<td style="text-align: center;"><img alt="" src="{php echo tomedia($row['avatar'])}" width='auto' style="max-height:30px;" height='auto'></td>
+					<td style="text-align: center;">{$row['mobile']}</td>
+					<!-- <td>{$row['province']}{if $row['city']!=''}-{/if}{$row['city']}{if $row['area']!=''}-{/if}{$row['area']}</td>
+					<td>{if $row['level']==1}省级{else if $row['level']==2}市级{else if $row['level']==3}区/镇级{else}系统错误{/if}</td> -->
+					<td style="text-align: center;">{php echo date('Y/m/d H:i:s', $row['create_time']);}</td>
+					<td style="text-align: center;" {if $row['status'] == '不通过'}style="color:red;"{/if}{if $row['status'] == '已通过'}style="color:green;"{/if}>
+						{if $row['is_auditing']==1}
+						<span style="color:#4CAE4C">通过</span>
+						{else if $row['is_auditing']==2}
+						<span style="color:red">拒绝</span>
+						{else if $row['is_auditing']==3}
+						申请中
+                        {/if}
+					</td>
+					<td>
+					{if $row['is_auditing']==3}
+						<a class="btn btn-default" onclick="return confirm('确定要通过吗')" href="{php echo $this->createWebUrl('chat_audit', array('op' => 'partne_update','id' => $row['id'],'version_id'=>0,'par'=>1))}">通过</a>
+						<a class="btn btn-default" onclick="return confirm('确定要拒绝吗')"href="{php echo $this->createWebUrl('chat_audit', array('op' => 'partne_update','id' => $row['id'],'version_id'=>0,'par'=>2))}">拒绝</a>
+					{/if}
+					</td>
+				</tr>
+				{/loop}
+			</tbody>
+		</table>
+	</div>
+</div>
+{$pager}
+{/if}
+{if $op == "user_agent"}
+<div id="action_list" class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-xs-12 col-sm-11" style="width:99%;">
+			<form  method="get" class="form-horizontal" role="form">
+			    <div class="input-group">
+					<input type="hidden" name="version_id" value="0">
+					<input type="hidden" name="c" value="site">
+					<input type="hidden" name="a" value="entry">
+					<input type="hidden" name="do" value="chat_audit">
+					<input type="hidden" name="op" value="user_agent">
+					<input type="hidden" name="m" value="dg_ask">
+					<span class="input-group-addon"> 查询关键词</span>
+					<input style="border:1px solid #e4e4e4" name="keyword" id="" type="text" value="{$_GPC['keyword']}" placeholder="企业全称 |电话 | 统一社会信用代码" class="form-control ac_name">
+					<span class="input-group-addon"></span>
+					<select name="status" class="form-control input-medium">
+						<option value="99" <?php if($_GPC['status'] == 99){echo 'selected';} ?> >审核状态</option>
+						<option value="1" <?php if($_GPC['status'] == 1){echo 'selected';} ?> >审核中</option>
+						<option value="2" <?php if($_GPC['status'] == 2){echo 'selected';} ?> >已通过</option>
+						<option value="3" <?php if($_GPC['status'] == 3){echo 'selected';} ?> >不通过</option>
+					</select>
+					<span class="input-group-btn">
+	                	<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+	                </span>
+	            </div>
+			</form>
+		</div>
+	</div>
+</div>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<div class="row-fluid">
+			<div class="span8 control-group">
+				共计 {$totalnum} 条数据
+			</div>
+		</div>
+	</div>
+	<div class="panel-body table-responsive">
+		<table class="table table-hover">
+			<thead class="navbar-inner">
+				<tr>
+					<th>申请用户</th>
+					<th>企业全称</th>
+					<th>联系电话</th>
+					<th>统一社会信用代码</th>
+					<!-- <th>执照照片</th> -->
+					<th>申请时间</th>
+					<th>审核状态</th>
+					<th style="width:200px;">快捷操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				{loop $audit $row}
+				<tr>
+					<td>{$row['nickname']}</td>
+					<td>{$row['qy_name']}</td>
+					<td>{$row['mobile']}</td>
+					<td>{$row['zzzch']}</td>
+					<!-- <td><img alt="" src="{php echo tomedia($row['zh_photo'])}" width='auto' style="max-height:80px;" height='auto'></td> -->
+					<td>{php echo date('Y/m/d H:i:s', $row['create_time']);}</td>
+					<td {if $row['status'] == '不通过'}style="color:red;"{/if}{if $row['status'] == '已通过'}style="color:green;"{/if}>
+						{$row['status']}
+					</td>
+					<td>
+						<a class="btn btn-default"  href="{php echo $this->createWebUrl('chat_audit', array('op' => 'qyrz_xq','qy_id' => $row['qy_id'],'version_id'=>0))}">资料详情</a>
+					</td>
+				</tr>
+				{/loop}
+			</tbody>
+		</table>
+	</div>
+</div>
+{$pager}
+{/if}
+{if $op == "qyrz_xq"}
+<div class="modal fade" id="pass_reason_box" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog" style="width:800px;">
+		<div class="modal-content">
+			<form>
+				<input type="hidden" id="pass_qyid">
+				<input type="hidden" id="pass_uid">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<span><h4>不通过原因</h4></span>
+				</div>
+				<div class="modal-body" style="padding:50px 30px!important;">
+					<div class="form-group">
+						<textarea style="width:100%; height:150px;" id='pass_reason_text' class="form-control" cols="150"></textarea>
+					</div>
+           			<div class="form-group col-sm-12" style="padding-top:40px;">
+						<input onclick="qyrz_audit('',3)" type="button" name="submit" value="确定" class="btn btn-primary col-lg-1">
+					</div>
+			    </div>
+		    </form>
+		</div>
+	</div>
+</div>
+
+<div class="main">
+	<input type="hidden" name="uid" value="{$uid}">
+	<div class="picShade"></div>
+
+	<div class="form-horizontal form">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				企业认证资料详情
+			</div>
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">企业全称</label>
+					<div class="col-sm-5 col-xs-6">
+						<div class="input-group">
+							<input type="text" class="form-control" value="{$qyrz['qy_name']}" readonly="readonly" />
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">联系电话</label>
+					<div class="col-sm-5 col-xs-6">
+						<div class="input-group">
+							<input type="text" class="form-control" value="{$qyrz['mobile']}"readonly="readonly" />
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">统一社会信用代码</label>
+					<div class="col-sm-5 col-xs-6">
+						<div class="input-group">
+							<input type="text" class="form-control" value="{$qyrz['zzzch']}"readonly="readonly" />
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 col-md-2  control-label"><span style='color:red'>*</span>营业执照</label>
+					<div class="col-sm-5 form-control-static">
+						{loop $yyzz $i $v}
+							<img src="{php echo tomedia($v)}" onclick="zoomPic('{php echo tomedia($v)}')" style="height:150px;width:150px;">
+						{/loop}
+						<p style="color:red">点击图片预览</p>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">详细地址</label>
+					<div class="col-sm-5 col-xs-6">
+						<div class="input-group">
+							<input type="text" class="form-control" name="duties" value="{$qyrz['szdq']}" readonly="readonly"/>
+							<span class="input-group-addon"></span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">所在地区</label>
+					<div class="col-sm-5 col-xs-6">
+						<div class="input-group">
+							<input type="text" class="form-control" value="{$qyrz['province']}{$qyrz['city']}{$qyrz['area']}" readonly="readonly" />
+							<span class="input-group-addon"></span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 col-md-2 control-label">公司职位</label>
+					<div class="col-sm-5 col-xs-6">
+						<div class="input-group">
+							<input type="text" class="form-control" name="gszw" value="{$qyrz['gszw']}" readonly="readonly"/>
+							<span class="input-group-addon"></span>
+						</div>
+					</div>
+				</div>
+
+				{if $qyrz['status'] == 3}
+					<div class="form-group">
+						<label class="col-xs-12 col-sm-3 col-md-2 control-label">不通过原因</label>
+						<div class="col-sm-5 col-xs-6 form-control-static">
+							<textarea style="height:150px;"  readonly="readonly" id='user_desc' class="form-control" cols="60">{$qyrz['pass_reason']}</textarea>
+						</div>
+					</div>
+				{/if}
+			</div>
+		</div>
+		<div class="form-group col-sm-12">
+			{if $qyrz['status'] == 1}
+				<input onclick="qyrz_audit({$qyrz['qy_id']},2,{$qyrz['uid']})" type="submit" name="submit" value="审核通过" class="btn btn-default btn-sm manage submit" />
+				<input onclick="pass_reason({$qyrz['qy_id']},{$qyrz['uid']})" type="submit" name="submit" value="拒绝" class="btn btn-default btn-sm manage" style="left: 10%" />
+			{/if}
+			<input type="hidden" name="token" value="{$_W['token']}" />
+		</div>
+	</div>
+</div>
+<script>
+	function zoomPic(imgFile){//预览图片
+		console.log(imgFile)
+		var imgFile=imgFile;  //图片路径
+		var $imgWidth=$(document.body).outerWidth(true)/2;
+		var $img = '<img src="'+imgFile+'">';
+		$('.picShade').show();
+		$('.picShade').append($img);
+		$('.picShade img').css({'width':$imgWidth+'px','position':'fixed','top':'50%','left':'50%','transform': 'translate(-50%,-50%)','z-index':'1001','transition': 'all .3s'})
+		//点击遮罩层回复
+	 	$('.picShade').click(function(){
+			$('.picShade img').remove();
+	 		$('.picShade').hide();
+		})
+	}
+
+</script>
+{/if}
+<!-- 代理管理 start -->
+{if $op == 'agentList'}
+<div id="action_list" class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-xs-12 col-sm-11" style="width:99%;">
+            <form action="" method="get" class="form-horizontal" role="form" id="form1">
+                <input type="hidden" name="op" value="agentList">
+                <input type="hidden" name="do" value="chat_audit">
+                <input type="hidden" name="c" value="{$_GPC['c']}">
+                <input type="hidden" name="a" value="{$_GPC['a']}">
+                <input type="hidden" name="eid" value="{$_GPC['eid']}">
+                <input type="hidden" name="version_id" value="0">
+                <div class="input-group">
+                    <select name="status_select" class="form-control"><!-- input-medium -->
+                        <option value="1" <?php if($status_select == 1){echo 'selected';} ?> >不按时间</option>
+                        <option value="create_time" <?php if($_GPC['status_select'] == 'create_time'){echo 'selected';} ?> >创建时间</option>
+                    </select>
+                    <span class="input-group-addon" style="padding: 0; width: 0;border:none;">
+                    </span>
+                        {php echo tpl_form_field_daterange('time',array('start'=>($_GPC['start'] ? $_GPC['start'] : $_GPC['time']['start']),'end'=>($_GPC['end'] ? $_GPC['end'] : $_GPC['time']['end'])));}
+
+                    <script type="text/javascript">
+                        $(function(){
+                            $("#action_list .input-group .daterange-date").addClass("form-control");
+                        })
+                    </script>
+                    <span class="input-group-addon"></span>
+                    <select name="to_examine" class="form-control"><!-- input-medium -->
+                        <option value="10" <?php if($_GPC['to_examine'] == 10){echo 'selected';} ?> >审核状态</option>
+                        <option value="1" <?php if($_GPC['to_examine'] == 1){echo 'selected';} ?> >未处理</option>
+                        <option value="2" <?php if($_GPC['to_examine'] == 2){echo 'selected';} ?> >已通过</option>
+                        <option value="3" <?php if($_GPC['to_examine'] == 3){echo 'selected';} ?> >已拒绝</option>
+                    </select>
+                    <span class="input-group-addon">关键字</span>
+                    <input type="text" name="content" class="form-control ac_name" value="{$_GPC['content']}" placeholder="姓名 | 手机号"/>
+                    <span class="input-group-btn">
+                    <input type="submit" class="btn" value="提交筛选" style="border:1px solid #ccc;"/>
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="row-fluid">
+            <div class="span8 control-group">
+            <span class="padd search_time"></span>
+            <span class="padd to_examine"></span>
+                <span style="float:right;">共计 {$total['num']} 条数据</span>
+            </div>
+        </div>
+    </div>
+    <div class="panel-body table-responsive">
+        <table class="table table-hover">
+            <thead class="navbar-inner">
+                <tr>
+                    <th>姓名</th>
+                    <th>手机号</th>
+                    <th>电子邮箱</th>
+                    <!-- <th>国家名称</th> -->
+                    <th>省份</th>
+                    <th>城市</th>
+                    <th>详细地址</th>
+                    <th>创建时间</th>
+                    <th>审核状态</th>
+                    <th>收益</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {loop $chat_agent $i $v}
+                    <tr>
+                        <td>{$v['name']}</td>
+                        <td>{$v['mobile']}</td>
+                        <td>{$v['email']}</td>
+                        <!-- <td>{$v['country']}</td> -->
+                        <td>{$v['province']}</td>
+                        <td>{$v['city']}</td>
+                        <td>{$v['address']}</td>
+                        <td>{php echo date('Y-m-d H:i',$v['create_time'])}</td>
+                        <td>
+                            {if $v['status'] == 1}
+                                <span>未处理</span>
+                            {elseif $v['status'] == 2}
+                                <span style="color:green">已通过</span>
+                            {elseif $v['status'] == 3}
+                                <span style="color:red">已拒绝</span>
+                            {/if}
+                        </td>
+                        <td>{$v['profit']}</td>
+                        <td>
+                            {if $v['status'] == 1}
+                                <a class="btn btn-default" onclick="zt({$v['agid']},2);">通过</a>
+                                <a class="btn btn-default" href="{php echo $this->createWebUrl('chat_audit',array('op'=>'set_agent_status','agid'=>$v['agid'],'version_id'=>0,'eid'=>$_GPC['eid']))}">
+                                	拒绝
+                                </a>
+                            {/if}
+                        </td>
+                    </tr>
+                {/loop}
+            </tbody>
+        </table>
+    </div>
+</div>
+{$pager}
+<script>
+function zt(agid,status){
+	if(confirm('你确定要操作吗？') == false){
+		return false;
+	}
+    $.post("{php echo $this->createWebUrl('chat_audit',array('op'=>'set_agent_status'))}",{
+        agid: agid,
+        status: status
+    },function(data){
+        if(data.code == 1){
+            util.message(data.msg, setTimeout(function(){location.reload()},1000), "success");
+            return false;
+        }
+        if(data.code == 2){
+            util.message(data.msg, "", "error");
+            return false;
+        }
+    },'json');
+}
+</script>
+{/if}
+<!-- 代理管理 end -->
+<!-- 更改代理状态 start -->
+{if $op == 'set_agent_status'}
+<div class="main">
+    <div class="form-horizontal form">
+        <div class="panel panel-default">
+            <div class="panel-heading">编辑代理</div>
+            <div class="panel-body">
+                    <input type="hidden" name="c" value="{$_GPC['c']}">
+                    <input type="hidden" name="a" value="{$_GPC['a']}">
+                    <input type="hidden" name="eid" value="{$_GPC['eid']}">
+                    <input type="hidden" name="version_id" value="0">
+                    <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">备注</label>
+                    <div class="col-sm-5 col-xs-6 form-control-static">
+                        <textarea style="height:150px;" name="remarks" id='user_desc' class="form-control" cols="60"></textarea>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="form-group col-sm-12">
+            <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" onclick="zt({$agid},3)" />
+            <input type="hidden" name="token" value="{$_W['token']}" />
+        </div>
+    </div>
+</div>
+<script>
+function zt(agid,status){
+    var remarks = $("textarea[name=remarks]").val();
+    if(remarks == ''){
+        util.message('备注不能为空',"","error");
+        return false;
+    }
+    if(confirm('你确定要操作吗？') == false){
+		return false;
+	}
+    $.post("{php echo $this->createWebUrl('chat_audit',array('op'=>'set_agent_status'))}",{
+        agid: agid,
+        status: status,
+        remarks: remarks
+    },function(data){
+        if(data.code == 1){
+            util.message(data.msg,"{php echo $this->createWebUrl('chat_audit',array('op'=>'agentList','version_id'=>0,'eid'=>$_GPC['eid']))}", "success");
+            return false;
+        }
+        if(data.code == 2){
+            util.message(data.msg, "", "error");
+            return false;
+        }
+    },'json');
+}
+</script>
+{/if}
+<!-- 更改代理状态 end -->
+<script>
+	function pass_reason(qy_id,uid){
+		$('#pass_reason_box').modal('show');
+		$('#pass_qyid').val(qy_id);
+		$('#pass_uid').val(uid);
+	}
+
+	var click_num = 0;
+	//企业认证审核
+	function qyrz_audit(qy_id='',status='',uid=''){
+		if(confirm('你确定要操作吗？') == true){
+	        if(click_num === 0){
+				click_num = 1;
+				var audit_url = "{php echo $this->createWebUrl('chat_audit', array('op'=>'qyrz_audit','version_id'=>0))}";
+				var pass_reason = $('#pass_reason_text').val();
+				if(status == 3){
+					var qy_id = $('#pass_qyid').val();
+					var uid = $('#pass_uid').val();
+					if(!pass_reason){
+						util.message('原因不能为空');
+                 		return false;
+					}
+				}
+				$.post(audit_url,{
+					qy_id: qy_id,
+					uid: uid,
+					status: status,
+					pass_reason: pass_reason
+				},function(data){
+					click_num = 0;
+					if(data.code == 1){
+						util.message(data.msg,setTimeout(function(){location.href="{php echo $this->createWebUrl('chat_audit',array('op' => 'chat_qyrz','version_id' => 0))}"},1000), "success");
+					}else if(data.code == 2){
+						util.message(data.msg, "", "error");
+			            return false;
+					}
+				},'json');
+			}
+        }
+	}
+</script>
+{template 'common/footer'}

@@ -1,0 +1,619 @@
+{template 'common/header'}
+<style type="text/css">
+.table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+  white-space:normal;border:1px solid #ddd;text-align: center;
+}
+</style>
+<ul class="nav nav-tabs">
+	<li {if $op == 'totaldata' || $op == ''}class="active"{/if}><a href="{php echo $this->createWebUrl('ask_summary',array('op'=>'totaldata','version_id'=>0))}">数据统计</a></li>
+	<li {if $op == 'display'}class="active"{/if}><a href="{php echo $this->createWebUrl('ask_summary',array('op'=>'display','version_id'=>0))}">收益统计</a></li>
+	<li {if $op == 'income_log'}class="active"{/if}><a href="{php echo $this->createWebUrl('ask_summary',array('op'=>'income_log','version_id'=>0))}">收益日志</a></li>
+</ul>
+{if $op == 'totaldata'}
+<div id="action_list" class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-xs-12 col-sm-11" style="width:99%;">
+			<div class="input-group">
+				<form action="{php echo $this->createWebUrl('ask_summary',array('op' =>'totaldata'))}" method="post" class="form-horizontal" id="exc">
+					<input type="hidden" name="excel" id="totaldata" value="export">
+					<span class="input-group-btn">
+	                	<input type="submit" class="btn" value="导出表格" style="border:1px solid #ccc;"/>
+		            </span>
+	            </form>
+			</div>
+		</div>
+	</div>
+</div>
+<style>
+	.table-summary{background:#fff;}
+	.table-summary .navbar-inner tr th{line-height:44px;font-size: 16px;}
+	.table-summary tr td:first-child{border-left:0;}
+	.table-summary tr td:last-child{border-right:0;}
+	.table-summary tr:last-child td{border-bottom:0;}
+</style>
+<div class="panel panel-default">
+    <div class="table-responsive panel-body">
+        <table class="table table-hover table-summary">
+        	<thead class="navbar-inner">
+				<tr>
+					<th colspan="6">精选类目</th>
+				</tr>
+			</thead>
+			<tr>
+				<td rowspan="2" style="line-height: 400%;">分类</td>
+				<td colspan="4">上架数量</td>
+				<td>下架数量</td>
+			</tr>
+			<tr>
+				<td>今日增量</td>
+				<td>一周</td>
+				<td>一个月</td>
+				<td>总量</td>
+				<td>总量</td>
+			</tr>
+			<tr>
+				<td>平台文章</td>
+				<td>{$articleNum['day']['platform']}</td>
+				<td>{$articleNum['week']['platform']}</td>
+				<td>{$articleNum['month']['platform']}</td>
+				<td>{$articleNum['statusOne']['platform']}</td>
+				<td>{$articleNum['statusTwo']['platform']}</td>
+			</tr>
+			<tr>
+				<td>专家文章</td>
+				<td>{$articleNum['day']['expert']}</td>
+				<td>{$articleNum['week']['expert']}</td>
+				<td>{$articleNum['month']['expert']}</td>
+				<td>{$articleNum['statusOne']['expert']}</td>
+				<td>{$articleNum['statusTwo']['expert']}</td>
+			</tr>
+			<tr>
+				<td>用户问答</td>
+				<td>{$askNum['day']}</td>
+				<td>{$askNum['week']}</td>
+				<td>{$askNum['month']}</td>
+				<td>{$askNum['statusOne']}</td>
+				<td>{$askNum['statusTwo']}</td>
+			</tr>
+		</table>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="table-responsive panel-body">
+        <table class="table table-hover table-summary">
+        	<thead class="navbar-inner">
+				<tr>
+					<th colspan="7">专家数量</th>
+				</tr>
+			</thead>
+			<tr>
+				<td rowspan="2" style="line-height: 400%;">分类</td>
+				<td colspan="4">上架数量</td>
+				<td>下架数量</td>
+				<td>受邀数量</td>
+			</tr>
+			<tr>
+				<td>今日增量</td>
+				<td>一周</td>
+				<td>一个月</td>
+				<td>总量</td>
+				<td>总量</td>
+				<td>总量</td>
+			</tr>
+			<tr>
+				<td>平台</td>
+				<td>{$expertNum['day']['platform']}</td>
+				<td>{$expertNum['week']['platform']}</td>
+				<td>{$expertNum['month']['platform']}</td>
+				<td>{$expertNum['isOpenaskOne']['platform']}</td>
+				<td>{$expertNum['isOpenaskZero']['platform']}</td>
+				<td>{$expertNum['superiorId']['platform']}</td>
+			</tr>
+			<tr>
+				<td>其他</td>
+				<td>{$expertNum['day']['noPlatform']}</td>
+				<td>{$expertNum['week']['noplatform']}</td>
+				<td>{$expertNum['month']['noplatform']}</td>
+				<td>{$expertNum['isOpenaskOne']['noplatform']}</td>
+				<td>{$expertNum['isOpenaskZero']['noplatform']}</td>
+				<td>{$expertNum['superiorId']['noplatform']}</td>
+			</tr>
+		</table>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="table-responsive panel-body">
+        <table class="table table-hover table-summary">
+        	<thead class="navbar-inner">
+				<tr>
+					<th colspan="7">平台用户</th>
+				</tr>
+			</thead>
+			<tr>
+				<td>分类</td>
+				<td>今日增量</td>
+				<td>一周</td>
+				<td>一个月</td>
+				<td>总量</td>
+				<td>受邀请总量</td>
+			</tr>
+			<tr>
+				<td>用户数量</td>
+				<td>{$user['day']}</td>
+				<td>{$user['week']}</td>
+				<td>{$user['month']}</td>
+				<td>{$user['total']}</td>
+				<td>{$user['superior']}</td>
+			</tr>
+		</table>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="table-responsive panel-body">
+        <table class="table table-hover table-summary">
+        	<thead class="navbar-inner">
+				<tr>
+					<th colspan="7">用户一对一问答</th>
+				</tr>
+			</thead>
+			<tr>
+				<td>分类</td>
+				<td>今日增量</td>
+				<td>一周</td>
+				<td>一个月</td>
+				<td>总量</td>
+				<td>采纳总量</td>
+				<td>未采纳总量</td>
+			</tr>
+			<tr>
+				<td>中级专家</td>
+				<td>{$expertAsk['day']['intermediate']}</td>
+				<td>{$expertAsk['week']['intermediate']}</td>
+				<td>{$expertAsk['month']['intermediate']}</td>
+				<td>{$expertAsk['total']['intermediate']}</td>
+				<td>{$expertAsk['adopt']['intermediate']}</td>
+				<td>{$expertAsk['noAdopt']['intermediate']}</td>
+			</tr>
+			<tr>
+				<td>高级专家</td>
+				<td>{$expertAsk['day']['high']}</td>
+				<td>{$expertAsk['week']['high']}</td>
+				<td>{$expertAsk['month']['high']}</td>
+				<td>{$expertAsk['total']['high']}</td>
+				<td>{$expertAsk['adopt']['high']}</td>
+				<td>{$expertAsk['noAdopt']['high']}</td>
+			</tr>
+			<tr>
+				<td>资深级专家</td>
+				<td>{$expertAsk['day']['senior']}</td>
+				<td>{$expertAsk['week']['senior']}</td>
+				<td>{$expertAsk['month']['senior']}</td>
+				<td>{$expertAsk['total']['senior']}</td>
+				<td>{$expertAsk['adopt']['senior']}</td>
+				<td>{$expertAsk['noAdopt']['senior']}</td>
+			</tr>
+			<tr>
+				<td>大师级专家</td>
+				<td>{$expertAsk['day']['master']}</td>
+				<td>{$expertAsk['week']['master']}</td>
+				<td>{$expertAsk['month']['master']}</td>
+				<td>{$expertAsk['total']['master']}</td>
+				<td>{$expertAsk['adopt']['master']}</td>
+				<td>{$expertAsk['noAdopt']['master']}</td>
+			</tr>
+		</table>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="table-responsive panel-body">
+        <table class="table table-hover table-summary">
+        	<thead class="navbar-inner">
+				<tr>
+					<th colspan="7">用户悬赏</th>
+				</tr>
+			</thead>
+			<tr>
+				<td>今日增量</td>
+				<td>一周</td>
+				<td>一个月</td>
+				<td>总量</td>
+				<td>采纳总量</td>
+				<td>未采纳总量</td>
+				<td>未回答总量</td>
+			</tr>
+			<tr>
+				<td>{$reward['day']}</td>
+				<td>{$reward['week']}</td>
+				<td>{$reward['month']}</td>
+				<td>{$reward['total']}</td>
+				<td>{$reward['adopt']}</td>
+				<td>{$reward['noAdopt']}</td>
+				<td>{$reward['noAnswer']}</td>
+			</tr>
+		</table>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="table-responsive panel-body">
+        <table class="table table-hover table-summary">
+        	<thead class="navbar-inner">
+				<tr>
+					<th colspan="8">平台订单</th>
+				</tr>
+			</thead>
+			<tr>
+				<td>今日增量</td>
+				<td>{$order['day']['num']}</td>
+				<td>一周数量</td>
+				<td>{$order['week']['num']}</td>
+				<td>一月数量</td>
+				<td>{$order['month']['num']}</td>
+				<td>总订单数量</td>
+				<td>{$order['total']['num']}</td>
+			</tr>
+			<tr>
+				<td>合计金额</td>
+				<td>{$order['day']['price']}</td>
+				<td>合计金额</td>
+				<td>{$order['week']['price']}</td>
+				<td>合计金额</td>
+				<td>{$order['month']['price']}</td>
+				<td>总合计金额</td>
+				<td>{$order['total']['price']}</td>
+			</tr>
+		</table>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="table-responsive panel-body">
+        <table class="table table-hover table-summary">
+        	<thead class="navbar-inner">
+				<tr>
+					<th colspan="8">用户充值</th>
+				</tr>
+			</thead>
+			<tr>
+				<td>今日增量</td>
+				<td>{$recharge['day']['num']}</td>
+				<td>一周数量</td>
+				<td>{$recharge['week']['num']}</td>
+				<td>一月数量</td>
+				<td>{$recharge['month']['num']}</td>
+				<td>总订单数量</td>
+				<td>{$recharge['total']['num']}</td>
+			</tr>
+			<tr>
+				<td>合计金额</td>
+				<td>{$recharge['day']['price']}</td>
+				<td>合计金额</td>
+				<td>{$recharge['week']['price']}</td>
+				<td>合计金额</td>
+				<td>{$recharge['month']['price']}</td>
+				<td>总合计金额</td>
+				<td>{$recharge['total']['price']}</td>
+			</tr>
+		</table>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="table-responsive panel-body">
+        <table class="table table-hover table-summary">
+        	<thead class="navbar-inner">
+				<tr>
+					<th colspan="8">专家团审核统计</th>
+				</tr>
+			</thead>
+			<tr>
+				<td>今日团审核增量</td>
+				<td>{$experResult['day']['num']}</td>
+				<td>本周团审核数量</td>
+				<td>{$experResult['week']['num']}</td>
+				<td>本月团审核数量</td>
+				<td>{$experResult['month']['num']}</td>
+				<td>总团审核数量</td>
+				<td>{$experResult['total']['num']}</td>
+			</tr>
+			<tr>
+				<td>今日团订单增量</td>
+				<td>{$experOrder['day']['num']}</td>
+				<td>本周团订单数量</td>
+				<td>{$experOrder['week']['num']}</td>
+				<td>本月团订单数量</td>
+				<td>{$experOrder['month']['num']}</td>
+				<td>总团订单数量</td>
+				<td>{$experOrder['total']['num']}</td>
+			</tr>
+			<tr>
+				<td>合计金额</td>
+				<td>{$experOrder['day']['price']}</td>
+				<td>合计金额</td>
+				<td>{$experOrder['week']['price']}</td>
+				<td>合计金额</td>
+				<td>{$experOrder['month']['price']}</td>
+				<td>总合计金额</td>
+				<td>{$experOrder['total']['price']}</td>
+			</tr>
+		</table>
+    </div>
+</div>
+
+<!-- <div class="panel panel-default">
+    <div class="table-responsive panel-body">
+        <table class="table table-hover table-summary">
+        	<thead class="navbar-inner">
+				<tr>
+					<th colspan="11">平台总账汇总</th>
+				</tr>
+			</thead>
+			<tr>
+				<td colspan="6">消费汇总</td>
+				<td colspan="2">支付方式</td>
+				<td colspan="2">金额汇总</td>
+				<td rowspan="2" style="line-height: 400%;">差异金额</td>
+			</tr>
+			<tr>
+				<td>文章收益</td>
+				<td>问答收益</td>
+				<td>悬赏收益</td>
+				<td>赞赏收益</td>
+				<td>服务收益</td>
+				<td>平台收益</td>
+				<td>余额</td>
+				<td>微信</td>
+				<td>余额</td>
+				<td>入账金额</td>
+			</tr>
+			<tr>
+				<td>{$profit['article']}</td>
+				<td>{$profit['ask']}</td>
+				<td>{$profit['ask']}</td>
+				<td>{$profit['reward']}</td>
+				<td>{$profit['service']}</td>
+				<td>{$profit['platform']}</td>
+				<td>{$payment['ye']}</td>
+				<td>{$payment['wx']}</td>
+				<td>{$userBalance}</td>
+				<td></td>
+				<td></td>
+			</tr>
+		</table>
+    </div> -->
+</div>
+{/if}
+
+{if $op == 'display'}
+<div id="action_list" class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-xs-12 col-sm-11" style="width:99%;">
+			<form action="{php echo $this->createWebUrl('ask_payment',array('issucc' => $_GPC['status']))}" method="get" class="form-horizontal" role="form" id="form1">
+				<input type="hidden" name="c" value="site">
+				<input type="hidden" name="a" value="entry">
+				<input type="hidden" name="do" value="ask_summary">
+				<input type="hidden" name="op" value="display">
+				<input type="hidden" name="m" value="dg_ask">
+				<input type="hidden" name="excel" id="excel" value="no">
+				<input type="hidden" name="version_id" value="0">
+				<div class="input-group">
+					<span class="input-group-addon">时间范围</span>
+					<!-- <div class="col-sm-6 col-lg-8"> -->
+					{php echo tpl_form_field_daterange('time', array('starttime'=>date('Y-m-d', $starttime),'endtime'=>date('Y-m-d', $endtime)));}
+					<script type="text/javascript">
+		                $(function(){
+		                    $("#action_list .input-group .daterange-date").addClass("form-control");
+		                })
+	                </script>
+					<span class="input-group-btn">
+		            	<input onclick="tj()" type="button" class="btn" value="提交筛选" style="border:1px solid #ccc;"/>
+                    	<input onclick="dc()" type="button" class="btn" value="导出" style="border:1px solid #ccc;background-color: #fff;"/>
+		            </span>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<div class="panel panel-default">
+    <div class="table-responsive panel-body">
+        <table class="table table-hover">
+			<thead class="navbar-inner">
+				<tr>
+					<th>类目</th>
+					<th>收益数目</th>
+					<th>收益金额</th>
+					<th>收入</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				{loop $data $i $row}
+					<tr>
+						<td>{if $row['type'] == 1}发布悬赏{elseif $row['type'] == 2}文章付费{elseif $row['type'] == 3}问答付费{elseif $row['type'] == 4}赞赏专家{elseif $row['type'] == 5}专家服务{/if}</td>
+						<td>平台专家数目：{$row['platform_number']}<br/>其他专家数目：{$row['expert_number']}<br/>合计数目：{php echo $row['expert_number'] + $row['platform_number']}</td>
+						<td>平台专家收益总数：{$row['platform_money']}<br/>其他专家收益总数：{$row['expert_money']}<br/>合计收益总数：{php echo $row['platform_money'] + $row['expert_money']}</td>
+						<td>平台收益：{$row['platform']}<br/>专家收益：{$row['expert']}{if $row['type'] == 3}<br/>会员收益：{$row['user']}{/if}</td>
+						<td>
+							<a href="{$row['detail_url']}"><label class="btn btn-default btn-sm manage" ><i class="fa fa-del"></i>查看详情</label></a>
+						</td>
+					</tr>
+				{/loop}
+				<tr>
+					<td>汇总</td>
+					<td>平台专家总数：{$total_platform_number}<br/>其他专家总数：{$total_expert_number}<br/>合计：{php echo $total_platform_number + $total_expert_number}</td>
+					<td>平台专家收益总数：{$total_platform_money}<br/>其他专家收益总数：{$total_expert_money}<br/>合计收益总数：{php echo $total_platform_money + $total_expert_money}</td>
+					<td>平台总收益：{$total_platform}<br/>专家总收益：{$total_expert}<br/>会员总收益：{$total_user}<br/>合计：{php echo $total_platform + $total_expert + $total_user}</td>
+					<td></td>
+				</tr>
+			</tbody>
+		</table>
+    </div>
+</div>
+{$pager}
+<script>
+   function tj(){
+        $('#excel').val('no');
+        $('#form1').submit();
+    }
+    function dc(){
+        $('#excel').val('yes');
+        $('#form1').submit();
+    }
+</script>
+{/if}
+
+<!-- 收益日志 start -->
+{if $op == 'income_log'}
+<div id="action_list" class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-xs-12 col-sm-11" style="width:99%;">
+			<form action="{php echo $this->createWebUrl('ask_payment',array('issucc' => $_GPC['status']))}" method="get" class="form-horizontal" role="form" id="form1">
+			    <div class="input-group">
+					<input type="hidden" name="version_id" value="0">
+					<input type="hidden" name="c" value="site">
+					<input type="hidden" name="a" value="entry">
+					<input type="hidden" name="do" value="ask_summary">
+					<input type="hidden" name="m" value="dg_ask">
+					<input type="hidden" name="op" id="ops" value="income_log">
+					<span class="input-group-addon">类目</span>
+					<select name="type" class="form-control input-medium">
+						<option value="9" <?php if($_GPC['type'] == 9){echo 'selected';} ?> >全部</option>
+                        <option value="1" <?php if($_GPC['type'] == 1){echo 'selected';} ?> >悬赏收益</option>
+                        <option value="2" <?php if($_GPC['type'] == 2){echo 'selected';} ?> >文章收益</option>
+                        <option value="3" <?php if($_GPC['type'] == 3){echo 'selected';} ?> >问答收益</option>
+                        <option value="4" <?php if($_GPC['type'] == 4){echo 'selected';} ?> >赞赏收益</option>
+                        <option value="5" <?php if($_GPC['type'] == 5){echo 'selected';} ?> >服务收益</option>
+
+                        <option value="6" <?php if($_GPC['type'] == 6){echo 'selected';} ?> >税媒大使收益</option>
+                        <option value="7" <?php if($_GPC['type'] == 7){echo 'selected';} ?> >合伙人收益</option>
+                        <!-- <option value="8" <?php if($_GPC['type'] == 8){echo 'selected';} ?> >运营总监收益</option> -->
+                    </select>
+                    <span class="input-group-addon">收益角色</span>
+					<select name="role" class="form-control input-medium">
+                        <option value="9" <?php if($_GPC['role'] == 9){echo 'selected';} ?> >全部</option>
+                        <option value="1" <?php if($_GPC['role'] == 1){echo 'selected';} ?> >税媒平台</option>
+                        <option value="2" <?php if($_GPC['role'] == 2){echo 'selected';} ?> >税媒用户</option>
+                        <option value="3" <?php if($_GPC['role'] == 3){echo 'selected';} ?> >普通专家</option>
+                        <option value="4" <?php if($_GPC['role'] == 4){echo 'selected';} ?> >平台专家</option>
+                        <option value="5" <?php if($_GPC['role'] == 5){echo 'selected';} ?> >平台税媒大使</option>
+                        <option value="6" <?php if($_GPC['role'] == 6){echo 'selected';} ?> >合伙税媒大使</option>
+                        <option value="7" <?php if($_GPC['role'] == 7){echo 'selected';} ?> >城市合伙人</option>
+                        <!-- <option value="8" <?php if($_GPC['role'] == 8){echo 'selected';} ?> >运营总监</option> -->
+                    </select>
+					<span class="input-group-addon">时间范围</span>
+					{php echo tpl_form_field_daterange('time', array('start'=>date('Y-m-d', $starttime),'end'=>date('Y-m-d', $endtime)));}
+					<script type="text/javascript">
+                    $(function(){
+                        $("#action_list .input-group .daterange-date").addClass("form-control");
+                    })
+                    </script>
+                    <span class="input-group-addon">关键词</span>
+					<input name="keyword" type="text" value="{$_GPC['keyword']}" placeholder="请输入收益人名称" class="form-control ac_name">
+	                <span class="input-group-btn">
+		            	<input onclick="tj()" type="button" class="btn" value="提交筛选" style="border:1px solid #ccc;"/>
+                    	<input onclick="dc()" type="button" class="btn" value="导出" style="border:1px solid #ccc;background-color: #fff;"/>
+		            </span>
+			    </div>
+			</form>
+		</div>
+	</div>
+</div>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<div class="row-fluid">
+			<div class="span8 control-group">
+				<span>共计 {$total} 条数据，总收益 {$totalmoney} 元</span>
+			</div>
+		</div>
+	</div>
+    <div class="table-responsive panel-body">
+        <table class="table table-hover">
+			<thead class="navbar-inner">
+				<tr>
+					<th style="width:50px;">编号</th>
+					<th>收益类目</th>
+					<th>收益角色</th>
+					<th>收益人名称</th>
+					<th>总金额</th>
+					<th>收益金额</th>
+					<th>收益比</th>
+					<th>添加时间</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				{loop $records $row}
+				<tr>
+					<td>{$row['prid']}</td>
+					<td>
+						{if $row['type']==1}
+							悬赏收益
+						{elseif $row['type']==2}
+							文章收益
+						{elseif $row['type']==3}
+							问答收益
+						{elseif $row['type']==4}
+							赞赏收益
+						{elseif $row['type']==5}
+							服务收益
+						{elseif $row['type']==6}
+							税媒大使收益
+						{elseif $row['type']==7}
+							合伙人收益
+						{elseif $row['type']==8}
+							运营总监收益
+						{elseif $row['type']==9}
+							专家团收益
+						{/if}
+					</td>
+					<td>
+						{if $row['role']==1}
+							税媒平台
+						{elseif $row['role']==2}
+							税媒会员
+						{elseif $row['role']==3}
+							普通专家
+						{elseif $row['role']==4}
+							平台专家
+						{elseif $row['role']==5}
+							平台业务员
+						{elseif $row['role']==6}
+							合伙人业务员
+						{elseif $row['role']==7}
+							城市合伙人
+						{elseif $row['role']==8}
+							运营总监
+						{elseif $row['role']==9}
+							专家团
+						{/if}
+					</td>
+					<td>
+					{if $row['role']==1 || $row['uid']==0 || $row['uid']=='999999'}税媒平台{else}{if $row['real_name'] != ''}{$row['real_name']}{else}{$row['nickname']}{/if}{/if}</td>
+					<td>{$row['total_price']}</td>
+					<td>{$row['get_price']}</td>
+					<td>{if $row['type'] != 9}{php echo @round($row['get_price'] / $row['total_price'],2)*100}%{else}分期付{/if}</td>
+					<td><?php echo date('Y-m-d H:i:s',$row['create_time'])?></td>
+					<td><a class="btn btn-default btn-sm manage"  href="{$row['go_url']}">查看</a></td>
+				</tr>
+				{/loop}
+			</tbody>
+		</table>
+    </div>
+</div>
+{$pager}
+<script type="text/javascript">
+function tj(){
+    $('#ops').val('income_log');
+    $('#form1').submit();
+}
+function dc(){
+    $('#ops').val('download');
+    $('#form1').submit();
+}
+</script>
+{/if}
+<!-- 收益日志 end -->
+{template 'common/footer'}
