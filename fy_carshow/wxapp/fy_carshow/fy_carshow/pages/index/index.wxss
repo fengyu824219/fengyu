@@ -1,0 +1,25 @@
+page{background-color: #fbf9fe;}
+.section{padding:10rpx;}
+
+.form-textarea{
+  background-color:#f8f8f8;
+  width:90%;
+  padding:35rpx;
+  border:#9e9e9e 1rpx solid;
+  border-radius: 10rpx;
+  margin-bottom:20rpx;
+  font-size:30rpx;
+}
+
+.form-button{
+  width:100%;
+  background-color: #e64240;
+  color:#f8f8f8;
+}
+
+.form-text{
+  font-size:30rpx;
+  color:#9e9e9e;
+  padding:15rpx;
+  text-indent: 60rpx;
+}

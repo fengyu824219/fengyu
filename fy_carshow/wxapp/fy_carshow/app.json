@@ -1,0 +1,13 @@
+{
+    "pages": [
+        "fy_carshow/pages/index/index",
+        "we7/pages/index/index",
+        "we7/pages/user/index/index"
+    ],
+    "window": {
+        "navigationBarTextStyle": "white",
+        "navigationBarTitleText": "锋秀",
+        "navigationBarBackgroundColor": "#e64240",
+        "backgroundColor": "#e64240"
+    }
+}

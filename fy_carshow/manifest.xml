@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns="http://www.w7.cc" versionCode="">
+	
+	<application setting='false'>
+		<name><![CDATA[锋秀]]></name>
+
+		<identifie><![CDATA[fy_carshow]]></identifie>
+
+		<version><![CDATA[1.0.0]]></version>
+
+		<ability><![CDATA[锋秀]]></ability>
+
+		<type><![CDATA[business]]></type>
+
+		<description><![CDATA[锋秀]]></description>
+
+		<author><![CDATA[jianglifeng]]></author>
+
+		<url><![CDATA[]]></url>
+
+		<setting><![CDATA[]]></setting>
+
+	</application>
+
+	
+	<platform>
+		<subscribes>
+			<message type="text" />
+
+		</subscribes>
+
+		<handles>
+
+			<message type="text" />
+		</handles>
+
+		<rule embed="false" />
+
+		<rule embed="false" />
+
+	<supports>
+
+			<item type="wxapp" />
+	</supports>
+
+	</platform>
+
+	
+	<bindings>
+
+		<menu>
+			<entry title="信息管理" do="goods" state="1" direct="" />
+		</menu>
+
+		<page>
+			<entry title="小程序入口" do="/fy_carshow/pages/index/index" state="" direct="" />
+		</page>
+
+	</bindings>
+
+	<install><![CDATA[]]></install>
+	<uninstall><![CDATA[]]></uninstall>
+	<upgrade><![CDATA[]]></upgrade>
+</manifest>

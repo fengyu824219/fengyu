@@ -1,0 +1,11 @@
+
+<view class="section">
+  <view class='form-text'>每当夜深人静时，你是否会独自一个人站在窗边看着这个浮躁而现实的世界，心里回想着那些印在你脑海里最美妙的场景。也许在现实资本主义的冲击下你并没有来得及刻印在你的脑海；也许为了生计而已持续奔波你并没有觉得这个世界还有多少经历需要刻印；也许在五彩斑斓的世界里你觉得每一个瞬间都是最美好的记忆。</view>
+  <view class='form-text'>但是那怕是流行一闪而过的光华，也在告诉世人，最丑的石头也有发光发亮的那一天。</view>
+  <view class='form-text'>路漫漫，总有一个你也会像流星一样发出璀璨的光华，而我可以帮你记录这一刻共勉之。</view>
+  <view class='form-text'>我自己带盐 微信：feng1337962319</view>
+  <form bindsubmit="bindFormSubmit">
+    <textarea placeholder="请留下你与我共勉的光华" name="content" class="form-textarea" value='{{content}}'/>
+    <button form-type="submit" class='form-button'>共勉之</button>
+  </form>
+</view>
